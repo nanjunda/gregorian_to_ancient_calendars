@@ -7,19 +7,19 @@ The "Gregorian to Hindu Panchanga Converter" is designed as a modular Python app
 
 ```mermaid
 graph TD
-    User["User Interface (Web Browser)"] --> Frontend["HTML/CSS/JS Frontend"]
-    Frontend --> Flask["Flask Backend API"]
-    
-    Flask --> Geocoder["Geolocation Engine (GeoPy/Browser API)"]
+    User["User Input (Date, Time, Location)"] --> Geocoder["Geolocation Engine (GeoPy)"]
     Geocoder --> LatLong["Latitude, Longitude, Timezone"]
+    User --> DT["UTC/Local DateTime"]
     
-    Flask --> AstroEngine["Astronomical Engine (Skyfield)"]
+    LatLong --> SunriseCalc["Sunrise/Sunset Calculator"]
+    DT --> SunriseCalc
+    
+    DT --> AstroEngine["Astronomical Engine (PySwissEph)"]
+    LatLong --> AstroEngine
     
     AstroEngine --> Longitudes["Sun & Moon Longitudes"]
-    LatLong --> SunriseCalc["Sunrise/Sunset Calculator"]
-    
-    Longitudes --> PanchangaLogic["Panchanga Computation Logic"]
-    SunriseCalc --> PanchangaLogic
+    SunriseCalc --> PanchangaLogic["Panchanga Computation Logic"]
+    Longitudes --> PanchangaLogic
     
     PanchangaLogic --> Tithi["Tithi & Paksha"]
     PanchangaLogic --> Vara["Vara"]
@@ -27,9 +27,8 @@ graph TD
     PanchangaLogic --> YogaKarana["Yoga & Karana"]
     PanchangaLogic --> MasaSamvat["Masa & Samvatsara"]
     
-    Tithi & Vara & Nakshatra & YogaKarana & MasaSamvat --> Formatter["JSON Formatter"]
-    Formatter --> Frontend
-    Frontend --> FinalOutput["Responsive Output Display"]
+    Tithi & Vara & Nakshatra & YogaKarana & MasaSamvat --> Formatter["Output Formatter"]
+    Formatter --> FinalOutput["Final Panchanga Report"]
 ```
 
 ## Module Descriptions
@@ -39,9 +38,9 @@ graph TD
 *   **Technology:** `geopy` and `timezonefinder`.
 
 ### 2. Astronomical Engine
-*   **Purpose:** High-precision computation of planetary positions.
-*   **Technology:** `skyfield` (Pure Python astronomy library).
-*   **Key Tasks:** Calculate the positioning of the Sun and Moon to derive longitudes for Panchanga elements with Lahiri Ayanamsha support.
+*   **Purpose:** High-precision computation of planetary positions using the Swiss Ephemeris.
+*   **Technology:** `pyswisseph` (Python wrapper for the C-based Swiss Ephemeris).
+*   **Key Tasks:** Calculate the Nirayana (Sidereal) longitudes of the Sun and Moon using Lahiri Ayanamsha.
 
 ### 3. Panchanga Computation Logic
 *   **Tithi:** (Moon Longitude - Sun Longitude) / 12°.
@@ -52,10 +51,8 @@ graph TD
 *   **Masa:** Based on the Sun's entry into Rasis (Sankranti) and the Tithi at the time of New Moon.
 *   **Samvatsara:** Determined from the 60-year Jovian cycle.
 
-### 4. Web Interface & Backend
-*   **Web Server:** Flask framework to handle HTTP requests and serve the UI.
-*   **Frontend:** A responsive single-page application (SPA) built with HTML5, CSS3 (Vanilla), and JavaScript.
-*   **Output Formatter:** Transforms numerical results into JSON for consumption by the frontend.
+### 4. Output Formatter
+*   **Purpose:** Transforms the raw numerical results into traditional Sanskrit/Hindi names and formats the output for the user.
 
 ## Data Flow
 1.  **Input:** User provides date/time and location.
@@ -63,8 +60,3 @@ graph TD
 3.  **Compute:** Calculate the Sidereal longitudes for the target time.
 4.  **Derive:** Apply Vedic formulas to the astronomical data.
 5.  **Present:** Display the results in a readable format.
-
-## User Review Required
-> [!NOTE]
-> I have switched from `pyswisseph` to `skyfield` because `pyswisseph` encountered compilation errors on Python 3.14. `skyfield` is a pure Python library that provides high-precision astronomical calculations and is fully compatible with your environment.
-> I will use **Lahiri Ayanamsha** as the default, as it is the standard for most Indian Panchangas.

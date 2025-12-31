@@ -8,12 +8,12 @@ Implement a robust Python script to convert Gregorian date/time and location int
 ### Environment Setup
 *   Install necessary dependencies:
     ```bash
-    pip install skyfield geopy timezonefinder pytz
+    pip install pyswisseph geopy timezonefinder pytz
     ```
 
 ### Phase 1: Core Utilities
 *   **[NEW] `utils/location.py`**: Logic to fetch Lat/Long/Timezone from a location string.
-*   **[NEW] `utils/astronomy.py`**: Integration with `skyfield` to get Sun/Moon longitudes with Lahiri Ayanamsha support.
+*   **[NEW] `utils/astronomy.py`**: Integration with `pyswisseph` to get Sun/Moon longitudes with Ayanamsha support.
 
 ### Phase 2: Panchanga Logic
 *   **[NEW] `panchanga/calculations.py`**:
@@ -37,6 +37,6 @@ Implement a robust Python script to convert Gregorian date/time and location int
     *   **Scenario 3:** Middle of the night time entry to check Vara transitions (after midnight but before sunrise).
 
 ## User Review Required
-> [!NOTE]
-> I have switched from `pyswisseph` to `skyfield` because `pyswisseph` encountered compilation errors on Python 3.14. `skyfield` is a pure Python library that provides high-precision astronomical calculations and is fully compatible with your environment.
+> [!IMPORTANT]
+> The `pyswisseph` library requires C-extensions. I will ensure the environment supports building it or use pre-compiled binaries if available.
 > I will use **Lahiri Ayanamsha** as the default, as it is the standard for most Indian Panchangas.

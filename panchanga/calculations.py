@@ -86,3 +86,23 @@ def calculate_masa_samvatsara(year, sun_lon):
     samvat_index = (year - 1987) % 60
     
     return masa_name, SAMVATSARAS[samvat_index]
+def format_panchanga_report(dt_local, loc_address, loc_timezone, sunrise, sunset, samvatsara, masa, paksha, tithi, vara, nakshatra, yoga, karana):
+    report = f"""
+       HINDU PANCHANGA REPORT
+========================================
+Input Date/Time : {dt_local.strftime('%Y-%m-%d %H:%M:%S')} ({loc_timezone})
+Location        : {loc_address}
+Sunrise         : {sunrise.strftime('%H:%M:%S') if sunrise else 'N/A'}
+Sunset          : {sunset.strftime('%H:%M:%S') if sunset else 'N/A'}
+----------------------------------------
+Samvatsara      : {samvatsara}
+Masa (Month)    : {masa}
+Paksha          : {paksha}
+Tithi           : {tithi}
+Vara (Weekday)  : {vara}
+Nakshatra       : {nakshatra}
+Yoga            : {yoga}
+Karana (Index)  : {karana}
+========================================
+"""
+    return report

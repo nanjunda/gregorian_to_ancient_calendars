@@ -1,18 +1,10 @@
 # Hindu Panchanga Converter Task Checklist
 
-- [x] Prepare One-pager and get user approval
-- [x] Design Architecture
-- [x] Create Implementation Plan
-- [x] Implement Panchanga Logic
-    - [x] Setup astronomical calculation library
-    - [x] Implement Tithi calculation
-    - [x] Implement Vara calculation
-    - [x] Implement Nakshatra calculation
-    - [x] Implement Masa and Samvatsara calculation
-- [x] Create CLI/Script Interface
-- [x] Verify results against known Panchanga
-- [x] Develop Web UI Wrapper
-    - [x] Design Frontend UI (HTML/CSS)
-    - [x] Implement Flask Backend
-    - [x] Connect UI to Panchanga Logic
-    - [x] Test Web UI locally
+- [x] Version Control and Release v1.0
+- [x] Develop version 2.0: iCal Integration
+    - [x] Prepare One-pager for v2.0 and get user approval
+    - [x] Design Architecture and Workflow for recurring date search
+    - [x] Implement Masa/Paksha/Tithi search logic
+    - [x] Implement iCal (.ics) file generation
+    - [x] Update Web UI for Title input and iCal download
+    - [x] Verify recurrence logic

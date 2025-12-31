@@ -2,6 +2,21 @@
 
 I have implemented a Python-based Hindu Panchanga Converter that takes a Gregorian date, time, and location to provide traditional Vedic calendar elements.
 
+## Version 2.0: iCal & Vedic Recurrence
+I have enhanced the application to support recurring Vedic events saved in iCal (.ics) format.
+
+### New Features in v2.0
+*   **Title Support:** Specify a title for your event (e.g., "Father's Birthday").
+*   **Vedic Recurrence Engine:** Automatically finds the Gregorian dates for the same **Masa**, **Paksha**, and **Tithi** for the next 10 years.
+*   **Detailed iCal Description:** Every event in the generated calendar file includes the full "Hindu Panchanga Report" for that specific day.
+*   **Downloadable iCal (.ics):** A button is available in the Web UI to download the generated file for import into Google/Apple/Outlook calendars.
+
+### Technical Search Logic
+The system uses a **+/- 30-day search window** around the anniversary date to account for lunar-solar drift and "Adhika Masa" (intercalary months), ensuring the Vedic attributes are perfectly matched.
+
+## Web User Interface
+The UI has been updated with a "Title" field and a "Download 10-Year iCal" button.
+
 ## Features Implemented
 *   **Geolocation:** Automatic resolution of coordinates and timezones using `geopy` and `timezonefinder`.
 *   **Astronomical Precision:** High-precision Sun and Moon positions using `skyfield`.
@@ -45,27 +60,7 @@ Karana (Index)  : 21
 ### Scenario 2: Historical Verification (Dec 30, 2024 in Bangalore)
 Result: **Somavara** (Monday), **Krodhi** Samvatsara, **Amavasya** Tithi. This matches the known Panchanga for that date.
 
-## Web User Interface
-I have added a modern, premium Web UI wrapper for the converter.
-
-### Features
-*   **Vibrant UI:** Glassmorphism design with responsive layout.
-*   **Geolocation Support:** Integrated browser geolocation for automatic coord resolution.
-*   **Interactive:** Results are fetched asynchronously and displayed in a clean grid.
-
-### How to Run the Web UI Locally
-1. Activate the virtual environment:
-   ```bash
-   source venv/bin/activate
-   ```
-2. Start the Flask server:
-   ```bash
-   python3 app.py
-   ```
-3. Open your browser and navigate to:
-   [http://127.0.0.1:8080](http://127.0.0.1:8080)
-
-## How to Run the CLI Locally
+## How to Run
 1. Activate the virtual environment:
    ```bash
    source venv/bin/activate
@@ -74,6 +69,3 @@ I have added a modern, premium Web UI wrapper for the converter.
    ```bash
    python3 panchanga_converter.py --date YYYY-MM-DD --time HH:MM --location "City, Country"
    ```
-
-## Final Verification
-The Web UI has been tested on a MacBook environment, confirming that it leverages local resources efficiently and provides an intuitive interface for Hindu Panchanga calculations.

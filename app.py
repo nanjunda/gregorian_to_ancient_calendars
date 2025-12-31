@@ -15,12 +15,53 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+from panchanga.recurrence import find_recurrences
+from utils.ical_gen import create_ical_content
+from flask import Response, make_response
+
+@app.route('/api/generate-ical', methods=['POST'])
+def generate_ical():
+    data = request.json
+    date_str = data.get('date')
+    time_str = data.get('time')
+    location_name = data.get('location')
+    title = data.get('title', 'Hindu Panchanga Event')
+
+    if not all([date_str, time_str, location_name]):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    try:
+        # 1. Resolve Location
+        loc = get_location_details(location_name)
+        
+        # 2. Parse DateTime
+        dt_str = f"{date_str} {time_str}"
+        naive_dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
+        local_tz = pytz.timezone(loc["timezone"])
+        local_dt = local_tz.localize(naive_dt)
+
+        # 3. Find Recurrences (10 years)
+        occurrences = find_recurrences(local_dt, loc, num_years=10)
+        
+        # 4. Generate iCal content
+        ical_data = create_ical_content(title, occurrences)
+        
+        response = make_response(ical_data)
+        response.headers["Content-Disposition"] = f"attachment; filename={title.replace(' ', '_')}.ics"
+        response.headers["Content-Type"] = "text/calendar"
+        
+        return response
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 @app.route('/api/panchanga', methods=['POST'])
 def get_panchanga():
     data = request.json
     date_str = data.get('date')
     time_str = data.get('time')
     location_name = data.get('location')
+    title = data.get('title', 'Event') # Added title support
 
     if not all([date_str, time_str, location_name]):
         return jsonify({"error": "Missing required fields"}), 400
@@ -49,6 +90,12 @@ def get_panchanga():
         karana_num = calculate_karana(sun_lon, moon_lon)
         masa, samvatsara = calculate_masa_samvatsara(local_dt.year, sun_lon)
 
+        report = format_panchanga_report(
+            local_dt, loc["address"], loc["timezone"],
+            sunrise, sunset, samvatsara, masa, paksha, tithi,
+            vara, nakshatra, yoga, karana_num
+        )
+
         return jsonify({
             "success": True,
             "data": {
@@ -64,7 +111,8 @@ def get_panchanga():
                 "vara": vara,
                 "nakshatra": nakshatra,
                 "yoga": yoga,
-                "karana": karana_num
+                "karana": karana_num,
+                "report": report
             }
         })
 

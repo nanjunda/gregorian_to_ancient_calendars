@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hindu Panchanga Converter</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;500;700&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -17,6 +21,10 @@
         <main>
             <section class="card glass">
                 <form id="panchanga-form">
+                    <div class="input-group full-width">
+                        <label for="title">Event Title</label>
+                        <input type="text" id="title" placeholder="e.g. Birthday, Festival..." required>
+                    </div>
                     <div class="input-group">
                         <label for="date">Date</label>
                         <input type="date" id="date" required>
@@ -39,7 +47,7 @@
                     <h2 id="res-samvatsara">Samvatsara</h2>
                     <p id="res-location">Location Detail</p>
                 </div>
-                
+
                 <div class="grid">
                     <div class="grid-item">
                         <span class="label">Masa</span>
@@ -70,6 +78,8 @@
                 <div class="extra-details">
                     <p>Sunrise: <span id="res-sunrise">-</span> | Sunset: <span id="res-sunset">-</span></p>
                 </div>
+
+                <button id="download-ical-btn" class="secondary-btn">Download 10-Year iCal (.ics)</button>
             </section>
 
             <div id="loader" class="hidden">
@@ -84,4 +94,5 @@
     </div>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
+
 </html>
