@@ -24,15 +24,19 @@ A high-precision tool to convert Gregorian calendar dates into traditional Hindu
    ```
 2. **Run:** `python3 app.py`
 
-### Cloud Deployment (Linux VM)
-Simply run the deployment script:
+### Cloud Deployment (Native Linux VM)
+Simply run the deployment script on your VM (Ubuntu/Debian recommended):
 ```bash
-curl -sSL https://raw.githubusercontent.com/nanjundasomayaji/gregorian_to_hindu_calendar/main/deploy.sh | bash
+git clone https://github.com/nanjundasomayaji/gregorian_to_hindu_calendar.git
+cd gregorian_to_hindu_calendar
+chmod +x deploy.sh
+./deploy.sh
 ```
-Or manually using Docker:
-```bash
-docker-compose up --build -d
-```
+The script will automatically:
+1. Install Python, Nginx, and system dependencies.
+2. Setup a virtual environment and install packages.
+3. Configure Gunicorn to run as a systemd service.
+4. Setup Nginx as a reverse proxy on port 80.
 
 ## Documentation
 Refer to the `docs/` directory for detailed architecture and implementation plans.

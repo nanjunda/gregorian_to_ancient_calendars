@@ -3,47 +3,49 @@
 # Exit on any error
 set -e
 
-echo "🚀 Starting Hindu Panchanga v3.0 Deployment..."
+echo "🚀 Starting Hindu Panchanga v3.0 Native Deployment..."
 
-# 1. Update system
-echo "📦 Updating system packages..."
-sudo apt-get update -y && sudo apt-get upgrade -y
+APP_NAME="panchanga"
+APP_PATH=$(pwd)
+CURRENT_USER=$(whoami)
 
-# 2. Install Docker if not present
-if ! command -v docker &> /dev/null; then
-    echo "🐳 Installing Docker..."
-    curl -fsSL https://get.docker.com -o get-docker.sh
-    sudo sh get-docker.sh
-    sudo usermod -aG docker $USER
-    echo "✅ Docker installed."
-else
-    echo "✅ Docker is already installed."
+# 1. Update system and install dependencies
+echo "📦 Installing system dependencies..."
+sudo apt-get update -y
+sudo apt-get install -y python3-pip python3-venv nginx git curl
+
+# 2. Setup Virtual Environment
+if [ ! -d "venv" ]; then
+    echo "🏗️ Creating virtual environment..."
+    python3 -m venv venv
 fi
 
-# 3. Install Docker Compose if not present
-if ! command -v docker-compose &> /dev/null; then
-    echo "🏗️ Installing Docker Compose..."
-    sudo apt-get install -y docker-compose
-    echo "✅ Docker Compose installed."
-else
-    echo "✅ Docker Compose is already installed."
-fi
+echo "🐍 Installing Python packages..."
+./venv/bin/pip install --upgrade pip
+./venv/bin/pip install -r requirements.txt
 
-# 4. Clone or update repository
-if [ ! -d "gregorian_to_hindu_calendar" ]; then
-    echo "📂 Cloning repository..."
-    # Replace with the actual URL if needed, or assume it's already in the folder
-    git clone https://github.com/nanjundasomayaji/gregorian_to_hindu_calendar.git
-    cd gregorian_to_hindu_calendar
-else
-    echo "📂 Updating repository..."
-    cd gregorian_to_hindu_calendar
-    git pull
-fi
+# 3. Configure systemd service
+echo "⚙️ Configuring systemd service..."
+sed -e "s|{{USER}}|$CURRENT_USER|g" \
+    -e "s|{{APP_PATH}}|$APP_PATH|g" \
+    panchanga.service.template | sudo tee /etc/systemd/system/$APP_NAME.service > /dev/null
 
-# 5. Build and Run
-echo "⚡ Building and starting containers..."
-sudo docker-compose up --build -d
+sudo systemctl daemon-reload
+sudo systemctl enable $APP_NAME
+sudo systemctl restart $APP_NAME
 
-echo "🎉 Deployment complete! App is running on port 80."
-echo "Wait a few seconds for the app to initialize."
+# 4. Configure Nginx
+echo "🌐 Configuring Nginx..."
+# Use localhost or server IP if no domain provided
+PUBLIC_IP=$(curl -s ifconfig.me || echo "localhost")
+
+sed -e "s|{{DOMAIN_OR_IP}}|$PUBLIC_IP|g" \
+    -e "s|{{APP_PATH}}|$APP_PATH|g" \
+    panchanga.nginx.template | sudo tee /etc/nginx/sites-available/$APP_NAME > /dev/null
+
+sudo ln -sf /etc/nginx/sites-available/$APP_NAME /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t && sudo systemctl restart nginx
+
+echo "🎉 Deployment complete!"
+echo "App should be accessible at: http://$PUBLIC_IP"
