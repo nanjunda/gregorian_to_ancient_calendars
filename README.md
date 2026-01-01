@@ -1,42 +1,38 @@
-# Hindu Panchanga Converter v2.0
+# Hindu Panchanga Converter v3.0
 
-A high-precision tool to convert Gregorian calendar dates, times, and locations into traditional Hindu Panchanga elements (Tithi, Nakshatra, Yoga, Karana, Vara, Masa, and Samvatsara).
+A high-precision tool to convert Gregorian calendar dates into traditional Hindu Panchanga elements.
 
 ## Features
-- **Version 2.0 (New):**
+- **Version 3.0 (New):**
+    - **Multi-language Support:** English (EN), Kannada (KN), and Sanskrit (SA).
+    - **Nakshatra Padas:** Detailed calculation of the 4 padas for each Nakshatra.
+    - **Cloud Deployment:** Ready-to-use Docker and `deploy.sh` for Linux VMs.
+- **Version 2.0:**
     - **Vedic Recurrence:** Generate calendar events that recur based on Masa, Paksha, and Tithi.
-    - **iCal Export:** Download a 10-year `.ics` file for easy import into digital calendars.
-    - **Detailed Reports:** Every calendar event includes a full ASCI Panchanga report in the description.
-- **Web UI:** Modern, responsive interface with glassmorphism design.
-- **CLI Utility:** Command-line tool for quick conversions.
-- **High Precision:** Uses `skyfield` for astronomical data and Lahiri Ayanamsha.
-- **Geolocation:** Automatic location resolution and timezone handling.
+    - **iCal Export:** Download a 20-year `.ics` file.
+- **Web UI:** Modern Glassmorphism interface.
+- **High Precision:** Uses `skyfield` (DE440/DE421) and Lahiri Ayanamsha.
 
-## Installation
+## Installation & Deployment
 
-1. **Clone the repository:**
-   ```bash
-   git clone <repository-url>
-   cd gregorian_to_hindu_calendar
-   ```
-
-2. **Setup virtual environment:**
+### Local Development
+1. **Setup virtual environment:**
    ```bash
    python3 -m venv venv
    source venv/bin/activate
    pip install -r requirements.txt
    ```
+2. **Run:** `python3 app.py`
 
-3. **Run the Web UI:**
-   ```bash
-   python3 app.py
-   ```
-   Access it at `http://127.0.0.1:8080`.
-
-4. **Run the CLI:**
-   ```bash
-   python3 panchanga_converter.py --date 2025-12-30 --time 16:17 --location "Bangalore, India"
-   ```
+### Cloud Deployment (Linux VM)
+Simply run the deployment script:
+```bash
+curl -sSL https://raw.githubusercontent.com/nanjundasomayaji/gregorian_to_hindu_calendar/main/deploy.sh | bash
+```
+Or manually using Docker:
+```bash
+docker-compose up --build -d
+```
 
 ## Documentation
-Refer to the `docs/` directory for architecture, implementation plans, and walkthroughs.
+Refer to the `docs/` directory for detailed architecture and implementation plans.
