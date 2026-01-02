@@ -36,15 +36,7 @@ if [ "$PKG_MGR" == "dnf" ]; then
     sudo dnf install -y python3-pip nginx git-core curl policycoreutils-python-utils openssl
     sudo systemctl enable --now nginx
     
-    # Open firewall for Oracle Linux
-    if command -v firewall-cmd &> /dev/null; then
-        echo "🔥 Opening firewall ports (5080, 80, 443)..."
-        # We keep 5080 open just in case, but primary is now 443
-        sudo firewall-cmd --permanent --add-port=5080/tcp
-        sudo firewall-cmd --permanent --add-service=http
-        sudo firewall-cmd --permanent --add-service=https
-        sudo firewall-cmd --reload
-    fi
+
     
     # Allow Nginx network connect (Critical)
     echo "🛡️ Enabling Nginx network connections..."
@@ -104,8 +96,7 @@ if command -v semanage &> /dev/null; then
     # Explicitly ensure Gunicorn is bin_t (Critical for 203/EXEC)
     sudo chcon -t bin_t $DEPLOY_DIR/venv/bin/gunicorn
     
-    # Allow Nginx to listen on 5080
-    sudo semanage port -a -t http_port_t -p tcp 5080 || true
+
 
     # CRITICAL ORACLE LINUX 9 FIX: Check for fapolicyd (Application Whitelisting)
     # This prevents running any binary not installed via DNF/RPM (like our pip gunicorn)

@@ -134,9 +134,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function renderResult(data) {
-        document.getElementById('res-samvatsara').textContent = data.samvatsara;
+        // Use user-provided title for the header
+        document.getElementById('res-title').textContent = document.getElementById('title').value || 'Panchanga Result';
         document.getElementById('res-location').textContent = `${data.address} (${data.timezone})`;
 
+        document.getElementById('res-samvatsara').textContent = data.samvatsara;
         document.getElementById('res-masa').textContent = data.masa;
         document.getElementById('res-paksha').textContent = data.paksha;
         document.getElementById('res-tithi').textContent = data.tithi;
