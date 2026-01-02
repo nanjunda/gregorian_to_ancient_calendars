@@ -90,8 +90,20 @@ if [ -n "$NGINX_LINK_DIR" ]; then
 fi
 
 sudo nginx -t && sudo systemctl restart nginx
+# Fix permissions for Nginx access
+echo "🔓 Fixing Nginx permissions..."
+# Allow Nginx to traverse home directory (required if app is in /home/user)
+chmod 711 /home/$CURRENT_USER
+
+# Set group ownership
 sudo chown -R $CURRENT_USER:$HTTP_GROUP $APP_PATH/static
 sudo chmod -R 755 $APP_PATH/static
+
+# Fix SELinux Context for Static Files (Critical for Oracle Linux)
+if command -v chcon &> /dev/null; then
+    echo "🛡️ applying SELinux context to static files..."
+    sudo chcon -R -t httpd_sys_content_t $APP_PATH/static
+fi
 
 echo "🎉 Deployment complete!"
 echo "App should be accessible at: http://$PUBLIC_IP:5080"
