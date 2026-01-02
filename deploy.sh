@@ -107,6 +107,8 @@ if command -v chcon &> /dev/null; then
     # CRITICAL: Allow Nginx to talk to Gunicorn on localhost:8000
     echo "🛡️ Enabling Nginx network connections..."
     sudo setsebool -P httpd_can_network_connect 1
+    # Redundant check for some RHEL versions
+    sudo setsebool -P httpd_can_network_relay 1 || true
 fi
 
 echo "🎉 Deployment complete!"
