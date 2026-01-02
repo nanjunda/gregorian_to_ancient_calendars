@@ -1,0 +1,59 @@
+# Task Checklist
+
+- [x] Update Deployment Strategy
+    - [x] Create implementation plan
+    - [x] Create systemd service template
+    - [x] Create Nginx configuration template
+    - [x] Update deploy.sh for non-docker install
+- [x] Final Documentation and Commit
+    - [x] Update README.md with direct install steps
+    - [x] Commit all deployment artifacts
+- [x] Remote Repository Setup
+    - [x] Create GitHub repository `gregorian_to_hindu_calendar`
+    - [x] Push source code and artifacts
+- [x] Direct VM Deployment Package
+    - [x] Generate `panchanga_v3_install.tar.gz`
+- [x] Fix Remote Access Error
+    - [x] Diagnose 403 Forbidden (Repo is Private)
+    - [x] Change visibility to PUBLIC for easy cloning (CONFIRMED)
+- [x] Oracle Linux 9 Support
+    - [x] Update Implementation Plan for RHEL/DNF
+    - [x] Update `deploy.sh` for compatibility
+    - [x] Update Nginx template for RHEL
+- [x] Document Nginx Architecture
+    - [x] Create Mermaid workflow diagram
+    - [x] Update `architecture.md`
+- [x] Fix Nginx proxy_params Issue
+    - [x] Update `panchanga.nginx.template`
+    - [x] Push fix to GitHub
+# Task Checklist
+
+## v3.2 Features (Rashi/Lagna, HTTPS, Ops)
+- [ ] Setup
+    - [x] Create branch `feature/v3.2-upgrade`
+    - [x] Create Implementation Plan `v3.2_implementation_plan.md`
+- [x] Backend Implementation
+    - [x] Implement Rashi/Lagna logic in `utils/astronomy.py`
+    - [x] Update `app.py` API
+- [x] Frontend Implementation
+    - [x] Add Privacy Note to UI
+    - [x] Display Rashi & Lagna in results
+- [ ] Deployment & Ops (v3.2.1)
+    - [x] Create Implementation Plan `v3.2.1_implementation_plan.md`
+    - [x] UI Tweaks (Title & Samvatsara)
+    - [x] Configure Nginx (Port 58921)
+    - [x] Update `deploy.sh` (Firewall, SELinux for 58921)
+    - [ ] Verification on VM
+- [x] Merge to Main
+    - [x] Checkout `main`
+    - [x] Merge `feature/v3.2-upgrade`
+    - [x] Push to `origin/main`
+- [x] Relocate to /opt/panchanga (Nuclear Option)
+    - [x] Update `deploy.sh` to copy files to `/opt/panchanga`
+    - [x] Rebuild venv in `/opt` (using System Python)
+    - [x] Apply SELinux contexts to new location
+    - [x] Push changes to `feature/nginx-enable`
+- [x] Merge to Main
+    - [x] Checkout `main`
+    - [x] Merge `feature/nginx-enable`
+    - [x] Push to `origin/main`
