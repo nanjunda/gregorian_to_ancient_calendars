@@ -107,12 +107,14 @@ if command -v chcon &> /dev/null; then
     # CRITICAL: Allow Nginx to talk to Gunicorn on localhost:8000
     echo "🛡️ Enabling Nginx network connections..."
     sudo setsebool -P httpd_can_network_connect 1
-    # Redundant check for some RHEL versions
     sudo setsebool -P httpd_can_network_relay 1 || true
+    # Allow services to run in home directories
+    sudo setsebool -P httpd_enable_homedirs 1 || true
 
-    # Fix Gunicorn Execution from Systemd (audit log showed failure)
-    echo "🛡️ Applying bin_t context to venv executables..."
-    sudo chcon -R -t bin_t $APP_PATH/venv/bin
+    # Fix Gunicorn Execution from Systemd
+    echo "🛡️ Fixing venv permissions and SELinux context..."
+    chmod +x $APP_PATH/venv/bin/*
+    sudo chcon -R -t bin_t $APP_PATH/venv
 fi
 
 echo "🎉 Deployment complete!"
