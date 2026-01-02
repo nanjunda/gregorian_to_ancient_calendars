@@ -3,8 +3,8 @@
 # Exit on any error
 set -e
 
-echo "🚀 Starting Hindu Panchanga v3.0 SIMPLIFIED Deployment..."
-echo "ℹ️  Mode: Gunicorn Only (No Nginx)"
+echo "🚀 Starting Hindu Panchanga v3.0 Deployment (Nginx Enabled)..."
+echo "ℹ️  Mode: Nginx Reverse Proxy (Port 5080) -> Gunicorn (Internal 8000)"
 
 APP_NAME="panchanga"
 APP_PATH=$(pwd)
@@ -13,11 +13,14 @@ CURRENT_USER=$(whoami)
 # Detect Package Manager
 if command -v dnf &> /dev/null; then
     PKG_MGR="dnf"
-    # Group for Gunicorn? stick to user for simplified execution
-    HTTP_GROUP=$CURRENT_USER 
+    HTTP_GROUP="nginx"
+    NGINX_CONF_DIR="/etc/nginx/conf.d"
+    NGINX_LINK_DIR="" 
 elif command -v apt-get &> /dev/null; then
     PKG_MGR="apt-get"
-    HTTP_GROUP=$CURRENT_USER
+    HTTP_GROUP="www-data"
+    NGINX_CONF_DIR="/etc/nginx/sites-available"
+    NGINX_LINK_DIR="/etc/nginx/sites-enabled"
 else
     echo "❌ Unsupported package manager. Please install manually."
     exit 1
@@ -25,30 +28,31 @@ fi
 
 echo "📦 Detected package manager: $PKG_MGR"
 
-# 1. Install dependencies (Python Only)
+# 1. Install dependencies
 echo "📦 Installing system dependencies..."
 if [ "$PKG_MGR" == "dnf" ]; then
-    sudo dnf install -y python3-pip git-core curl
+    sudo dnf install -y python3-pip nginx git-core curl
+    sudo systemctl enable --now nginx
     
-    # Disable Nginx if present to free up ports/confusion
-    if systemctl is-active --quiet nginx; then
-        echo "🛑 Stopping Nginx to avoid conflicts..."
-        sudo systemctl stop nginx
-        sudo systemctl disable nginx
-    fi
-
     # Open firewall for Oracle Linux
     if command -v firewall-cmd &> /dev/null; then
         echo "🔥 Opening firewall port 5080..."
         sudo firewall-cmd --permanent --add-port=5080/tcp
         sudo firewall-cmd --reload
     fi
+    
+    # Allow Nginx to bind to custom port 5080 (SELinux)
+    if command -v semanage &> /dev/null; then
+        echo "🛡️ Configuring SELinux for port 5080..."
+        sudo semanage port -a -t http_port_t -p tcp 5080 || true
+    elif command -v setsebool &> /dev/null; then
+        # Fallback: Allow Nginx to bind to any port if semanage is missing
+        sudo setsebool -P httpd_run_stickshift 1 || true 
+        sudo setsebool -P httpd_can_network_connect 1 || true
+    fi
 else
     sudo apt-get update -y
-    sudo apt-get install -y python3-pip python3-venv git curl
-    # Disable Nginx on Debian too if simplifying
-    sudo systemctl stop nginx || true
-    sudo systemctl disable nginx || true
+    sudo apt-get install -y python3-pip python3-venv nginx git curl
 fi
 
 # 2. Setup Virtual Environment
@@ -63,9 +67,8 @@ echo "🐍 Installing Python packages..."
 
 # 3. Configure systemd service
 echo "⚙️ Configuring systemd service..."
-# Note: Using CURRENT_USER for Group as well to avoid permission issues
 sed -e "s|{{USER}}|$CURRENT_USER|g" \
-    -e "s|{{GROUP}}|$CURRENT_USER|g" \
+    -e "s|{{GROUP}}|$HTTP_GROUP|g" \
     -e "s|{{APP_PATH}}|$APP_PATH|g" \
     panchanga.service.template | sudo tee /etc/systemd/system/$APP_NAME.service > /dev/null
 
@@ -73,15 +76,22 @@ sudo systemctl daemon-reload
 sudo systemctl enable $APP_NAME
 sudo systemctl restart $APP_NAME
 
-# 4. Verification Check
-echo "⏳ Waiting for service to start..."
-sleep 3
-if systemctl is-active --quiet $APP_NAME; then
-    echo "✅ Service is RUNNING."
-else
-    echo "❌ Service failed to start. Check logs: journalctl -u $APP_NAME"
+# 4. Configure Nginx
+echo "🌐 Configuring Nginx..."
+PUBLIC_IP=$(curl -s ifconfig.me || echo "localhost")
+
+sed -e "s|{{DOMAIN_OR_IP}}|$PUBLIC_IP|g" \
+    -e "s|{{APP_PATH}}|$APP_PATH|g" \
+    panchanga.nginx.template | sudo tee $NGINX_CONF_DIR/$APP_NAME.conf > /dev/null
+
+if [ -n "$NGINX_LINK_DIR" ]; then
+    sudo ln -sf $NGINX_CONF_DIR/$APP_NAME.conf $NGINX_LINK_DIR/
+    sudo rm -f $NGINX_LINK_DIR/default
 fi
 
-PUBLIC_IP=$(curl -s ifconfig.me || echo "localhost")
+sudo nginx -t && sudo systemctl restart nginx
+sudo chown -R $CURRENT_USER:$HTTP_GROUP $APP_PATH/static
+sudo chmod -R 755 $APP_PATH/static
+
 echo "🎉 Deployment complete!"
-echo "App accessible directly at: http://$PUBLIC_IP:5080"
+echo "App should be accessible at: http://$PUBLIC_IP:5080"
