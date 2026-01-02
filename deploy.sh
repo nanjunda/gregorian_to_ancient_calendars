@@ -109,6 +109,10 @@ if command -v chcon &> /dev/null; then
     sudo setsebool -P httpd_can_network_connect 1
     # Redundant check for some RHEL versions
     sudo setsebool -P httpd_can_network_relay 1 || true
+
+    # Fix Gunicorn Execution from Systemd (audit log showed failure)
+    echo "🛡️ Applying bin_t context to venv executables..."
+    sudo chcon -R -t bin_t $APP_PATH/venv/bin
 fi
 
 echo "🎉 Deployment complete!"
