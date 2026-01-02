@@ -115,8 +115,8 @@ if command -v semanage &> /dev/null; then
     fi
 fi
 
-# Explicit permission fix
-chmod +x $DEPLOY_DIR/venv/bin/*
+# Explicit permission fix (Ignore errors on symlinks like 'python' which point to system read-only files)
+chmod +x $DEPLOY_DIR/venv/bin/* || true
 
 # 5. Configure systemd service
 echo "⚙️ Configuring systemd service..."
