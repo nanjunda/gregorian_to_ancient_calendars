@@ -11,7 +11,7 @@ itsdangerous==2.2.0
 Jinja2==3.1.6
 jplephem==2.23
 MarkupSafe==3.0.3
-numpy==2.4.0
+numpy==2.0.2
 pycparser==2.23
 pytz==2025.2
 setuptools==80.9.0
