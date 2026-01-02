@@ -103,6 +103,10 @@ sudo chmod -R 755 $APP_PATH/static
 if command -v chcon &> /dev/null; then
     echo "🛡️ applying SELinux context to static files..."
     sudo chcon -R -t httpd_sys_content_t $APP_PATH/static
+    
+    # CRITICAL: Allow Nginx to talk to Gunicorn on localhost:8000
+    echo "🛡️ Enabling Nginx network connections..."
+    sudo setsebool -P httpd_can_network_connect 1
 fi
 
 echo "🎉 Deployment complete!"
