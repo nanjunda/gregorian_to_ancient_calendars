@@ -1,10 +1,16 @@
-# Hindu Panchanga Converter Task Checklist
+# Task Checklist
 
-- [x] Version Control and Release v1.0
-- [x] Develop version 2.0: iCal Integration (Refined Range)
-    - [x] Prepare One-pager for v2.0 and get user approval
-    - [x] Design Architecture and Workflow for recurring date search
-    - [x] Update recurrence logic for 20-year current search
-    - [x] Implement iCal (.ics) file generation
-    - [x] Update Web UI for Title input and iCal download
-    - [x] Verify recurrence logic
+- [x] Update Deployment Strategy
+    - [x] Create implementation plan
+    - [x] Create systemd service template
+    - [x] Create Nginx configuration template
+    - [x] Update deploy.sh for non-docker install
+- [x] Final Documentation and Commit
+    - [x] Update README.md with direct install steps
+    - [x] Commit all deployment artifacts
+- [x] Remote Repository Setup
+    - [x] Create GitHub repository `gregorian_to_hindu_calendar`
+    - [x] Push source code and artifacts
+- [x] Direct VM Deployment Package
+    - [x] Generate `panchanga_v3_install.tar.gz`
+- [x] Final Verification and Notify User
