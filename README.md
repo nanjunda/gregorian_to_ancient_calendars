@@ -24,6 +24,10 @@ A high-precision tool to convert Gregorian calendar dates into traditional Hindu
    ```
 2. **Run:** `python3 app.py`
 
+### Accessing the Application
+Once the script finishes, it will print your public IP. You can access the application at:
+`http://<your-vm-ip>:5080`
+
 ### Cloud Deployment (Native Linux VM)
 Simply run the deployment script on your VM (Ubuntu/Debian recommended):
 ```bash

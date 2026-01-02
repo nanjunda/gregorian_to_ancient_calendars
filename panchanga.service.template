@@ -7,7 +7,7 @@ User={{USER}}
 Group={{GROUP}}
 WorkingDirectory={{APP_PATH}}
 Environment="PATH={{APP_PATH}}/venv/bin"
-ExecStart={{APP_PATH}}/venv/bin/gunicorn --workers 3 --bind unix:{{APP_PATH}}/panchanga.sock -m 007 app:app
+ExecStart={{APP_PATH}}/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 -m 007 app:app
 
 [Install]
 WantedBy=multi-user.target

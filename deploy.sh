@@ -37,9 +37,8 @@ else
     sudo systemctl enable --now nginx
     # Open firewall for Oracle Linux
     if command -v firewall-cmd &> /dev/null; then
-        echo "🔥 Opening firewall ports..."
-        sudo firewall-cmd --permanent --add-service=http
-        sudo firewall-cmd --permanent --add-service=https
+        echo "🔥 Opening firewall port 5080..."
+        sudo firewall-cmd --permanent --add-port=5080/tcp
         sudo firewall-cmd --reload
     fi
 fi
@@ -81,4 +80,4 @@ fi
 sudo nginx -t && sudo systemctl restart nginx
 
 echo "🎉 Deployment complete!"
-echo "App should be accessible at: http://$PUBLIC_IP"
+echo "App should be accessible at: http://$PUBLIC_IP:5080"
