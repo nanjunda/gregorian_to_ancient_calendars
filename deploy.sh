@@ -3,7 +3,7 @@
 # Exit on any error
 set -e
 
-echo "🚀 Starting Hindu Panchanga v3.0 Deployment (Nuclear Option)..."
+echo "🚀 Starting Hindu Panchanga v4.0 Deployment (Nuclear Option)..."
 echo "ℹ️  Mode: Nginx Reverse Proxy (Port 5080) -> Gunicorn"
 echo "⚠️  RELOCATING App to /opt/panchanga to bypass SELinux Home Dir restrictions"
 
@@ -42,6 +42,13 @@ if [ "$PKG_MGR" == "dnf" ]; then
     echo "🛡️ Enabling Nginx network connections..."
     sudo setsebool -P httpd_can_network_connect 1
     sudo setsebool -P httpd_can_network_relay 1 || true
+
+    # Open Firewall Port (Security Port 58921)
+    if command -v firewall-cmd &> /dev/null; then
+        echo "🔥 Opening Firewall Port 58921..."
+        sudo firewall-cmd --permanent --add-port=58921/tcp
+        sudo firewall-cmd --reload
+    fi
 else
     sudo apt-get update -y
     sudo apt-get install -y python3-pip python3-venv nginx git curl
@@ -169,6 +176,6 @@ fi
 
 sudo nginx -t && sudo systemctl restart nginx
 
-echo "🎉 Deployment complete (v3.2)!"
-echo "App is SECURE at: https://$PUBLIC_IP"
+echo "🎉 Deployment complete (v4.0)!"
+echo "App is SECURE at: https://$PUBLIC_IP:58921"
 echo "Note: Accept the self-signed certificate warning in browser."
