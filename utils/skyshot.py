@@ -240,31 +240,32 @@ def generate_skymap(
                             fill=False, color='#333344', linewidth=1, linestyle='--')
     ax.add_patch(inner_ring)
     
-    # Title
+    # Title - Increased vertical margin to prevent cutoff
     title_text = f"🌌 Moon in {nakshatra_name}"
     if nakshatra_pada:
         title_text += f" (Pada {nakshatra_pada})"
     
+    # Lower y value to give more head room
     fig.suptitle(
         title_text,
-        fontsize=18, color='#ffffff', fontweight='bold', y=0.96,
-        fontfamily='sans-serif'
+        fontsize=22, color='#ffffff', fontweight='bold', y=0.95,
+        fontfamily='sans-serif', horizontalalignment='center'
     )
     
     # Subtitle with event title if provided
     if event_title:
-        ax.set_title(f'"{event_title}"', fontsize=12, color='#ff9100', 
-                     pad=20, fontfamily='sans-serif')
+        ax.set_title(f'"{event_title}"', fontsize=13, color='#ff9100', 
+                     pad=30, fontfamily='sans-serif')
     
     # Caption at bottom
     caption_text = f"Moon Position: {moon_longitude:.1f}° Sidereal  |  Phase: {phase_angle:.0f}°"
-    fig.text(0.5, 0.04, caption_text, ha='center', va='center',
-             fontsize=10, color='#666666', fontfamily='sans-serif')
+    fig.text(0.5, 0.06, caption_text, ha='center', va='center',
+             fontsize=12, color='#888888', fontfamily='sans-serif')
     
     # Educational note
-    fig.text(0.5, 0.01, 
+    fig.text(0.5, 0.03, 
              "Ecliptic wheel showing the Moon's position among the 27 Nakshatras",
-             ha='center', va='center', fontsize=8, color='#444444', 
+             ha='center', va='center', fontsize=10, color='#555555', 
              style='italic', fontfamily='sans-serif')
     
     # Configure polar plot
@@ -275,10 +276,10 @@ def generate_skymap(
     ax.set_yticks([])
     ax.spines['polar'].set_visible(False)
     
-    # Save the figure
+    # Save the figure with significant padding to avoid any possible clipping
     plt.savefig(output_path, dpi=150, bbox_inches='tight', 
                 facecolor=fig.get_facecolor(), edgecolor='none',
-                pad_inches=0.3)
+                pad_inches=0.8)
     plt.close(fig)
     
     return output_path

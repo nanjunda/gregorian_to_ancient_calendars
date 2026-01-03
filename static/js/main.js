@@ -199,6 +199,14 @@ document.addEventListener('DOMContentLoaded', () => {
             location: locationInput.value,
             title: document.getElementById('title').value
         });
+
+        // Load the Solar System visualization (Phase 3)
+        loadSolarSystem({
+            date: document.getElementById('date').value,
+            time: document.getElementById('time').value,
+            location: locationInput.value,
+            title: document.getElementById('title').value
+        });
     }
 
     async function loadSkyshot(data) {
@@ -239,6 +247,40 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Skyshot fetch error:', error);
             skyshotSection.classList.add('hidden');
+        }
+    }
+
+    async function loadSolarSystem(data) {
+        const solarSection = document.getElementById('solar-system-section');
+        const solarImage = document.getElementById('solar-system-image');
+        const solarLoader = document.getElementById('solar-loader');
+
+        // Show section and loader
+        solarSection.classList.remove('hidden');
+        solarLoader.classList.remove('hidden');
+        solarImage.style.display = 'none';
+
+        try {
+            const response = await fetch('/api/solar-system', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                const cacheBuster = result.cached ? '' : `?t=${Date.now()}`;
+                solarImage.src = result.image_url + cacheBuster;
+                solarImage.style.display = 'block';
+                solarLoader.classList.add('hidden');
+            } else {
+                console.error('Solar System error:', result.error);
+                solarSection.classList.add('hidden');
+            }
+        } catch (error) {
+            console.error('Solar System fetch error:', error);
+            solarSection.classList.add('hidden');
         }
     }
 });

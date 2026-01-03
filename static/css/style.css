@@ -376,3 +376,36 @@ footer {
         border-radius: 16px;
     }
 }
+
+/* Solar System Section */
+#solar-system-section {
+    text-align: center;
+    padding: 2rem;
+}
+
+#solar-system-container {
+    max-width: 500px;
+    margin: 1.5rem auto;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+    padding: 1rem;
+    box-shadow: 0 0 40px rgba(74, 144, 217, 0.2);
+}
+
+#solar-system-image {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    animation: fadeIn 1s ease-out;
+}
+
+#solar-loader {
+    padding: 5rem 2rem;
+}
+
+@media (max-width: 600px) {
+    #solar-system-container {
+        padding: 0.5rem;
+        border-radius: 16px;
+    }
+}

@@ -19,6 +19,7 @@ def index():
 from panchanga.recurrence import find_recurrences
 from utils.ical_gen import create_ical_content
 from utils.skyshot import generate_skymap, get_cache_key, get_cached_image, CACHE_DIR
+from utils.solar_system import generate_solar_system, get_cache_key as get_solar_cache_key, get_cached_image as get_solar_cached_image, CACHE_DIR as SOLAR_CACHE_DIR
 from flask import Response, make_response
 
 @app.route('/api/generate-ical', methods=['POST'])
@@ -118,6 +119,59 @@ def get_skyshot():
             "cached": False,
             "nakshatra": nakshatra,
             "moon_longitude": round(moon_lon, 2)
+        })
+        
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/solar-system', methods=['POST'])
+def get_solar_system():
+    """
+    Generate or retrieve a cached heliocentric solar system view.
+    """
+    data = request.json
+    date_str = data.get('date')
+    time_str = data.get('time')
+    location_name = data.get('location')
+    title = data.get('title', '')
+    
+    if not all([date_str, time_str, location_name]):
+        return jsonify({"success": False, "error": "Missing required fields"}), 400
+    
+    try:
+        # 1. Resolve location (needed to get timezone for UTC conversion)
+        loc = get_location_details(location_name)
+        
+        # 2. Check cache (heliocentric view only depends on date/time)
+        cache_key = get_solar_cache_key(date_str, time_str)
+        cached_path = get_solar_cached_image(cache_key)
+        
+        if cached_path:
+            return jsonify({
+                "success": True,
+                "image_url": f"/{cached_path}",
+                "cached": True
+            })
+        
+        # 3. Get UTC time
+        dt_str = f"{date_str} {time_str}"
+        naive_dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
+        local_tz = pytz.timezone(loc["timezone"])
+        local_dt = local_tz.localize(naive_dt)
+        utc_dt = local_dt.astimezone(pytz.utc)
+        
+        # 4. Generate Solar System view
+        output_path = str(SOLAR_CACHE_DIR / f"{cache_key}.png")
+        generate_solar_system(
+            utc_dt=utc_dt,
+            output_path=output_path,
+            event_title=title if title else None
+        )
+        
+        return jsonify({
+            "success": True,
+            "image_url": f"/{output_path}",
+            "cached": False
         })
         
     except Exception as e:
