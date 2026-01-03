@@ -7,7 +7,7 @@ from panchanga.calculations import (
     calculate_yoga, calculate_karana, calculate_masa_samvatsara,
     format_panchanga_report
 )
-from utils.astronomy import get_sidereal_longitude, get_sunrise_sunset, sun, moon, get_previous_new_moon
+from utils.astronomy import get_sidereal_longitude, get_sunrise_sunset, sun, moon, get_previous_new_moon, get_angular_data
 import os
 
 app = Flask(__name__)
@@ -133,6 +133,7 @@ def get_panchanga():
                 "karana": karana_num,
                 "rashi": {"name": rashi_name, "code": rashi_code},
                 "lagna": {"name": lagna_name, "code": lagna_code},
+                "angular_data": get_angular_data(local_dt, loc["latitude"], loc["longitude"], loc["timezone"]),
                 "report": report
             }
         })

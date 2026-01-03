@@ -136,23 +136,39 @@ def get_lagna(date_local, lat, lon, timezone_str):
     
     return lagna_index, asc_deg_sidereal
 
-if __name__ == "__main__":
-    # Test
-    now_utc = datetime.now(pytz.utc)
-    sun_lon = get_sidereal_longitude(now_utc, sun)
-    moon_lon = get_sidereal_longitude(now_utc, moon)
-    print(f"Sun Sidereal Longitude: {sun_lon}")
-    print(f"Moon Sidereal Longitude: {moon_lon}")
-    
-    # Test sunrise
-    sr, ss = get_sunrise_sunset(datetime.now(), 12.9716, 77.5946, "Asia/Kolkata")
-    print(f"Sunrise: {sr}")
-    print(f"Sunset: {ss}")
-    
-    # Test Rashi/Lagna
-    r_idx = get_rashi(moon_lon)
-    print(f"Rashi Index: {r_idx}")
-    
-    # Test Lagna (Bangalore)
-    l_idx, l_deg = get_lagna(datetime.now(pytz.timezone("Asia/Kolkata")), 12.9716, 77.5946, "Asia/Kolkata")
-    print(f"Lagna Index: {l_idx}, Deg: {l_deg}")
+def get_angular_data(date_local, lat, lon, timezone_str):
+    """
+    Returns a dictionary with raw astronomical data needed for educational fact cards.
+    Includes:
+        - Sun sidereal longitude
+        - Moon sidereal longitude
+        - Ayanamsha (Lahiri)
+        - Sun-Moon angular separation (phase angle)
+        - Ecliptic longitude of the Sun (tropical) for reference
+    """
+    # Ensure date_local is a datetime with timezone
+    if date_local.tzinfo is None:
+        tz = pytz.timezone(timezone_str)
+        date_local = tz.localize(date_local)
+    # Convert to UTC for calculations
+    utc_dt = date_local.astimezone(pytz.utc)
+    # Sidereal longitudes
+    sun_sid = get_sidereal_longitude(utc_dt, sun)
+    moon_sid = get_sidereal_longitude(utc_dt, moon)
+    # Ayanamsha for the moment
+    t = ts.from_datetime(utc_dt)
+    ayanamsha = get_ayanamsha(t.tt)
+    # Tropical Sun longitude (for phase calculation)
+    t_tropical = ts.from_datetime(utc_dt)
+    astrometric = earth.at(t_tropical).observe(sun)
+    _, sun_tropical_lon, _ = astrometric.ecliptic_latlon()
+    sun_tropical_deg = sun_tropical_lon.degrees
+    # Phase angle between Sun and Moon (0-360)
+    phase_angle = (moon_sid - sun_sid) % 360
+    return {
+        "sun_sidereal": round(sun_sid, 4),
+        "moon_sidereal": round(moon_sid, 4),
+        "ayanamsha": round(ayanamsha, 4),
+        "sun_tropical": round(sun_tropical_deg, 4),
+        "phase_angle": round(phase_angle, 2)
+    }

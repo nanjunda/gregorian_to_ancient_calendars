@@ -148,9 +148,47 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('res-rashi').textContent = data.rashi.name;
         document.getElementById('res-lagna').textContent = data.lagna.name;
 
-        document.getElementById('res-sunrise').textContent = data.sunrise;
-        document.getElementById('res-sunset').textContent = data.sunset;
+        // Simplified educational fact cards
+        const factContainer = document.getElementById('fact-cards-container');
+        factContainer.innerHTML = '';
+        const angular = data.angular_data;
+        const westernZodiacs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
+        const sunIdx = Math.floor(angular.sun_sidereal / 30) % 12;
+        const moonIdx = Math.floor(angular.moon_sidereal / 30) % 12;
+        const facts = [];
+        facts.push({ title: 'Sun', text: `${westernZodiacs[sunIdx]} (sidereal)` });
+        facts.push({ title: 'Moon', text: `${westernZodiacs[moonIdx]} (sidereal)` });
+        // Moon phase description
+        let phaseDesc = '';
+        if (angular.phase_angle === 0) phaseDesc = 'New Moon';
+        else if (angular.phase_angle === 180) phaseDesc = 'Full Moon';
+        else phaseDesc = `${angular.phase_angle.toFixed(1)}° separation`;
+        facts.push({ title: 'Moon Phase', text: phaseDesc });
+        // Precision correction (Ayanamsha)
+        facts.push({ title: 'Precision correction (Ayanamsha)', text: `${angular.ayanamsha.toFixed(2)}°` });
+        // Render cards
+        facts.forEach(f => {
+            const card = document.createElement('div');
+            card.className = 'grid-item';
+            const label = document.createElement('span');
+            label.className = 'label';
+            label.textContent = f.title;
+            const value = document.createElement('span');
+            value.className = 'value';
+            value.textContent = f.text;
+            card.appendChild(label);
+            card.appendChild(value);
+            factContainer.appendChild(card);
+        });
 
+        // Populate sunrise and sunset times
+        document.getElementById('res-sunrise').textContent = data.sunrise || '-';
+        document.getElementById('res-sunset').textContent = data.sunset || '-';
+
+        // Show the fact cards section
+        document.getElementById('fact-cards').classList.remove('hidden');
+
+        // Show result grid again
         resultContainer.classList.remove('hidden');
         resultContainer.scrollIntoView({ behavior: 'smooth' });
     }
