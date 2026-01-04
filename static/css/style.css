@@ -131,6 +131,15 @@ input:focus {
     opacity: 1;
 }
 
+.input-hint {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 0.3rem;
+    opacity: 0.8;
+}
+
 .lang-selector {
     display: flex;
     gap: 0.5rem;

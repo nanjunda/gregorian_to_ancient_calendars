@@ -10,6 +10,7 @@ The **Hindu Panchanga Converter** is a high-precision astronomical and Vedic cal
 2. **Dynamic Canvas Scaling**: The "Cosmic Alignment" canvas is increased by 23% to accommodate high-detail hybrid naming.
 3. **Optimized Visuals**: Sky-map titles are repositioned to prevent clipping, and terminologies are shifted from "Birth" to "Cosmic" to fit any event type.
 4. **Next 20 Occurrences**: The iCal engine now finds exactly the next 20 occurrences of a Vedic date (Anniversaries), ideal for recurring annual festivals or birthdays.
+5. **Universal Location Guidance**: Improved the location input with guided placeholders and generic hints (Village, Town, City, or Landmark) to resolve geocoding ambiguity.
 
 ---
 
