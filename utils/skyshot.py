@@ -162,11 +162,9 @@ def generate_skymap(
     from matplotlib.figure import Figure
     from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
     
-    fig = Figure(figsize=(15.5, 15.5), facecolor='#0a0a0f')
+    fig = Figure(figsize=(10.0, 10.0), facecolor='#0a0a0f')
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(111, polar=True, facecolor='#0a0a0f')
-    
-    # ... (Nakshatras and Moon rendering logic stays exactly the same)
     
     # Draw the 27 Nakshatra segments
     for i, nak in enumerate(NAKSHATRAS):
@@ -234,28 +232,6 @@ def generate_skymap(
             markeredgecolor='#ffffff', markeredgewidth=1.5, zorder=5)
     ax.text(0, 0, 'EARTH', fontsize=7, ha='center', va='center', color='#ffffff', zorder=6)
     
-    # TWO-LINE STACKED TITLE (v4.1 Fix for Truncation)
-    fig.text(0.5, 0.93, "Moon position in", 
-             ha='center', va='center', fontsize=18, color='#ffffff', alpha=0.9)
-    
-    full_nak_name = nakshatra_name.upper()
-    if nakshatra_pada:
-        full_nak_name += f" (PADA {nakshatra_pada})"
-    
-    fig.text(0.5, 0.88, full_nak_name, 
-             ha='center', va='center', fontsize=26, color='#ff9100', fontweight='bold')
-    
-    # Caption at bottom
-    caption_text = f"Moon Position: {moon_longitude:.1f}° Sidereal  |  Phase: {phase_angle:.0f}°"
-    fig.text(0.5, 0.08, caption_text, ha='center', va='center',
-             fontsize=14, color='#888888', fontfamily='sans-serif')
-    
-    # Educational note
-    fig.text(0.5, 0.04, 
-             "Ecliptic wheel showing the Moon's sidereal position among the Nakshatras",
-             ha='center', va='center', fontsize=11, color='#555555', 
-             style='italic', fontfamily='sans-serif')
-    
     # Configure polar plot
     ax.set_theta_zero_location('N')
     ax.set_theta_direction(-1)
@@ -264,10 +240,10 @@ def generate_skymap(
     ax.set_yticks([])
     ax.spines['polar'].set_visible(False)
     
-    # Save the figure with extra padding
-    fig.savefig(output_path, dpi=150, bbox_inches='tight', 
+    # Save the figure with minimal padding
+    fig.savefig(output_path, dpi=120, bbox_inches='tight', 
                 facecolor=fig.get_facecolor(), edgecolor='none',
-                pad_inches=0.8)
+                pad_inches=0.1)
     
     return output_path
 

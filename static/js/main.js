@@ -219,10 +219,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const skyshotImage = document.getElementById('skyshot-image');
         const skyshotLoader = document.getElementById('skyshot-loader');
         const skyshotCaption = document.getElementById('skyshot-caption');
+        const skyshotMainTitle = document.getElementById('skyshot-main-title');
+        const skyshotTitleArea = document.getElementById('skyshot-dynamic-title');
 
-        // Show loader, hide image initially
+        // Show section and loader
         skyshotSection.classList.remove('hidden');
         skyshotLoader.classList.remove('hidden');
+        skyshotTitleArea.style.opacity = '0.3'; // Dim title while loading
         skyshotImage.style.display = 'none';
 
         try {
@@ -235,14 +238,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
 
             if (result.success) {
-                // Use Base64 data directly (No public URL)
+                // Update HTML Title Area (v4.1 fix for truncation)
+                skyshotMainTitle.textContent = result.nakshatra || 'Unknown Nakshatra';
+                skyshotTitleArea.style.opacity = '1';
+
+                // Use Base64 data directly
                 skyshotImage.src = result.image_data;
                 skyshotImage.style.display = 'block';
                 skyshotLoader.classList.add('hidden');
 
-                // Update caption with Nakshatra info if available
-                if (result.nakshatra) {
-                    skyshotCaption.innerHTML = `Moon at <strong>${result.moon_longitude}°</strong> sidereal longitude, in <strong>${result.nakshatra}</strong>`;
+                // Update caption with coordinates
+                if (result.moon_longitude) {
+                    skyshotCaption.innerHTML = `Moon Position: <strong>${result.moon_longitude}°</strong> Sidereal  |  Phase: <strong>${result.phase_angle || 0}°</strong>`;
                 }
             } else {
                 console.error('Skyshot error:', result.error);
