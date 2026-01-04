@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Explorer - Discover Your Skies</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .flyer-container {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .hero {
+            position: relative;
+            padding: 4rem 1rem 2rem;
+            overflow: hidden;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FF6F00 0%, #FFD54F 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -2px;
+            text-transform: uppercase;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: var(--text-white);
+            margin-bottom: 2rem;
+            font-weight: 300;
+            opacity: 0.9;
+        }
+
+        .poster-art {
+            width: 100%;
+            max-width: 600px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            margin: 2rem auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .poster-art:hover {
+            transform: scale(1.02);
+        }
+
+        .story-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 4rem 0;
+            text-align: left;
+        }
+
+        .story-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .story-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+        }
+
+        .story-card h3 {
+            color: var(--secondary);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .story-card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #FF6F00 0%, #E64A19 100%);
+            color: white;
+            padding: 1.2rem 3rem;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 4px 20px rgba(255, 111, 0, 0.4);
+            transition: all 0.3s ease;
+            margin-top: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 111, 0, 0.6);
+            background: linear-gradient(135deg, #FFA000 0%, #FF6F00 100%);
+        }
+
+        @media (max-width: 768px) {
+            .story-section {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="flyer-container">
+        <header class="hero">
+            <h1 class="hero-title">Cosmic Explorer</h1>
+            <p class="hero-subtitle">Travel back in time to the moment you were born.</p>
+            <img src="/static/img/flyer_art.png" alt="Cosmic Explorer Poster" class="poster-art">
+        </header>
+
+        <section class="story-section">
+            <article class="story-card">
+                <h3>🚀 Modern Science</h3>
+                <p>
+                    Using NASA's jet propulsion data, we can mathematically reconstruct the solar system for any date in
+                    history.
+                    See exactly where Earth, Mars, and Jupiter were positioned the second you entered the world.
+                </p>
+            </article>
+
+            <article class="story-card">
+                <h3>📜 Ancient Wisdom</h3>
+                <p>
+                    Long before telescopes, ancient Indian astronomers calculated these same positions using pure
+                    mathematics.
+                    Discover the "Nakshatra" (Star Field) that the Moon was visiting during your birth.
+                </p>
+            </article>
+        </section>
+
+        <section class="cta-section">
+            <h2 style="color:white; margin-bottom: 1rem;">Ready to see your sky?</h2>
+            <p style="color:var(--text-muted); max-width: 600px; margin: 0 auto;">
+                Enter your biirth date or any special event to generate a personalized Cosmic Dashboard.
+            </p>
+            <a href="/" class="cta-button">Launch Time Machine ✨</a>
+        </section>
+
+        <footer style="margin-top: 5rem; color: #555; font-size: 0.9rem;">
+            <p>Hindu Panchanga Converter v4.1 | Educational Tool</p>
+        </footer>
+    </div>
+</body>
+
+</html>

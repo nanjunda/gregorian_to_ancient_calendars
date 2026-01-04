@@ -283,5 +283,12 @@ def get_panchanga():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
+@app.route('/explore')
+def explore():
+    """
+    Serve the educational 'Cosmic Explorer' flyer page.
+    """
+    return render_template('flyer.html')
+
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=5080, debug=True)
