@@ -144,8 +144,8 @@ sudo systemctl daemon-reload
 sudo systemctl enable $APP_NAME
 sudo systemctl restart $APP_NAME
 
-# 7. OPS: Log Rotation
-echo "🔄 Configuring Log Rotation..."
+# 7. LOGGING & PRIVACY: Logrotate and Image Cleanup
+echo "📝 Configuring logs and privacy settings..."
 if [ -f "$SOURCE_DIR/panchanga.logrotate" ]; then
     sudo cp $SOURCE_DIR/panchanga.logrotate /etc/logrotate.d/panchanga
     sudo chmod 644 /etc/logrotate.d/panchanga
@@ -154,6 +154,13 @@ if [ -f "$SOURCE_DIR/panchanga.logrotate" ]; then
     echo "   Setting up hourly cron job for logs..."
     echo "0 * * * * root /usr/sbin/logrotate -f /etc/logrotate.d/panchanga" | sudo tee /etc/cron.d/panchanga-rotate > /dev/null
 fi
+
+# PRIVACY: Setup automated image cleanup (Deletes images > 24h old)
+echo "🧹 Setting up automated image cache cleanup..."
+sudo mkdir -p $DEPLOY_DIR/scripts
+sudo cp $SOURCE_DIR/scripts/cleanup_cache.sh $DEPLOY_DIR/scripts/cleanup_cache.sh
+sudo chmod +x $DEPLOY_DIR/scripts/cleanup_cache.sh
+echo "15 * * * * root $DEPLOY_DIR/scripts/cleanup_cache.sh >> /var/log/panchanga_cleanup.log 2>&1" | sudo tee /etc/cron.d/panchanga-cleanup > /dev/null
 
 # 8. SECURITY: Generate Self-Signed Certificate
 echo "🔒 Generating Self-Signed SSL Certificate..."

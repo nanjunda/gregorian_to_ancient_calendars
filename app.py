@@ -113,7 +113,9 @@ def get_skyshot():
             nakshatra_pada=nak_pada,
             phase_angle=angular_data["phase_angle"],
             output_path=output_path,
-            event_title=title if title else None
+            event_title=title if title else None,
+            rahu_longitude=angular_data["rahu_sidereal"],
+            ketu_longitude=angular_data["ketu_sidereal"]
         )
         
         # 7. Convert to Base64 for privacy (No public URL)
@@ -125,7 +127,9 @@ def get_skyshot():
             "image_data": f"data:image/png;base64,{encoded_string}",
             "cached": False,
             "nakshatra": nakshatra,
-            "moon_longitude": round(moon_lon, 2)
+            "moon_longitude": round(moon_lon, 2),
+            "rahu_longitude": round(angular_data["rahu_sidereal"], 2),
+            "ketu_longitude": round(angular_data["ketu_sidereal"], 2)
         })
         
     except Exception as e:

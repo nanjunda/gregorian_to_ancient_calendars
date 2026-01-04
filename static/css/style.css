@@ -478,3 +478,53 @@ footer {
 #solar-loader {
     padding: 5rem 2rem;
 }
+/* Astronomical Insights (v4.1.1) */
+.insight-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 2rem;
+    align-items: center;
+    margin-top: 1.5rem;
+    text-align: left;
+}
+
+.insight-text h4 {
+    color: var(--secondary);
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+}
+
+.insight-text p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-white);
+    margin-bottom: 1rem;
+}
+
+.insight-list {
+    list-style: none;
+    padding: 0;
+}
+
+.insight-list li {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 0.8rem;
+    position: relative;
+    padding-left: 1.5rem;
+    line-height: 1.4;
+}
+
+.insight-list li::before {
+    content: "•";
+    color: var(--secondary);
+    position: absolute;
+    left: 0;
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .insight-grid {
+        grid-template-columns: 1fr;
+    }
+}

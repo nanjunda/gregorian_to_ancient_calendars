@@ -21,7 +21,9 @@ planets_map = {
     "Earth": eph['earth'],
     "Mars": eph['mars'],
     "Jupiter": eph['jupiter barycenter'],
-    "Saturn": eph['saturn barycenter']
+    "Saturn": eph['saturn barycenter'],
+    "Uranus": eph['uranus barycenter'],
+    "Neptune": eph['neptune barycenter']
 }
 
 CACHE_DIR = Path("static/solar_systems")
@@ -50,24 +52,23 @@ def generate_solar_system(utc_dt, output_path, event_title=None):
     for name, body in planets_map.items():
         # Get position relative to sun
         astrometric = sun.at(t).observe(body)
-        # We want the x, y in the ecliptic plane
-        # skyfield's ecliptic_position() returns distance in AU, and angles
-        # We can also get cartesian coordinates in the ecliptic frame
         from skyfield.framelib import ecliptic_frame
         pos = astrometric.frame_xyz(ecliptic_frame).au
         positions[name] = (pos[0], pos[1]) # X, Y coordinates
 
-    # Vedic names map (Western in brackets)
+    # Vedic/Approximated names map
     vedic_names = {
         "Mercury": "BUDHA (MERCURY)",
         "Venus": "SHUKRA (VENUS)",
         "Earth": "PRITHVI (EARTH)",
         "Mars": "MANGALA (MARS)",
         "Jupiter": "GURU (JUPITER)",
-        "Saturn": "SHANI (SATURN)"
+        "Saturn": "SHANI (SATURN)",
+        "Uranus": "ARUNA (URANUS)*",
+        "Neptune": "VARUNA (NEPTUNE)*"
     }
 
-    # Setup Plot - Thread Safe
+    # Setup Plot
     from matplotlib.figure import Figure
     from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
     
@@ -75,7 +76,6 @@ def generate_solar_system(utc_dt, output_path, event_title=None):
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(111, facecolor='#0a0a0f')
     
-    # Sun at center with glow
     import matplotlib.patches as patches
     for r_glow in [0.2, 0.1]:
         glow = patches.Circle((0, 0), r_glow, color='#ffcc00', alpha=0.3, zorder=9)
@@ -84,66 +84,80 @@ def generate_solar_system(utc_dt, output_path, event_title=None):
             markeredgecolor='#ffffff', markeredgewidth=1.5, label='Sun', zorder=10)
     ax.text(0, -0.6, 'SUN (SURYA)', color='#ffffff', ha='center', fontsize=16, fontweight='bold')
 
-    # Orbit Radii for visualization
     colors = {
         "Mercury": "#9b9b9b",
         "Venus": "#f3d299",
         "Earth": "#4a90d9",
         "Mars": "#e94560",
         "Jupiter": "#d39c7e",
-        "Saturn": "#c5ab6e"
+        "Saturn": "#c5ab6e",
+        "Uranus": "#a2cffe", # Muted blue
+        "Neptune": "#3f51b5" # Muted indigo
     }
     
     symbols = {
         "Mercury": "☿", "Venus": "♀", "Earth": "⊕", 
-        "Mars": "♂", "Jupiter": "♃", "Saturn": "♄"
+        "Mars": "♂", "Jupiter": "♃", "Saturn": "♄",
+        "Uranus": "♅", "Neptune": "♆"
     }
 
-    # Normalize distances for a better visual (inner vs outer)
+    traditional_planets = ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn"]
+
+    # Refined Logarithmic-Style Scaling to handle outer planets without squashing inner
     def scale_pos(x, y):
         dist = np.sqrt(x**2 + y**2)
         if dist == 0: return 0, 0
-        # Refined scaling for better inner planetary visibility
-        scaled_dist = 1.2 * (dist ** 0.55) 
+        # Log-based scaling allows Uranus and Neptune to fit beautifully
+        scaled_dist = 4.5 * np.log1p(dist) 
         factor = scaled_dist / dist
         return x * factor, y * factor
 
-    # Draw Orbits and Planets
     max_r = 0
     for name, (x, y) in positions.items():
         sx, sy = scale_pos(x, y)
         r = np.sqrt(sx**2 + sy**2)
         max_r = max(max_r, r)
         
-        # Draw Orbit circle - more prominent
-        circle = patches.Circle((0, 0), r, color='#444455', fill=False, linestyle='-', alpha=0.2, linewidth=1)
+        is_modern = name not in traditional_planets
+        
+        # Orbit styling
+        orbit_color = '#ffffff' if not is_modern else '#444455'
+        orbit_alpha = 0.15 if not is_modern else 0.08
+        ls = '-' if not is_modern else '--'
+        
+        circle = patches.Circle((0, 0), r, color=orbit_color, fill=False, 
+                                linestyle=ls, alpha=orbit_alpha, linewidth=1)
         ax.add_patch(circle)
         
-        # Add Colored Symbol as the Marker (Replacement for circle)
+        # Planet Symbol
+        opacity = 1.0 if not is_modern else 0.6
         ax.text(sx, sy, symbols[name], color=colors[name], ha='center', va='center', 
-                fontsize=28, fontweight='bold', zorder=15)
+                fontsize=28, fontweight='bold', zorder=15, alpha=opacity)
         
-        # Add Name label next to symbol - Adaptive offsetting
-        # If planet is on the right half, label to the right. If left, label to the left.
+        # Planet Name
         ha = 'left' if sx >= 0 else 'right'
         offset = 0.5 if sx >= 0 else -0.5
         v_name = vedic_names.get(name, name.upper())
         ax.text(sx + offset, sy, v_name, color=colors[name], 
-                ha=ha, va='center', fontsize=14, fontweight='bold', zorder=15)
+                ha=ha, va='center', fontsize=14, fontweight='bold', zorder=15, alpha=opacity)
+
+    # Note about Aruna/Varuna
+    ax.text(0.98, 0.02, "* Modern astronomical additions (Aruna & Varuna)", 
+            transform=ax.transAxes, color='#555555', fontsize=12, ha='right', style='italic')
 
     # Styling
-    padding = 1.2
+    padding = 1.1
     ax.set_xlim(-max_r * padding, max_r * padding)
     ax.set_ylim(-max_r * padding, max_r * padding)
     ax.set_aspect('equal')
     ax.axis('off')
 
-    # Grid background (faint stars) - 50 random points
+    # Background Stars
     np.random.seed(42)
-    stars_x = np.random.uniform(-max_r*padding, max_r*padding, 50)
-    stars_y = np.random.uniform(-max_r*padding, max_r*padding, 50)
-    ax.scatter(stars_x, stars_y, s=1, color='#ffffff', alpha=0.2, zorder=1)
+    stars_x = np.random.uniform(-max_r*padding, max_r*padding, 100)
+    stars_y = np.random.uniform(-max_r*padding, max_r*padding, 100)
+    ax.scatter(stars_x, stars_y, s=1.5, color='#ffffff', alpha=0.15, zorder=1)
 
-    # Save the figure with clean padding - No internal titles (v4.1)
+    # Save the figure
     fig.savefig(output_path, dpi=130, bbox_inches='tight', facecolor='#0a0a0f', pad_inches=0.2)
     return output_path

@@ -292,6 +292,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 solarImage.src = result.image_data;
                 solarImage.style.display = 'block';
                 solarLoader.classList.add('hidden');
+
+                // Show Astronomical Insights (v4.1.1)
+                document.getElementById('astronomical-insights').classList.remove('hidden');
             } else {
                 console.error('Solar System error:', result.error);
                 solarSection.classList.add('hidden');

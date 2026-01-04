@@ -165,10 +165,22 @@ def get_angular_data(date_local, lat, lon, timezone_str):
     sun_tropical_deg = sun_tropical_lon.degrees
     # Phase angle between Sun and Moon (0-360)
     phase_angle = (moon_sid - sun_sid) % 360
+
+    # Calculate Rahu (Mean North Node)
+    # T = centuries from J2000.0
+    tt = t.tt
+    T = (tt - 2451545.0) / 36525.0
+    # Formula for Mean Node (Tropical)
+    rahu_tropical = (125.0445479 - 1934.1362891 * T + 0.0020754 * T**2 + 0.000002139 * T**3 - 0.0000000165 * T**4) % 360
+    rahu_sidereal = (rahu_tropical - ayanamsha) % 360
+    ketu_sidereal = (rahu_sidereal + 180) % 360
+
     return {
         "sun_sidereal": round(sun_sid, 4),
         "moon_sidereal": round(moon_sid, 4),
         "ayanamsha": round(ayanamsha, 4),
         "sun_tropical": round(sun_tropical_deg, 4),
-        "phase_angle": round(phase_angle, 2)
+        "phase_angle": round(phase_angle, 2),
+        "rahu_sidereal": round(rahu_sidereal, 4),
+        "ketu_sidereal": round(ketu_sidereal, 4)
     }

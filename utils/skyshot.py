@@ -133,27 +133,13 @@ def generate_skymap(
     nakshatra_pada: int,
     phase_angle: float,
     output_path: str,
-    event_title: str = None
+    event_title: str = None,
+    rahu_longitude: float = None,
+    ketu_longitude: float = None
 ) -> str:
     """
     Generate an ecliptic wheel sky map showing the Moon's position among the 27 Nakshatras.
-    
-    This creates a polar plot visualization with:
-    - 27 Nakshatra segments arranged in a circle
-    - The Moon marker at its correct sidereal position
-    - The current Nakshatra highlighted
-    - Educational labels and captions
-    
-    Args:
-        moon_longitude: Moon's sidereal longitude (0-360°)
-        nakshatra_name: Name of the current Nakshatra
-        nakshatra_pada: Pada number (1-4)
-        phase_angle: Sun-Moon angular separation for moon phase
-        output_path: File path to save the generated PNG
-        event_title: Optional title for the event
-    
-    Returns:
-        Path to the generated image
+    Includes Rahu and Ketu as mathematical markers (v4.1.1).
     """
     # Ensure cache directory exists
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -168,11 +154,9 @@ def generate_skymap(
     
     # Draw the 27 Nakshatra segments
     for i, nak in enumerate(NAKSHATRAS):
-        # Convert degrees to radians for polar plot
         start_rad = np.radians(90 - nak["start"])
         end_rad = np.radians(90 - nak["end"])
         
-        # Determine if this is the current Nakshatra
         is_current = (nak["name"].lower() == nakshatra_name.lower() or 
                       nakshatra_name.lower().startswith(nak["name"].lower()[:4]))
         
@@ -185,20 +169,16 @@ def generate_skymap(
             alpha = 0.5
             linewidth = 0.5
         
-        # Create the wedge for this Nakshatra
         theta = np.linspace(start_rad, end_rad, 50)
         r_inner = 0.55
         r_outer = 0.95
         
-        # Fill the segment
         ax.fill_between(theta, r_inner, r_outer, color=color, alpha=alpha, 
                         edgecolor='#ffffff', linewidth=linewidth)
         
-        # Add Nakshatra name label (abbreviated)
         mid_angle = (start_rad + end_rad) / 2
         label_r = 0.75
         
-        # Calculate rotation
         rotation_deg = np.degrees(mid_angle) - 90
         if -180 < rotation_deg < -90 or 90 < rotation_deg < 180:
             rotation_deg += 180
@@ -215,6 +195,17 @@ def generate_skymap(
             rotation_mode='anchor'
         )
     
+    # Rahu & Ketu (Lunar Nodes) - Mathematical points (v4.1.1)
+    if rahu_longitude is not None:
+        rahu_rad = np.radians(90 - rahu_longitude)
+        ax.text(rahu_rad, 1.02, '☊', color='#ff33cc', fontsize=18, fontweight='bold', ha='center', va='center')
+        ax.text(rahu_rad, 1.10, 'RAHU', color='#ff33cc', fontsize=7, ha='center', va='center', fontweight='bold')
+    
+    if ketu_longitude is not None:
+        ketu_rad = np.radians(90 - ketu_longitude)
+        ax.text(ketu_rad, 1.02, '☋', color='#cc33ff', fontsize=18, fontweight='bold', ha='center', va='center')
+        ax.text(ketu_rad, 1.10, 'KETU', color='#cc33ff', fontsize=7, ha='center', va='center', fontweight='bold')
+
     # Draw the Moon at its position
     moon_rad = np.radians(90 - moon_longitude)
     moon_r = 0.75
@@ -223,7 +214,7 @@ def generate_skymap(
     ax.plot(moon_rad, moon_r, 'o', markersize=28, color='#ffd700', 
             markeredgecolor='#ffffff', markeredgewidth=2, zorder=10)
     
-    # Add moon phase symbol (using text, avoiding emoji glyph issue if possible)
+    # Add moon phase symbol
     moon_symbol = get_moon_phase_symbol(phase_angle)
     ax.text(moon_rad, moon_r, moon_symbol, fontsize=20, ha='center', va='center', zorder=11)
     
@@ -235,7 +226,7 @@ def generate_skymap(
     # Configure polar plot
     ax.set_theta_zero_location('N')
     ax.set_theta_direction(-1)
-    ax.set_ylim(0, 1.05)
+    ax.set_ylim(0, 1.15) # Increased to fit Rahu/Ketu labels
     ax.set_xticks([])
     ax.set_yticks([])
     ax.spines['polar'].set_visible(False)

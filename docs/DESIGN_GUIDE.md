@@ -112,7 +112,26 @@ The app is hardened for secure enterprise-grade deployment:
 
 ---
 
-## 6. Developer Guidelines
+---
+
+## 7. Modern & Vedic Hybrid Strategy (v4.1.1)
+Version 4.1.1 introduces a deeper integration between modern scientific data and traditional Vedic concepts.
+
+### A. Modern Planets (Uranus & Neptune)
+- **Role**: Included in the **Cosmic Alignment** (Solar System) view for scientific completeness.
+- **Naming**: Referred to as **Aruna (Uranus)** and **Varuna (Neptune)**—the modern Sanskrit approximations.
+- **Styling**: Rendered with lower opacity and dashed orbits to distinguish them from the traditional Navagrahas.
+- **Mathematics**: Uses **Logarithmic Scaling** ($4.5 \times \ln(1+d)$) to allow these distant bodies (30+ AU) to fit on the same canvas as Mercury (0.38 AU) without squashing the internal orbits.
+
+### B. Lunar Nodes (Rahu & Ketu)
+- **Concept**: Visualized in the **Celestial Perspective** (Sky-Shot) as mathematical intersection points.
+- **Astronomical Reality**: Rahu and Ketu are not physical rocks but the **Lunar Nodes**—the two points where the Moon's 5-degree tilted orbit intersects the Earth's Ecliptic Plane.
+- **Markers**: Plotted using their international astronomical symbols (☊ for North Node, ☋ for South Node).
+- **Predictive Power**: Their inclusion helps users understand why they are known as "Eclipse Points"—as eclipses only happen when the Sun and Moon are near these markers.
+
+---
+
+## 8. Developer Guidelines
 - **Modifying Calculations**: Edit `panchanga/calculations.py`. All astronomical calls must pass through `utils/astronomy.py`.
 - **Changing Styles**: Centralized in `static/css/style.css` using CSS Variables (`--primary`, `--accent`).
 - **Memory Management**: Ephemeris data (`eph`) is global and shared between modules to minimize RAM usage on 1GB instances.
