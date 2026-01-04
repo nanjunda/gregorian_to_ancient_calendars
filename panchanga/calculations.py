@@ -28,7 +28,11 @@ def calculate_nakshatra(moon_lon, lang='EN'):
     # Each nakshatra is 13°20' (13.333... degrees)
     # Each pada is 3°20' (3.333... degrees)
     pada = int((moon_lon % (360/27)) / (360/108)) + 1
-    return NAKSHATRAS[lang][nakshatra_index], pada
+    
+    nak_name = NAKSHATRAS[lang][nakshatra_index]
+    star_name = NAKSHATRA_STARS[nakshatra_index]
+    
+    return f"{nak_name} ({star_name})", pada
 
 def calculate_yoga(sun_lon, moon_lon, lang='EN'):
     yoga_lon = (sun_lon + moon_lon) % 360

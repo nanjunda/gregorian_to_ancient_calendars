@@ -6,10 +6,10 @@ from panchanga.calculations import (
     calculate_nakshatra, calculate_yoga, calculate_karana, format_panchanga_report
 )
 
-def find_recurrences(base_dt, loc_details, num_years=20, lang='EN'):
+def find_recurrences(base_dt, loc_details, num_entries=20, lang='EN'):
     """
-    Finds the next num_years occurrences of the same Masa, Paksha, and Tithi.
-    Starts search from the current year.
+    Finds the next num_entries occurrences of the same Masa, Paksha, and Tithi.
+    Starts search from the current date.
     """
     # 1. Get target attributes from the original date
     utc_dt = base_dt.astimezone(pytz.utc)
@@ -23,50 +23,49 @@ def find_recurrences(base_dt, loc_details, num_years=20, lang='EN'):
     sun_lon_at_nm = get_sidereal_longitude(prev_nm_utc, sun)
     target_masa, _ = calculate_masa_samvatsara(base_dt.year, sun_lon_at_nm, sun_lon, lang=lang)
     
-    current_year = datetime.now().year
-    print(f"Searching for: {target_masa}, {target_paksha}, {target_tithi} starting from {current_year}")
+    now = datetime.now(pytz.utc)
+    current_year = now.year
+    
+    # Starting search from current year
+    print(f"Searching for: {target_masa}, {target_paksha}, {target_tithi} for next {num_entries} matches...")
     
     results = []
+    year_to_search = current_year
     
-    # 2. Iterate through future years starting from current_year
-    for year_offset in range(num_years + 1):
-        year = current_year + year_offset
-        # Approximate date: use same month/day from original input as starting point for search
+    # 2. Search year by year until we have num_entries
+    while len(results) < num_entries:
+        # Approximate date: same month/day
         try:
-            approx_date = datetime(year, base_dt.month, base_dt.day, base_dt.hour, base_dt.minute)
+            approx_date = datetime(year_to_search, base_dt.month, base_dt.day, base_dt.hour, base_dt.minute)
         except ValueError:
-            # Handle Feb 29
-            approx_date = datetime(year, base_dt.month, base_dt.day - 1, base_dt.hour, base_dt.minute)
+            approx_date = datetime(year_to_search, base_dt.month, 28, base_dt.hour, base_dt.minute)
             
-        # Search window +/- 30 days
-        found_for_year = False
+        tz = pytz.timezone(loc_details["timezone"])
+        # Window of search (+/- 30 days around approx date)
         start_search = approx_date - timedelta(days=32)
         
-        # Scan day by day
-        for d_offset in range(65): # 65 days window to be safe
+        for d_offset in range(65):
             current_day = start_search + timedelta(days=d_offset)
-            current_day_local = current_day.replace(tzinfo=None) # naive for calculation
-            
-            # For each day, we check the Panchanga elements at the input time or noon
-            # Traditionally, we should check when the Tithi prevails.
-            # Here we check the exact same time of day as the original input.
-            tz = pytz.timezone(loc_details["timezone"])
             dt_local = tz.localize(datetime(current_day.year, current_day.month, current_day.day, base_dt.hour, base_dt.minute))
             dt_utc = dt_local.astimezone(pytz.utc)
             
+            # Skip past dates
+            if dt_utc < now:
+                continue
+                
             s_lon = get_sidereal_longitude(dt_utc, sun)
             m_lon = get_sidereal_longitude(dt_utc, moon)
             
             tithi, paksha = calculate_tithi(s_lon, m_lon, lang=lang)
-            
-            # For each candidate day, we must also check the Masa at THAT day's preceding New Moon
             curr_nm_utc = get_previous_new_moon(dt_utc)
             s_lon_at_nm = get_sidereal_longitude(curr_nm_utc, sun)
             masa, samvatsara = calculate_masa_samvatsara(dt_local.year, s_lon_at_nm, s_lon, lang=lang)
             
             if tithi == target_tithi and paksha == target_paksha and masa == target_masa:
-                # Found the match!
-                # Calculate full details for report
+                # Basic protection against double-counting the same day
+                if results and results[-1]["datetime"].date() == dt_local.date():
+                    continue
+
                 sunrise, sunset = get_sunrise_sunset(dt_local, loc_details["latitude"], loc_details["longitude"], loc_details["timezone"])
                 vara = calculate_vara(dt_local, sunrise, lang=lang)
                 nakshatra, nak_pada = calculate_nakshatra(m_lon, lang=lang)
@@ -83,7 +82,15 @@ def find_recurrences(base_dt, loc_details, num_years=20, lang='EN'):
                     "datetime": dt_local,
                     "report": report
                 })
-                found_for_year = True
-                break
+                
+                if len(results) >= num_entries:
+                    break
+        
+        year_to_search += 1
+        # Safety break to prevent infinite loops if something is wrong with calculations
+        if year_to_search > current_year + (num_entries * 2):
+            break
+            
+    return results
                 
     return results

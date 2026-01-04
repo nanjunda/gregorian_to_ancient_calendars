@@ -45,8 +45,8 @@ def generate_ical():
         local_tz = pytz.timezone(loc["timezone"])
         local_dt = local_tz.localize(naive_dt)
 
-        # 3. Find Recurrences (20 years starting from current year)
-        occurrences = find_recurrences(local_dt, loc, num_years=20, lang=lang)
+        # 3. Find Recurrences (Exactly next 20 entries)
+        occurrences = find_recurrences(local_dt, loc, num_entries=20, lang=lang)
         
         # 4. Generate iCal content
         ical_data = create_ical_content(title, occurrences)
@@ -248,6 +248,10 @@ def get_panchanga():
             vara, nakshatra, nak_pada, yoga, karana_num, lang=lang
         )
 
+        # 6. Calculate Next Birthday (Feature v4.1)
+        next_bdays = find_recurrences(local_dt, loc, num_entries=1, lang=lang)
+        next_bday = next_bdays[0]["datetime"].strftime('%A, %B %d, %Y') if next_bdays else "N/A"
+
         return jsonify({
             "success": True,
             "data": {
@@ -267,6 +271,7 @@ def get_panchanga():
                 "rashi": {"name": rashi_name, "code": rashi_code},
                 "lagna": {"name": lagna_name, "code": lagna_code},
                 "angular_data": get_angular_data(local_dt, loc["latitude"], loc["longitude"], loc["timezone"]),
+                "next_birthday": next_bday,
                 "report": report
             }
         })

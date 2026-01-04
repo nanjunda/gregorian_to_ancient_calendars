@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('iCal error:', error);
             alert('Failed to generate iCal file.');
         } finally {
-            downloadBtn.textContent = 'Download 20-Year iCal (.ics)';
+            downloadBtn.textContent = 'Download Next 20 Birthdays (.ics)';
             downloadBtn.disabled = false;
         }
     });
@@ -147,6 +147,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('res-yoga').textContent = data.yoga;
         document.getElementById('res-rashi').textContent = data.rashi.name;
         document.getElementById('res-lagna').textContent = data.lagna.name;
+
+        // Next Birthday (v4.1)
+        document.getElementById('res-next-birthday').textContent = data.next_birthday;
 
         // Simplified educational fact cards
         const factContainer = document.getElementById('fact-cards-container');

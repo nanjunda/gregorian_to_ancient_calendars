@@ -1,13 +1,18 @@
-# Hindu Panchanga Converter v4.0 - Design Guide
+# Hindu Panchanga Converter v4.1 - Design Guide
 
 ## 1. Introduction
-The **Hindu Panchanga Converter** is a high-precision astronomical and Vedic calendar engine. Its primary objective is to bridge the gap between ancient Vedic science and modern celestial mechanics. Version 4.0, the "Cosmic Context" release, adds educational visualizations that allow users to see exactly where the planets and stars were at their moment of birth.
-
-This document serves as an architectural blueprint for developers to understand the system's design, component relationships, and security implementation.
+The **Hindu Panchanga Converter** is a high-precision astronomical and Vedic calendar engine. Its primary objective is to bridge the gap between ancient Vedic science and modern celestial mechanics. Version 4.1 adds a **"Bridge to the West"** by incorporating Western astronomical star names and zodiac equivalents alongside Vedic names.
 
 ---
 
-## 2. High-Level Architecture
+## 2. Bridge Strategy (v4.1 Updates)
+1. **Hybrid Naming**: Nakshatras, Rashis, and Lagnas now display the Vedic name followed by the Western equivalent in brackets (e.g., *Mesha (Aries)* or *Ashwini (Beta Arietis)*).
+2. **Next 20 Birthdays**: The iCal engine now ignores year boundaries and finds exactly the next 20 occurrences of a Vedic birth date.
+3. **Birthday Spotlight**: The UI prominently displays the very next Gregorian date corresponding to the user's Vedic birth details.
+
+---
+
+## 3. High-Level Architecture
 The application follows a modular **Client-Server Architecture**. It is designed to be lightweight, stateless on the client side, and highly accurate on the backend.
 
 ### System Architecture Diagram

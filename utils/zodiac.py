@@ -16,12 +16,23 @@ ZODIAC_SIGNS = {
 
 def get_zodiac_name(index, lang="EN"):
     """
-    Returns the localized name of the zodiac sign for a given index (0-11).
+    Returns the localized name of the zodiac sign for a given index (0-11)
+    with the Western equivalent in brackets.
     """
     sign = ZODIAC_SIGNS.get(index % 12)
+    western_name = sign["name_en"]
+    
     if lang == "KN":
-        return sign["name_kn"]
+        vedic_name = sign["name_kn"]
     elif lang == "SA":
-        return sign["name_sa"]
+        vedic_name = sign["name_sa"]
     else:
-        return sign["name_en"]
+        # For EN, we still use the Vedic transliteration as primary if available
+        # but here name_en is already the Western name. 
+        # Actually, in ZODIAC_SIGNS, name_en is the Western name.
+        # Let's adjust to show Vedic translit if possible.
+        # Currently RASIS in panchanga_data has Vedic names in English.
+        # Let's use that if possible or just stick to the requested format.
+        vedic_name = sign["name_sa"] # Use Sanskrit as Vedic base for EN
+        
+    return f"{vedic_name} ({western_name})"

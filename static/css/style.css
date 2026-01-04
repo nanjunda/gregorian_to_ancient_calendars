@@ -265,6 +265,35 @@ input:focus {
     display: none;
 }
 
+/* Special High-Contrast Card */
+.special-card {
+    background: linear-gradient(135deg, rgba(233, 69, 96, 0.2), rgba(15, 52, 96, 0.4));
+    border: 1px solid rgba(233, 69, 96, 0.3);
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin: 1.5rem 0;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(233, 69, 96, 0.15);
+}
+
+.special-card .label {
+    display: block;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--secondary);
+    margin-bottom: 0.5rem;
+}
+
+.special-card .value {
+    display: block;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
+}
+
 /* Loader */
 #loader {
     text-align: center;
@@ -375,6 +404,11 @@ footer {
         max-width: 100%;
         border-radius: 16px;
     }
+
+    #solar-system-container {
+        padding: 0.5rem;
+        border-radius: 16px;
+    }
 }
 
 /* Solar System Section */
@@ -401,11 +435,4 @@ footer {
 
 #solar-loader {
     padding: 5rem 2rem;
-}
-
-@media (max-width: 600px) {
-    #solar-system-container {
-        padding: 0.5rem;
-        border-radius: 16px;
-    }
 }

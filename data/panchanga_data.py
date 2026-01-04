@@ -68,6 +68,13 @@ NAKSHATRAS = {
     ]
 }
 
+NAKSHATRA_STARS = [
+    "Beta Arietis", "41 Arietis", "Alcyone", "Aldebaran", "Lambda Orionis", "Betelgeuse", "Pollux", "Delta Cancri", 
+    "Alpha Hydrae", "Regulus", "Delta Leonis", "Denebola", "Delta Corvi", "Spica", "Arcturus", "Alpha Librae", 
+    "Delta Scorpionis", "Antares", "Lambda Scorpionis", "Delta Sagittarii", "Sigma Sagittarii", "Altair", 
+    "Beta Delphini", "Lambda Aquarii", "Alpha Pegasi", "Gama Pegasi", "Zeta Piscium"
+]
+
 YOGAS = {
     "EN": [
         "Vishkumbha", "Preeti", "Ayushman", "Saubhagya", "Shobhana", "Atiganda", "Sukarma", "Dhriti", "Shoola", "Ganda", "Vriddhi", "Dhruva", "Vyaghata", "Harshana", "Vajra", "Siddhi", "Vyatipata", "Variyan", "Parigha", "Shiva", "Siddha", "Sadhya", "Shubha", "Shukla", "Brahma", "Indra", "Vaidhriti"
