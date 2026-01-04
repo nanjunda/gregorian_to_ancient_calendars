@@ -32,12 +32,80 @@
             text-transform: uppercase;
         }
 
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 700;
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: var(--text-white);
+            margin-bottom: 2rem;
+            font-weight: 300;
+            opacity: 0.9;
         }
 
-        /* ... (rest of styles) ... */
+        .poster-art {
+            width: 100%;
+            max-width: 600px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            margin: 2rem auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .poster-art:hover {
+            transform: scale(1.02);
+        }
+
+        .story-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 4rem 0;
+            text-align: left;
+        }
+
+        .story-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .story-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+        }
+
+        .story-card h3 {
+            color: var(--secondary);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .story-card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #FF6F00 0%, #E64A19 100%);
+            color: white;
+            padding: 1.2rem 3rem;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 4px 20px rgba(255, 111, 0, 0.4);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 111, 0, 0.6);
+            background: linear-gradient(135deg, #FFA000 0%, #FF6F00 100%);
+        }
 
         .guide-button {
             display: inline-block;
