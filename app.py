@@ -297,5 +297,12 @@ def guide():
     """
     return render_template('guide.html')
 
+@app.route('/visuals/lunar-nodes')
+def lunar_nodes_visual():
+    """
+    Serve the 3D Lunar Nodes interactive visualization.
+    """
+    return render_template('lunar_nodes_visual.html')
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5080, debug=True)

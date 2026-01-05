@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Lunar Nodes Diagram</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            font-family: Arial, sans-serif;
+        }
+
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            max-width: 300px;
+            z-index: 100;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #info h3 {
+            margin: 0 0 10px 0;
+            color: #4fc3f7;
+        }
+
+        .legend-item {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .color-box {
+            width: 30px;
+            height: 15px;
+            margin-right: 10px;
+            border: 1px solid #666;
+        }
+
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #tiltInfo {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #4fc3f7;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            border: 1px solid rgba(79, 195, 247, 0.5);
+            text-align: center;
+        }
+
+        #tiltInfo .big {
+            font-size: 32px;
+            font-weight: bold;
+            color: #4fc3f7;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="info">
+        <h3>Lunar Nodes (3D View)</h3>
+        <div class="legend-item">
+            <div class="color-box" style="background: #ffd700;"></div>
+            <span>Earth's Orbital Plane (Ecliptic)</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background: #4fc3f7;"></div>
+            <span>Moon's Orbital Plane (tilted 5°)</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background: #9c27b0;"></div>
+            <span>Rahu (Ascending Node ↑)</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background: #f44336;"></div>
+            <span>Ketu (Descending Node ↓)</span>
+        </div>
+    </div>
+
+    <div id="tiltInfo">
+        <div class="big">5.14°</div>
+        <div>Moon's Orbital Tilt</div>
+    </div>
+
+    <div id="controls">
+        <strong>Controls:</strong> Drag to rotate • Scroll to zoom<br>
+        <small>Rotate around to see the tilt clearly!</small>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.Fog(0x000000, 800, 2000);
+
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 10000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        // Camera position - positioned to see tilt better
+        camera.position.set(600, 300, 600);
+        camera.lookAt(300, 0, 0);
+
+        // Enhanced Lighting for 3D depth
+        const ambientLight = new THREE.AmbientLight(0x222222, 1);
+        scene.add(ambientLight);
+
+        // Main light from sun
+        const sunLight = new THREE.PointLight(0xffffcc, 2, 1500);
+        sunLight.position.set(0, 0, 0);
+        sunLight.castShadow = true;
+        scene.add(sunLight);
+
+        // Directional light for better shading
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        dirLight.position.set(200, 300, 200);
+        scene.add(dirLight);
+
+        // Back light for depth
+        const backLight = new THREE.DirectionalLight(0x4488ff, 0.3);
+        backLight.position.set(-200, -100, -200);
+        scene.add(backLight);
+
+        // Stars
+        const starsGeometry = new THREE.BufferGeometry();
+        const starVertices = [];
+        for (let i = 0; i < 2000; i++) {
+            const x = (Math.random() - 0.5) * 3000;
+            const y = (Math.random() - 0.5) * 3000;
+            const z = (Math.random() - 0.5) * 3000;
+            starVertices.push(x, y, z);
+        }
+        starsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+        const starsMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 2 });
+        const stars = new THREE.Points(starsGeometry, starsMaterial);
+        scene.add(stars);
+
+        // Sun with glow
+        const sunGeometry = new THREE.SphereGeometry(35, 32, 32);
+        const sunMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffff00,
+            emissive: 0xffff00,
+            emissiveIntensity: 1
+        });
+        const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+        scene.add(sun);
+
+        // Sun glow layers
+        for (let i = 0; i < 3; i++) {
+            const glowGeometry = new THREE.SphereGeometry(40 + i * 8, 32, 32);
+            const glowMaterial = new THREE.MeshBasicMaterial({
+                color: 0xffdd44,
+                transparent: true,
+                opacity: 0.15 - i * 0.04
+            });
+            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+            scene.add(glow);
+        }
+
+        // Earth's orbital plane (Ecliptic) - with better material
+        const eclipticGeometry = new THREE.CircleGeometry(420, 128);
+        const eclipticMaterial = new THREE.MeshPhongMaterial({
+            color: 0xffd700,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.15,
+            shininess: 60,
+            emissive: 0x664400,
+            emissiveIntensity: 0.1
+        });
+        const ecliptic = new THREE.Mesh(eclipticGeometry, eclipticMaterial);
+        ecliptic.rotation.x = Math.PI / 2;
+        ecliptic.receiveShadow = true;
+        scene.add(ecliptic);
+
+        // Grid on ecliptic for better depth perception
+        const gridHelper = new THREE.PolarGridHelper(420, 16, 8, 64, 0x886600, 0x664400);
+        gridHelper.rotation.x = Math.PI / 2;
+        gridHelper.material.opacity = 0.2;
+        gridHelper.material.transparent = true;
+        scene.add(gridHelper);
+
+        // Earth's orbit line
+        const earthOrbitCurve = new THREE.EllipseCurve(0, 0, 350, 350, 0, 2 * Math.PI, false, 0);
+        const earthOrbitPoints = earthOrbitCurve.getPoints(128);
+        const earthOrbitGeometry = new THREE.BufferGeometry().setFromPoints(earthOrbitPoints);
+        const earthOrbitMaterial = new THREE.LineBasicMaterial({ color: 0xffaa00, linewidth: 2 });
+        const earthOrbitLine = new THREE.Line(earthOrbitGeometry, earthOrbitMaterial);
+        earthOrbitLine.rotation.x = Math.PI / 2;
+        scene.add(earthOrbitLine);
+
+        // Earth with better materials
+        const earthGeometry = new THREE.SphereGeometry(22, 32, 32);
+        const earthMaterial = new THREE.MeshPhongMaterial({
+            color: 0x2196f3,
+            emissive: 0x0d47a1,
+            emissiveIntensity: 0.2,
+            shininess: 80,
+            specular: 0x4488ff
+        });
+        const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+        earth.position.set(300, 0, 0);
+        earth.castShadow = true;
+        earth.receiveShadow = true;
+        scene.add(earth);
+
+        // Moon's orbital plane - TILTED with enhanced visualization
+        const tiltAngle = 5.14 * Math.PI / 180; // 5.14 degrees in radians
+
+        // Create a more visible tilted plane
+        const moonPlaneGeometry = new THREE.CircleGeometry(95, 64);
+        const moonPlaneMaterial = new THREE.MeshPhongMaterial({
+            color: 0x00bcd4,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.25,
+            shininess: 100,
+            emissive: 0x004d5a,
+            emissiveIntensity: 0.3
+        });
+        const moonPlane = new THREE.Mesh(moonPlaneGeometry, moonPlaneMaterial);
+        moonPlane.position.copy(earth.position);
+        moonPlane.rotation.x = Math.PI / 2;
+        moonPlane.rotation.y = tiltAngle;
+        moonPlane.receiveShadow = true;
+        scene.add(moonPlane);
+
+        // Grid on moon's plane for depth
+        const moonGrid = new THREE.PolarGridHelper(95, 12, 4, 64, 0x00bcd4, 0x006680);
+        moonGrid.position.copy(earth.position);
+        moonGrid.rotation.x = Math.PI / 2;
+        moonGrid.rotation.y = tiltAngle;
+        moonGrid.material.opacity = 0.4;
+        moonGrid.material.transparent = true;
+        scene.add(moonGrid);
+
+        // Moon's orbit line - TILTED
+        const moonOrbitCurve = new THREE.EllipseCurve(0, 0, 75, 75, 0, 2 * Math.PI, false, 0);
+        const moonOrbitPoints = moonOrbitCurve.getPoints(128);
+        const moonOrbitGeometry = new THREE.BufferGeometry().setFromPoints(moonOrbitPoints);
+        const moonOrbitMaterial = new THREE.LineBasicMaterial({ color: 0x00e5ff, linewidth: 3 });
+        const moonOrbitLine = new THREE.Line(moonOrbitGeometry, moonOrbitMaterial);
+        moonOrbitLine.position.copy(earth.position);
+        moonOrbitLine.rotation.x = Math.PI / 2;
+        moonOrbitLine.rotation.y = tiltAngle;
+        scene.add(moonOrbitLine);
+
+        // Tube geometry for thicker orbit visualization
+        const moonOrbitTubePath = new THREE.CatmullRomCurve3(
+            moonOrbitPoints.map(p => new THREE.Vector3(p.x, 0, p.y))
+        );
+        moonOrbitTubePath.closed = true;
+        const tubeGeometry = new THREE.TubeGeometry(moonOrbitTubePath, 128, 1.5, 8, true);
+        const tubeMaterial = new THREE.MeshPhongMaterial({
+            color: 0x00e5ff,
+            emissive: 0x0088aa,
+            emissiveIntensity: 0.4,
+            shininess: 100
+        });
+        const moonOrbitTube = new THREE.Mesh(tubeGeometry, tubeMaterial);
+        moonOrbitTube.position.copy(earth.position);
+        moonOrbitTube.rotation.x = Math.PI / 2;
+        moonOrbitTube.rotation.y = tiltAngle;
+        scene.add(moonOrbitTube);
+
+        // Line of Nodes - intersection line
+        const nodesLineGeometry = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(-600, 0, 0),
+            new THREE.Vector3(600, 0, 0)
+        ]);
+        const nodesLineMaterial = new THREE.LineDashedMaterial({
+            color: 0xff1744,
+            linewidth: 2,
+            dashSize: 15,
+            gapSize: 10
+        });
+        const nodesLine = new THREE.Line(nodesLineGeometry, nodesLineMaterial);
+        nodesLine.computeLineDistances();
+        nodesLine.rotation.z = tiltAngle;
+        scene.add(nodesLine);
+
+        // Calculate node positions on the tilted orbit
+        const moonOrbitRadius = 75;
+
+        // Rahu position (where moon crosses UP through ecliptic)
+        const rahuAngle = 0;
+        const rahuX = earth.position.x + moonOrbitRadius * Math.cos(rahuAngle) * Math.cos(tiltAngle);
+        const rahuY = moonOrbitRadius * Math.sin(rahuAngle);
+        const rahuZ = earth.position.z + moonOrbitRadius * Math.cos(rahuAngle) * Math.sin(tiltAngle);
+
+        // Rahu marker with glow
+        const rahuGeometry = new THREE.SphereGeometry(10, 32, 32);
+        const rahuMaterial = new THREE.MeshPhongMaterial({
+            color: 0xaa00ff,
+            emissive: 0x9c27b0,
+            emissiveIntensity: 0.8,
+            shininess: 100
+        });
+        const rahu = new THREE.Mesh(rahuGeometry, rahuMaterial);
+        rahu.position.set(rahuX, rahuY, rahuZ);
+        scene.add(rahu);
+
+        // Rahu glow ring
+        const rahuRingGeometry = new THREE.RingGeometry(12, 16, 32);
+        const rahuRingMaterial = new THREE.MeshBasicMaterial({
+            color: 0xbb00ff,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.6
+        });
+        const rahuRing = new THREE.Mesh(rahuRingGeometry, rahuRingMaterial);
+        rahuRing.position.copy(rahu.position);
+        scene.add(rahuRing);
+
+        // Ketu position (where moon crosses DOWN through ecliptic)
+        const ketuAngle = Math.PI;
+        const ketuX = earth.position.x + moonOrbitRadius * Math.cos(ketuAngle) * Math.cos(tiltAngle);
+        const ketuY = moonOrbitRadius * Math.sin(ketuAngle);
+        const ketuZ = earth.position.z + moonOrbitRadius * Math.cos(ketuAngle) * Math.sin(tiltAngle);
+
+        // Ketu marker with glow
+        const ketuGeometry = new THREE.SphereGeometry(10, 32, 32);
+        const ketuMaterial = new THREE.MeshPhongMaterial({
+            color: 0xff1744,
+            emissive: 0xf44336,
+            emissiveIntensity: 0.8,
+            shininess: 100
+        });
+        const ketu = new THREE.Mesh(ketuGeometry, ketuMaterial);
+        ketu.position.set(ketuX, ketuY, ketuZ);
+        scene.add(ketu);
+
+        // Ketu glow ring
+        const ketuRingGeometry = new THREE.RingGeometry(12, 16, 32);
+        const ketuRingMaterial = new THREE.MeshBasicMaterial({
+            color: 0xff4444,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.6
+        });
+        const ketuRing = new THREE.Mesh(ketuRingGeometry, ketuRingMaterial);
+        ketuRing.position.copy(ketu.position);
+        scene.add(ketuRing);
+
+        // Vertical lines showing node heights
+        const rahuLineGeometry = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(rahuX, 0, rahuZ),
+            new THREE.Vector3(rahuX, rahuY, rahuZ)
+        ]);
+        const rahuLineMaterial = new THREE.LineDashedMaterial({
+            color: 0xaa00ff,
+            linewidth: 2,
+            dashSize: 3,
+            gapSize: 3
+        });
+        const rahuVertLine = new THREE.Line(rahuLineGeometry, rahuLineMaterial);
+        rahuVertLine.computeLineDistances();
+        scene.add(rahuVertLine);
+
+        // Moon with enhanced material
+        const moonGeometry = new THREE.SphereGeometry(7, 32, 32);
+        const moonMaterial = new THREE.MeshPhongMaterial({
+            color: 0xdddddd,
+            emissive: 0x444444,
+            emissiveIntensity: 0.1,
+            shininess: 20,
+            specular: 0x888888
+        });
+        const moon = new THREE.Mesh(moonGeometry, moonMaterial);
+        moon.castShadow = true;
+        scene.add(moon);
+
+        // Moon trail
+        const trailPoints = [];
+        const trailGeometry = new THREE.BufferGeometry();
+        const trailMaterial = new THREE.LineBasicMaterial({
+            color: 0x00ffff,
+            transparent: true,
+            opacity: 0.3
+        });
+        const trail = new THREE.Line(trailGeometry, trailMaterial);
+        scene.add(trail);
+
+        // Mouse controls
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        let rotationSpeed = 0.005;
+
+        renderer.domElement.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            previousMousePosition = { x: e.clientX, y: e.clientY };
+        });
+
+        renderer.domElement.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+
+                const cameraDistance = camera.position.distanceTo(earth.position);
+                const pivot = earth.position.clone();
+
+                camera.position.sub(pivot);
+
+                const rotationQuaternion = new THREE.Quaternion();
+                rotationQuaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), deltaX * rotationSpeed);
+                camera.position.applyQuaternion(rotationQuaternion);
+
+                const right = new THREE.Vector3(1, 0, 0);
+                right.applyQuaternion(camera.quaternion);
+                rotationQuaternion.setFromAxisAngle(right, deltaY * rotationSpeed);
+                camera.position.applyQuaternion(rotationQuaternion);
+
+                camera.position.add(pivot);
+                camera.lookAt(pivot);
+
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        renderer.domElement.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        // Zoom
+        renderer.domElement.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const direction = new THREE.Vector3();
+            camera.getWorldDirection(direction);
+
+            if (e.deltaY < 0) {
+                camera.position.addScaledVector(direction, 30);
+            } else {
+                camera.position.addScaledVector(direction, -30);
+            }
+        });
+
+        // Animation
+        let moonAngle = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Rotate moon around earth on tilted orbit
+            moonAngle += 0.008;
+            const moonX = earth.position.x + moonOrbitRadius * Math.cos(moonAngle) * Math.cos(tiltAngle);
+            const moonY = moonOrbitRadius * Math.sin(moonAngle);
+            const moonZ = earth.position.z + moonOrbitRadius * Math.cos(moonAngle) * Math.sin(tiltAngle);
+            moon.position.set(moonX, moonY, moonZ);
+
+            // Update trail
+            trailPoints.push(moon.position.clone());
+            if (trailPoints.length > 80) {
+                trailPoints.shift();
+            }
+            trailGeometry.setFromPoints(trailPoints);
+
+            // Rotate rings to face camera
+            rahuRing.lookAt(camera.position);
+            ketuRing.lookAt(camera.position);
+
+            // Subtle rotation of grids for visual effect
+            moonGrid.rotation.z += 0.001;
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+
+</html>
