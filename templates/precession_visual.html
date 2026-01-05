@@ -50,8 +50,8 @@
         scene.fog = new THREE.FogExp2(0x000000, 0.002);
 
         const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 30, 80);
-        camera.lookAt(0, 0, 0);
+        camera.position.set(0, 50, 100);
+        camera.lookAt(0, 20, 0);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -61,9 +61,9 @@
         const sunLight = new THREE.DirectionalLight(0xffffff, 1);
         sunLight.position.set(50, 20, 50);
         scene.add(sunLight);
-        scene.add(new THREE.AmbientLight(0x555555));
+        scene.add(new THREE.AmbientLight(0x333333));
 
-        // Function to create text sprites
+        // Function to create text sprites - SCALED DOWN DRASTICALLY
         function makeTextSprite(message, fontsize = 24, color = "rgba(255, 255, 255, 1.0)") {
             const ctx = document.createElement('canvas').getContext('2d');
             ctx.font = "Bold " + fontsize + "px Arial";
@@ -78,7 +78,8 @@
             const texture = new THREE.CanvasTexture(ctx.canvas);
             const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
             const sprite = new THREE.Sprite(spriteMaterial);
-            sprite.scale.set(width * 0.5, (fontsize + 20) * 0.5, 1);
+            // SCALE REDUCED: Was 0.5, now 0.1
+            sprite.scale.set(width * 0.1, (fontsize + 20) * 0.1, 1);
             return sprite;
         }
 
@@ -98,55 +99,62 @@
         const earth = new THREE.Mesh(earthGeo, earthMat);
         earthGroup.add(earth);
 
-        // Axis Line (The Poker)
-        const axisGeo = new THREE.CylinderGeometry(0.2, 0.2, 40, 8);
+        // Axis Line (The Poker) - Longer
+        const axisGeo = new THREE.CylinderGeometry(0.2, 0.2, 60, 8);
         const axisMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
         const axis = new THREE.Mesh(axisGeo, axisMat);
-        axis.position.y = 10;
+        axis.position.y = 20;
         earthGroup.add(axis);
 
-        // The "Cone of Time" - DASHED CIRCLE PATH
-        // We want a circle at y=28 (where the axis tip roughly ends)
-        // Radius based on 23.5 degree tilt
-        const coneHeight = 18; // From center? roughly
-        // Let's assume the axis tip is at Y ~ 30 relative to center 
-        // Earth R=10. Axis length 40, centered at Y=10. Top Y = 10 + 20 = 30.
-        // Tilt 23.5 deg. Radius = 30 * sin(23.5) approx? 
-        // More simply: we just want a visual ring that matches the wobble.
+        // VISUAL CONE STRUCTURE (Stationary)
+        // A circle high above
+        const topY = 45;
+        const topRadius = 18; // Tan(23.5) * 45 approx
 
-        const pathRadius = 11; // Visual fit
         const pathPoints = [];
         for (let i = 0; i <= 64; i++) {
             const th = (i / 64) * Math.PI * 2;
-            pathPoints.push(new THREE.Vector3(Math.cos(th) * pathRadius, 28, Math.sin(th) * pathRadius));
+            pathPoints.push(new THREE.Vector3(Math.cos(th) * topRadius, topY, Math.sin(th) * topRadius));
         }
         const lineGeo = new THREE.BufferGeometry().setFromPoints(pathPoints);
-        const lineMat = new THREE.LineDashedMaterial({ color: 0x4fc3f7, dashSize: 0.5, gapSize: 0.5 });
+        const lineMat = new THREE.LineDashedMaterial({ color: 0x4fc3f7, dashSize: 1, gapSize: 1 });
         const pathLine = new THREE.Line(lineGeo, lineMat);
-        pathLine.computeLineDistances(); // Crucial for dashed line
+        pathLine.computeLineDistances();
         scene.add(pathLine);
+
+        // Cone Lines (connecting earth to circle)
+        const coneMat = new THREE.LineBasicMaterial({ color: 0x4fc3f7, transparent: true, opacity: 0.2 });
+        for (let i = 0; i < 8; i++) {
+            const th = (i / 8) * Math.PI * 2;
+            const pts = [
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(Math.cos(th) * topRadius, topY, Math.sin(th) * topRadius)
+            ];
+            const g = new THREE.BufferGeometry().setFromPoints(pts);
+            scene.add(new THREE.Line(g, coneMat));
+        }
 
         // Labels
         const stars = [
-            { name: "Polaris", x: 0, z: -pathRadius },
-            { name: "Vega", x: 0, z: pathRadius }
+            { name: "Polaris", x: 0, z: -topRadius },
+            { name: "Vega", x: 0, z: topRadius }
         ];
 
         stars.forEach(s => {
             // Star Dot
-            const dot = new THREE.Mesh(new THREE.SphereGeometry(0.5), new THREE.MeshBasicMaterial({ color: 0xffff00 }));
-            dot.position.set(s.x, 28, s.z);
+            const dot = new THREE.Mesh(new THREE.SphereGeometry(0.8), new THREE.MeshBasicMaterial({ color: 0xffff00 }));
+            dot.position.set(s.x, topY, s.z);
             scene.add(dot);
 
             // Text Label
-            const sprite = makeTextSprite(s.name, 32, "rgba(255, 255, 0, 1.0)");
-            sprite.position.set(s.x, 32, s.z);
+            const sprite = makeTextSprite(s.name, 48, "rgba(255, 255, 0, 1.0)");
+            sprite.position.set(s.x, topY + 5, s.z);
             scene.add(sprite);
         });
 
-        // Time Note
-        const timeLabel = makeTextSprite("One Cycle = ~26,000 Years", 40, "rgba(79, 195, 247, 1.0)");
-        timeLabel.position.set(15, 28, 0); // Side
+        // Time Note - Positioned carefully
+        const timeLabel = makeTextSprite("One Cycle = ~26,000 Years", 60, "rgba(79, 195, 247, 1.0)");
+        timeLabel.position.set(25, topY, 0);
         scene.add(timeLabel);
 
 
@@ -164,7 +172,7 @@
             prevX = e.clientX; prevY = e.clientY;
         });
 
-        // Touch support
+        // Touch
         document.addEventListener('touchstart', e => { isDragging = true; prevX = e.touches[0].clientX; prevY = e.touches[0].clientY; });
         document.addEventListener('touchend', () => isDragging = false);
         document.addEventListener('touchmove', e => {
@@ -176,28 +184,24 @@
             prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
         });
 
-        // Zoom
+        // Zoom/Scroll
         document.addEventListener('wheel', (e) => {
             camera.position.z += e.deltaY * 0.1;
         });
-
 
         // Animation Loop
         let wobbleAngle = 0;
         function animate() {
             requestAnimationFrame(animate);
 
-            // 1. Earth Spins (Fast)
+            // 1. Earth Spins
             earth.rotation.y += 0.05;
 
-            // 2. Axis Wobbles (Slow)
+            // 2. Axis Wobbles
             wobbleAngle += 0.005;
-            // The tilt is 23.5 deg (approx 0.41 rad)
-            // We rotate the GROUP to mimic precession
-            // Note: The Path circle was drawn at Radius ~11, Y=28.
-            // Using logic: Radius/Height = tan(tilt). 11/20 approx 0.5. atan(0.5) ~ 26 deg. Close enough visually.
-            earthGroup.rotation.x = 0.41 * Math.cos(wobbleAngle);
-            earthGroup.rotation.z = 0.41 * Math.sin(wobbleAngle);
+            // Radius/Height = 18/45 = 0.4. ~21 deg tilt.
+            earthGroup.rotation.x = 0.4 * Math.cos(wobbleAngle);
+            earthGroup.rotation.z = 0.4 * Math.sin(wobbleAngle);
 
             renderer.render(scene, camera);
         }
