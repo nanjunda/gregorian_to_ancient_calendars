@@ -78,8 +78,8 @@
             const texture = new THREE.CanvasTexture(ctx.canvas);
             const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
             const sprite = new THREE.Sprite(spriteMaterial);
-            // SCALE REDUCED: Was 0.5, now 0.1
-            sprite.scale.set(width * 0.1, (fontsize + 20) * 0.1, 1);
+            // SCALE REDUCED: Set to 0.05 (Half of previous 0.1)
+            sprite.scale.set(width * 0.05, (fontsize + 20) * 0.05, 1);
             return sprite;
         }
 
