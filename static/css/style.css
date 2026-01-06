@@ -561,3 +561,8 @@ footer {
     align-items: center !important;
     justify-content: center;
 }
+
+/* Hide native Flatpickr year arrows when custom dropdown is used */
+.flatpickr-current-month .numInputWrapper span {
+    display: none !important;
+}
