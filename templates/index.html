@@ -23,7 +23,7 @@
                 <form id="panchanga-form">
                     <div class="input-group full-width">
                         <label for="title">Event Title</label>
-                        <input type="text" id="title" placeholder="e.g. Birthday, Festival..." required>
+                        <input type="text" id="title" name="title" placeholder="e.g. Birthday, Festival..." required>
                     </div>
                     <div class="input-group full-width">
                         <label>Language</label>
@@ -35,15 +35,16 @@
                     </div>
                     <div class="input-group">
                         <label for="date">Date</label>
-                        <input type="date" id="date" required>
+                        <input type="text" id="date" name="date" required>
                     </div>
                     <div class="input-group">
                         <label for="time">Time (24h)</label>
-                        <input type="time" id="time" required>
+                        <input type="time" id="time" name="time" required>
                     </div>
                     <div class="input-group">
                         <label for="location">Location</label>
-                        <input type="text" id="location" placeholder="e.g. Town, State, Country" required>
+                        <input type="text" id="location" name="location" placeholder="e.g. Town, State, Country"
+                            required>
                         <button type="button" id="geo-btn" title="Use current location">📍</button>
                         <small class="input-hint">Village, Town, City, or Landmark</small>
                     </div>
@@ -201,12 +202,13 @@
 
     <script>
         // Initialize Flatpickr
-        document.addEventListener('DOMContentLoaded', function() {
-            flatpickr("input[name='date']", {
+        document.addEventListener('DOMContentLoaded', function () {
+            flatpickr("#date", {
                 altInput: true,
                 altFormat: "F j, Y",
                 dateFormat: "Y-m-d",
-                defaultDate: "new Date()",
+                defaultDate: new Date(),
+                monthSelectorType: "dropdown",
                 theme: "dark",
                 animate: true
             });
