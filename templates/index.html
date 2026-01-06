@@ -194,6 +194,24 @@
         </footer>
     </div>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <!-- Flatpickr (Dark Theme) for consistent Cross-Browser Date Picking -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <script>
+        // Initialize Flatpickr
+        document.addEventListener('DOMContentLoaded', function() {
+            flatpickr("input[name='date']", {
+                altInput: true,
+                altFormat: "F j, Y",
+                dateFormat: "Y-m-d",
+                defaultDate: "new Date()",
+                theme: "dark",
+                animate: true
+            });
+        });
+    </script>
 </body>
 
 </html>
