@@ -3,7 +3,7 @@
 # Exit on any error
 set -e
 
-echo "🚀 Starting Hindu Panchanga v4.0 Deployment (Nuclear Option)..."
+echo "🚀 Starting Hindu Panchanga v4.2 Deployment (Nuclear Option)..."
 echo "ℹ️  Mode: Nginx Reverse Proxy (Port 5080) -> Gunicorn"
 echo "⚠️  RELOCATING App to /opt/panchanga to bypass SELinux Home Dir restrictions"
 

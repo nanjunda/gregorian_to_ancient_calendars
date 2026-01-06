@@ -21,47 +21,51 @@ The sky is a giant, moving city. To track time, ancient astronomers used similar
 By tracking *where* a traveler was against the *background*, they could pinpoint exact dates.
 
 ### 🌌 The Zodiac (The "Highway")
-The planets don't just wander anywhere. They all stick to a specific path across the sky called the **Ecliptic**. Ancient astronomers divided this highway into 12 equal zones called the **Zodiac** (Aries, Taurus, etc.) to describe where a planet was located.
+The planets don't just wander anywhere. They all stick to a specific path across the sky called the **Ecliptic**. Ancient astronomers divided this highway into 12 equal zones called the **Zodiac** (Aries, Taurus, etc.).
+
+**Interactive Visual 1: The Cosmic Stadium**
+In the guide, you will see a 3D model of the Solar System. 
+*   **The Track**: The planets race around the Sun on the floor.
+*   **The Wall**: The Zodiac signs form the stadium wall in the background.
+*   *Interaction*: Drag to rotate! Notice how from Earth's perspective, the Sun appears to be "in" a specific sign (like Aries) because that sign is behind it.
 
 ---
 
 ## 2. The Great Wobble: Tropical vs. Sidereal
 Here is the mind-blowing part: **Your "Western" star sign might not be where the stars actually are.**
 
-The Earth spins like a spinning top. And like a top that’s slowing down, it wobbles. This wobble is super slow—it takes 26,000 years to make one circle! This is called the **Precession of the Equinoxes**.
+The Earth spins like a spinning top. And like a top that’s slowing down, it wobbles. This wobble is super slow—it takes ~26,000 years to make one circle! This is called the **Precession of the Equinoxes**.
 
-*   **Western Astrology (Tropical)**: Based on the **Seasons**. It freezes the sky as it was 2,000 years ago. So when it says "Sun in Aries," the Sun might actually be in Pisces!
-*   **Vedic/Hindu Astronomy (Sidereal)**: Based on the **Stars**. It accounts for the wobble. It uses "Ayanamsha" (a correction factor) to tell you where the planets *actually* are in the sky right now.
+**Interactive Visual 2: The Spinning Top**
+*   **The Axis**: See the white line sticking out of the North Pole?
+*   **The Cone**: Watch it trace a slow circle in the sky.
+*   **The Pole Stars**: Right now, it points to **Polaris**. But in 13,000 years, it will point to **Vega**.
 
-**The App's Job**: This app calculates that "wobble correction" to show you the true astronomical position of the planets during your birth.
+*   **Vedic/Hindu Astronomy (Sidereal)**: Tracks this wobble to tell you where planets *actually* are.
+*   **Western Astrology (Tropical)**: Ignores the wobble, sticking to the map from 2,000 years ago.
 
 ---
 
 ## 3. The Mystery of the "Shadow Planets"
-In the app, you will see two mysterious points called **Rahu** and **Ketu**. In mythology, they are demons who swallow the Sun and Moon. But astronomically, they are something even cooler: **The Lunar Nodes**.
+In the app, you will see two mysterious points called **Rahu** and **Ketu**.
 
-Imagine two hula hoops:
-1.  **Gold Hoop**: The Earth's path around the Sun.
-2.  **Silver Hoop**: The Moon's path around the Earth.
+**Interactive Visual 3: Intersecting Planes**
+Imagine two giant discs in space:
+1.  **Yellow Plane (Ecliptic)**: The path the Earth travels around the Sun.
+2.  **Blue Plane (Lunar Orbit)**: The path the Moon travels around the Earth.
 
-The Silver hoop is tilted by about 5 degrees. It doesn't lie flat.
-The two points where the hoops **cross each other** are Rahu (North Node) and Ketu (South Node).
+The Blue plane is tilted by about 5 degrees. It strictly intersects the Yellow plane at two points:
+*   **RAHU (Purple Sphere)**: The "North Node" (Moon crossing UP).
+*   **KETU (Red Sphere)**: The "South Node" (Moon crossing DOWN).
 
-### Why do they matter?
-**Eclipses!**
-The Sun and Moon pass each other every month (New Moon), but we don't get an eclipse every month. Why? Because the Moon is usually too high or too low.
-An eclipse *only* happens when the Sun and Moon meet exactly at one of these "Crossing Points" (Nodes).
-
-So, Rahu and Ketu aren't physical rocks; they are **mathematical danger zones** for eclipses. Ancient astronomers calculated these invisible points thousands of years ago to predict eclipses with stunning accuracy.
+These are **mathematical danger zones** for eclipses.
 
 ---
 
 ## 4. How to Use the App
 1.  **Launch the Time Machine**: Go to the "Explore" page.
-2.  **Enter Data**: Put in your birth date, time, and city.
-3.  **See the Reality**:
-    *   **Cosmic Alignment**: Look at the "Solar System" map. See how the planets were arranged around the Sun. Were they bunched together? Spread out?
-    *   **Celestial Perspective**: Look at the "Sky Shot". This is your true view from Earth. Note the **Nakshatra**—the specific star cluster the Moon was visiting.
+2.  **Explore the Guide**: Use the interactive 3D models to understand the sky. Drag, rotate, and zoom!
+3.  **Enter Data**: Put in your birth date, time, and city to see your personal alignment.
 
 ### Exploring Further
 *   Why do you think ancient cultures needed to track the sky so badly? (Hint: Think about farming and seasons!)

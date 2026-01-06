@@ -1,12 +1,12 @@
-# Hindu Panchanga Converter v4.1 (Universal Context)
+# Hindu Panchanga Converter v4.2 (Interactive Education)
 
-A high-precision tool to convert **any Gregorian event** into its traditional Vedic equivalent, featuring high-fidelity cosmic visualizations.
+A high-precision tool to convert **any Gregorian event** into its traditional Vedic equivalent, featuring high-fidelity cosmic visualizations and interactive educational modules.
 
 ## Features
-- **Version 4.1 (Universal Context):**
-    - **Hybrid Visualizations:** "Cosmic Alignment" (Heliocentric with Uranus/Neptune) and "Celestial Perspective" (Geocentric with Rahu/Ketu).
+- **Version 4.2 (Interactive Education):**
+    - **Interactive 3D Modules:** "Zodiac Stadium", "Precession Top", and "Lunar Nodes" allow students to explore cosmic mechanics.
+    - **Hybrid Visualizations:** "Cosmic Alignment" (Heliocentric) and "Celestial Perspective" (Geocentric).
     - **Universal Event Support:** Generic engine designed for Birthdays, Festivals, or historical dates.
-    - **Scientific Bridge:** Visualizes Lunar Nodes (Rahu/Ketu) as mathematical intersection points.
     - **Privacy First:** "Stealth Mode" generates base64 images, ensuring no user PII is stored on disk.
 - **core Engine:**
     - **Vedic Recurrence:** Finds "Next Occurrence" for any event based on Masa, Paksha, and Tithi.
