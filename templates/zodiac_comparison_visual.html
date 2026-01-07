@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zodiac Comparison: Tropical vs Sidereal</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #0b0e14;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+        }
+
+        #ui {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            pointer-events: none;
+        }
+
+        .legend {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 5px;
+            font-size: 0.8rem;
+        }
+
+        .color-box {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+        }
+
+        input[type=range] {
+            width: 60%;
+            cursor: pointer;
+        }
+
+        .label {
+            position: absolute;
+            font-size: 10px;
+            color: #aaa;
+            text-align: center;
+            width: 60px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ui">
+        <div style="font-weight: 700; color: #00d2ff; margin-bottom: 5px;">ZODIAC ALIGNER</div>
+        <div class="legend">
+            <div class="color-box" style="background: #ff5733;"></div> Outer: Modern (Tropical/Seasonal)
+        </div>
+        <div class="legend">
+            <div class="color-box" style="background: #33ff57;"></div> Inner: Hindu (Sidereal/Stars)
+        </div>
+        <div id="ayanamsa-val" style="margin-top: 10px; font-size: 0.85rem; color: #ffcc00;">Ayanamsa Gap: 24.11°</div>
+    </div>
+
+    <div id="controls">
+        <input type="range" id="drift-slider" min="0" max="60" step="0.1" value="24.1">
+        <div style="font-size: 0.75rem; margin-top: 5px; color: #888;">Slide to simulate historical Precession (Time
+            Travel)</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
+        camera.position.set(0, 500, 600);
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        scene.add(new THREE.AmbientLight(0x404040, 2));
+        const sun = new THREE.PointLight(0xffffff, 1.5);
+        scene.add(sun);
+
+        // Core Earth
+        const earthGeo = new THREE.SphereGeometry(40, 32, 32);
+        const earthMat = new THREE.MeshPhongMaterial({ color: 0x2233ff, emissive: 0x112244 });
+        const earth = new THREE.Mesh(earthGeo, earthMat);
+        scene.add(earth);
+
+        const westernSigns = ["ARIES", "TAURUS", "GEMINI", "CANCER", "LEO", "VIRGO", "LIBRA", "SCORPIO", "SAGITTARIUS", "CAPRICORN", "AQUARIUS", "PISCES"];
+        const hinduRashis = ["MESHA", "VRISHABHA", "MITHUNA", "KATAKA", "SIMHA", "KANYA", "TULA", "VRISHCHIKA", "DHANUS", "MAKARA", "KUMBHA", "MEENA"];
+
+        const outerRing = new THREE.Group();
+        const innerRing = new THREE.Group();
+        scene.add(outerRing);
+        scene.add(innerRing);
+
+        function createRing(parent, radius, labels, color, opacity) {
+            const seg = (Math.PI * 2) / 12;
+            labels.forEach((text, i) => {
+                const angle = i * seg;
+                const geometry = new THREE.RingGeometry(radius, radius + 40, 64, 1, angle, seg);
+                const material = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide, transparent: true, opacity: opacity, wireframe: false });
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.rotation.x = -Math.PI / 2;
+                parent.add(mesh);
+
+                // Borders
+                const edges = new THREE.EdgesGeometry(geometry);
+                const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.5 }));
+                line.rotation.x = -Math.PI / 2;
+                parent.add(line);
+
+                // Labels (using simple Plane for speed)
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 128; canvas.height = 32;
+                ctx.fillStyle = 'white'; ctx.font = 'bold 20px Inter, Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(text, 64, 24);
+                const tex = new THREE.CanvasTexture(canvas);
+                const spriteMat = new THREE.SpriteMaterial({ map: tex });
+                const sprite = new THREE.Sprite(spriteMat);
+                const mid = angle + seg / 2;
+                sprite.position.set(Math.cos(mid) * (radius + 20), 5, -Math.sin(mid) * (radius + 20));
+                sprite.scale.set(60, 15, 1);
+                parent.add(sprite);
+            });
+        }
+
+        createRing(outerRing, 350, westernSigns, 0xff5733, 0.1); // Tropical
+        createRing(innerRing, 280, hinduRashis, 0x33ff57, 0.15); // Sidereal
+
+        const slider = document.getElementById('drift-slider');
+        const gapVal = document.getElementById('ayanamsa-val');
+
+        slider.addEventListener('input', (e) => {
+            const deg = parseFloat(e.target.value);
+            innerRing.rotation.y = -deg * (Math.PI / 180);
+            gapVal.innerText = `Ayanamsa Gap: ${deg.toFixed(2)}°`;
+        });
+
+        // Initialize with default
+        innerRing.rotation.y = -24.1 * (Math.PI / 180);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            outerRing.rotation.y += 0.0005; // Gentle rotation
+            innerRing.rotation.y += 0.0005;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>

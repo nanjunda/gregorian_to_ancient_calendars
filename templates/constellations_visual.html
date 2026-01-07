@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Constellation Explorer</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #0b0e14;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+        }
+
+        #ui {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        .highlight {
+            color: #ffcc00;
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ui">
+        <div id="target-info">Sky Focus: <span class="highlight" id="rashi-name">Loading...</span></div>
+        <div style="font-size: 0.75rem; color: #888; margin-top: 5px;">Showing Sidereal (fixed star) coordinates.</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const rashi = params.get('rashi') || 'Leo';
+        document.getElementById('rashi-name').innerText = rashi;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 5000);
+        camera.position.set(0, 0, 1);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Starfield
+        const starGeo = new THREE.BufferGeometry();
+        const starCoords = [];
+        for (let i = 0; i < 3000; i++) {
+            const x = THREE.MathUtils.randFloatSpread(4000);
+            const y = THREE.MathUtils.randFloatSpread(4000);
+            const z = THREE.MathUtils.randFloatSpread(4000);
+            starCoords.push(x, y, z);
+        }
+        starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starCoords, 3));
+        const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 2 });
+        const starField = new THREE.Points(starGeo, starMat);
+        scene.add(starField);
+
+        // Target Highlight
+        const highlightGeo = new THREE.SphereGeometry(100, 32, 32);
+        const highlightMat = new THREE.MeshBasicMaterial({ color: 0xffcc00, transparent: true, opacity: 0.2, wireframe: true });
+        const highlight = new THREE.Mesh(highlightGeo, highlightMat);
+        // Randomly place it based on a "hash" of the rashi name for demo
+        const hash = rashi.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0);
+        highlight.position.set(Math.cos(hash) * 1000, Math.sin(hash) * 1000, -1500);
+        scene.add(highlight);
+
+        // Core interactive rotation
+        let mouseX = 0, mouseY = 0;
+        window.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX - window.innerWidth / 2) * 0.05;
+            mouseY = (e.clientY - window.innerHeight / 2) * 0.05;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            starField.rotation.y += 0.0005;
+            camera.rotation.y += (mouseX * 0.001 - camera.rotation.y) * 0.05;
+            camera.rotation.x += (mouseY * 0.001 - camera.rotation.x) * 0.05;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>

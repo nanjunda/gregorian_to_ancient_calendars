@@ -47,17 +47,15 @@ class GeminiEngine(BaseAIEngine):
         karana = config_data.get('karana')
         location = config_data.get('address')
         input_dt = config_data.get('input_datetime')
-        
-        # Defensive extraction for rashi (it might be None or missing)
         rashi_obj = config_data.get('rashi')
         rashi = "N/A"
         if isinstance(rashi_obj, dict):
             rashi = rashi_obj.get('name', 'N/A')
         
         # Ayanamsa is usually around 24 degrees in this era
-        ayanamsa = "approx. 24.1°"
+        ayanamsa = "approx. 24.11° (Chitra Paksha)" 
         
-        # Split datetime if possible for cleaner prompt
+        # Split datetime for cleaner prompt
         date_part, time_part = "N/A", "N/A"
         if input_dt and ' ' in input_dt:
             date_part, time_part = input_dt.split(' ', 1)
@@ -65,12 +63,9 @@ class GeminiEngine(BaseAIEngine):
             date_part = input_dt
 
         prompt = f"""
-        Role: The "Astro-Tutor" (An expert in Astronomy, Math, and Mythology who speaks the language of middle and high school students—think science YouTuber meets coding instructor).
-
-        Objective:
-        Generate a comprehensive "Cosmic Dashboard" report based on the provided astronomical data. Bridge the gap between Ancient Indian Astronomy (Panchanga) and Modern Astrophysics for Grades 6–12. You must retain high-level technical details (degrees, names, periods) but explain them using relatable analogies (geometry, video games, sports, coding).
-
-        Key Requirement: You must explicitly explain the difference between the Modern Zodiac (Western/Tropical) and the Hindu Zodiac (Sidereal/Fixed), explaining why they don't match due to the Earth's wobble (Precession).
+        Role: The "Astro-Tutor" (Scientific YouTuber meets Coding Instructor).
+        Objective: Generate a comprehensive "Cosmic Dashboard" report. Bridge the gap between Ancient Indian Astronomy (Panchanga) and Modern Astrophysics for Grades 6–12. 
+        You are the 'orchestrator' of a 3D educational environment. 
 
         Input Data:
         - Date: {date_part}
@@ -84,7 +79,16 @@ class GeminiEngine(BaseAIEngine):
         - Rashi (Moon Sign): {rashi}
         - Yoga: {yoga}
         - Karana: {karana}
-        - Ayanamsa: {ayanamsa}
+        - Ayanamsa (Calculated): {ayanamsa}
+
+        CRITICAL REQUIREMENT:
+        You must contrast the Western (Tropical) and Hindu (Sidereal) systems. You MUST use the following **Active Render Tags** whenever you describe a visualization. Place these tags on their own line. These tags will trigger real 3D interactive modules in the app.
+
+        ACTIVE RENDER TAGS:
+        - [[RENDER:ZODIAC_COMPARISON]] -> Triggers a 3D dual-ring zodiac (Western Signs vs. Hindu Rashis).
+        - [[RENDER:MOON_PHASE_3D]] -> Triggers an interactive Moon-Sun angle calculator showing Tithi geometry.
+        - [[RENDER:PRECESSION_WOBBLE]] -> Triggers a 3D Earth axis wobble simulation (Precession).
+        - [[RENDER:CONSTELLATION_MAP]] -> Triggers a 3D star map focused on the current Nakshatra star cluster.
 
         Instructions for Output Structure:
 
@@ -95,24 +99,21 @@ class GeminiEngine(BaseAIEngine):
         2. The Zodiac Belt (The Sky Map)
         - Explain the difference between Rashi (Hindu) and Signs (Western).
         - Explain Precession (The Wobble) and Ayanamsa (The drift).
-        - Analogy: "Moving Stickers" (Seasons) vs. "Fixed Background" (Stars).
+        - Use Analogy: "Moving Stickers" (Seasons) vs. "Fixed Background" (Stars).
+        - INSERT [[RENDER:ZODIAC_COMPARISON]] here.
 
         3. The "Birthday Algorithm" (The 11-Day Lag)
         - Show the math: Solar Year (365.25) - Lunar Year (354) = ~11 days.
         - Explain why a Hindu birthday drifts backward every year.
 
         4. The Deep Dive (Technical Analysis)
-        - Analyze the specific input date using the data provided.
-        - Section A: The Geometry (Tithi & Yoga): Angles between Sun and Moon.
-        - Section B: The GPS Coordinates (Nakshatra & Rashi): Specific star clusters and Constellations.
+        - Section A: The Geometry (Tithi & Yoga). INSERT [[RENDER:MOON_PHASE_3D]].
+        - Section B: The GPS Coordinates (Nakshatra & Rashi). INSERT [[RENDER:CONSTELLATION_MAP]].
         - Section C: The Mythology (Story Mode): Deities and symbolic vibes for this moment.
 
-        5. Visual Interaction Concepts
-        - Throughout the text, insert "🖥️ Interactive Simulation Concept" blocks.
-        - Describe a hypothetical 3D diagram or widget that explains the concept (e.g., "A slider that rotates the moon").
-
-        6. The Cosmic Cheat Sheet (Vocabulary)
+        5. The Cosmic Cheat Sheet (Vocabulary)
         - Define: Equinox, Precession, Ayanamsa, and Ecliptic using simple analogies (seesaws, spinning tops).
+        - INSERT [[RENDER:PRECESSION_WOBBLE]].
 
         Tone: High-energy, precise, visual, and encouraging. Use Markdown formatting (bolding, bullet points). Use the term 'Panchanga' instead of 'Vedic'.
         """

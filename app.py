@@ -312,6 +312,27 @@ def zodiac_visual():
     """
     return render_template('zodiac_visual.html')
 
+@app.route('/visuals/zodiac-comparison')
+def zodiac_comparison():
+    """
+    Serve the 3D Dual-Ring Zodiac Comparison (Western vs Hindu).
+    """
+    return render_template('zodiac_comparison_visual.html')
+
+@app.route('/visuals/moon-phase')
+def moon_phase_visual():
+    """
+    Serve the interactive Sun-Moon Angle / Tithi calculator.
+    """
+    return render_template('moon_phase_visual.html')
+
+@app.route('/visuals/constellations')
+def constellations_visual():
+    """
+    Serve the focused 3D constellation/nakshatra map.
+    """
+    return render_template('constellations_visual.html')
+
 @app.route('/visuals/precession')
 def precession_visual():
     """
