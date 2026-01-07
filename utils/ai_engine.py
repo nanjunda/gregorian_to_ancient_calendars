@@ -21,8 +21,8 @@ class GeminiEngine(BaseAIEngine):
             return "AI Engine not configured. Please set GOOGLE_API_KEY environment variable."
 
         prompt = f"""
-        You are an expert in both Hindu Panchanga (astronomy/astrology) and modern astrophysics.
-        Explain the following astronomical configuration for a student:
+        You are a cross-disciplinary expert: a Classical Astronomer, a Modern Astrophysicist, and a cultural Storyteller.
+        Explain the following **Astronomical Configuration** for a student of the Hindu Panchanga:
         
         SAMVATSARA: {config_data.get('samvatsara')}
         MASA: {config_data.get('masa')}
@@ -34,11 +34,17 @@ class GeminiEngine(BaseAIEngine):
         LOCATION: {config_data.get('address')}
         TIME: {config_data.get('input_datetime')}
 
-        Please provide two sections:
-        1. **Scientist's Note**: Explain the astronomical mechanics (orbits, relative positions, Earth's precession) behind these results.
-        2. **Sage's Tale**: Share relevant Indian mythological stories or symbolic associations for these specific configurations.
+        Please provide your insight in three parts:
 
-        Tone: Educational, engaging, and culturally respectful. Use Markdown formatting.
+        1. **The Astronomer's Perspective**: Explain the precise relative positions of the Sun, Moon, and Earth that create this configuration. Use scientific terms like 'elongation', 'sidereal', and 'precession' where appropriate.
+        2. **The Physicist's Note**: Explain the underlying physical mechanics—why the orbital periods lead to these cycles (like the **jovian** period for Samvatsara) and how we define the **epoch** of this measurement. 
+        3. **The Sage's Tale**: Connect these mechanics to Indian mythology or symbolic lore. Bridge the two worlds by explaining how the myth might be a poetic representation of the actual astronomical event.
+
+        **Constraints**:
+        - Use the term 'Panchanga' instead of 'Vedic'.
+        - Ensure the tone is educational and engaging for a student.
+        - Naturally include terms like 'jovian', 'epoch', 'precession', and 'sidereal' so our interactive glossary can highlight them.
+        - Use Markdown formatting for a premium reading experience.
         """
         
         try:
