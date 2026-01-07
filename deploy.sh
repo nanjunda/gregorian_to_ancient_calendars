@@ -3,7 +3,7 @@
 # Exit on any error
 set -e
 
-echo "🚀 Starting Hindu Panchanga v4.2 Deployment (Nuclear Option)..."
+echo "🚀 Starting Hindu Panchanga v5.0 Deployment (AI Insights Edition)..."
 echo "ℹ️  Mode: Nginx Reverse Proxy (Port 5080) -> Gunicorn"
 echo "⚠️  RELOCATING App to /opt/panchanga to bypass SELinux Home Dir restrictions"
 
@@ -134,10 +134,18 @@ chmod +x $DEPLOY_DIR/venv/bin/* || true
 
 # 5. Configure systemd service
 echo "⚙️ Configuring systemd service..."
+
+# Handle Google API Key
+if [ -z "$GOOGLE_API_KEY" ]; then
+    echo "⚠️  GOOGLE_API_KEY is not set in the current environment."
+    read -p "🔑 Please enter your Google Gemini API Key: " GOOGLE_API_KEY
+fi
+
 # Using DEPLOY_DIR now instead of pwd
 sed -e "s|{{USER}}|$CURRENT_USER|g" \
     -e "s|{{GROUP}}|$HTTP_GROUP|g" \
     -e "s|{{APP_PATH}}|$DEPLOY_DIR|g" \
+    -e "s|{{GOOGLE_API_KEY}}|$GOOGLE_API_KEY|g" \
     panchanga.service.template | sudo tee /etc/systemd/system/$APP_NAME.service > /dev/null
 
 sudo systemctl daemon-reload
@@ -196,6 +204,6 @@ fi
 
 sudo nginx -t && sudo systemctl restart nginx
 
-echo "🎉 Deployment complete (v4.0)!"
+echo "🎉 Deployment complete (v5.0)!"
 echo "App is SECURE at: https://$PUBLIC_IP:58921"
 echo "Note: Accept the self-signed certificate warning in browser."

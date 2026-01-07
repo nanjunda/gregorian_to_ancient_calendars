@@ -7,6 +7,7 @@ User={{USER}}
 Group={{GROUP}}
 WorkingDirectory={{APP_PATH}}
 Environment="PATH={{APP_PATH}}/venv/bin"
+Environment="GOOGLE_API_KEY={{GOOGLE_API_KEY}}"
 ExecStart={{APP_PATH}}/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 -m 007 app:app
 # Basic security hardening that sometimes helps with SELinux transitions
 NoNewPrivileges=yes
