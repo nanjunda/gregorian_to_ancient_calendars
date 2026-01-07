@@ -44,6 +44,7 @@ class GeminiEngine(BaseAIEngine):
         tithi = config_data.get('tithi')
         nakshatra = config_data.get('nakshatra')
         yoga = config_data.get('yoga')
+        karana = config_data.get('karana')
         location = config_data.get('address')
         input_dt = config_data.get('input_datetime')
         
