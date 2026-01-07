@@ -148,19 +148,23 @@
         const slider = document.getElementById('drift-slider');
         const gapVal = document.getElementById('ayanamsa-val');
 
+        let baseRotation = 0;
+        let ayanamsaOffset = 24.1 * (Math.PI / 180);
+
         slider.addEventListener('input', (e) => {
             const deg = parseFloat(e.target.value);
-            innerRing.rotation.y = -deg * (Math.PI / 180);
+            ayanamsaOffset = deg * (Math.PI / 180);
             gapVal.innerText = `Ayanamsa Gap: ${deg.toFixed(2)}°`;
         });
 
-        // Initialize with default
-        innerRing.rotation.y = -24.1 * (Math.PI / 180);
-
         function animate() {
             requestAnimationFrame(animate);
-            outerRing.rotation.y += 0.0005; // Gentle rotation
-            innerRing.rotation.y += 0.0005;
+            baseRotation += 0.0005; // Global rotation speed
+
+            outerRing.rotation.y = baseRotation;
+            // The Hindu zodiac (Inner) is offset BACKWARDS by the Ayanamsa
+            innerRing.rotation.y = baseRotation - ayanamsaOffset;
+
             renderer.render(scene, camera);
         }
         animate();

@@ -100,6 +100,44 @@
         rashiLabel.position.set(0, 180, 0); // Position relative to highlight center
         highlight.add(rashiLabel);
 
+        // --- CONSTELLATION OUTLINES (V5.1 Enhancement) ---
+        // We find stars near our highlight and connect them to simulate a pattern
+        const constellationLines = new THREE.Group();
+        highlight.add(constellationLines);
+
+        const localHighlightPos = highlight.position.clone();
+        const nearbyStars = [];
+        const posAttr = starGeo.attributes.position;
+
+        for (let i = 0; i < posAttr.count; i++) {
+            const sx = posAttr.getX(i);
+            const sy = posAttr.getY(i);
+            const sz = posAttr.getZ(i);
+            const dist = Math.sqrt(
+                Math.pow(sx - hX, 2) +
+                Math.pow(sy - hY, 2) +
+                Math.pow(sz - hZ, 2)
+            );
+            if (dist < 150) { // Same as highlight radius
+                // Convert back to local highlight coordinates
+                nearbyStars.push(new THREE.Vector3(sx - hX, sy - hY, sz - hZ));
+            }
+        }
+
+        // Draw connecting lines between nearby stars
+        if (nearbyStars.length > 2) {
+            const lineMat = new THREE.LineBasicMaterial({ color: 0xffcc00, transparent: true, opacity: 0.4 });
+            // Simple logic: connect star i to i+1 and a few random ones
+            for (let i = 0; i < nearbyStars.length - 1; i++) {
+                if (Math.random() > 0.3) {
+                    const lGeo = new THREE.BufferGeometry().setFromPoints([nearbyStars[i], nearbyStars[i + 1]]);
+                    const constellationLine = new THREE.Line(lGeo, lineMat);
+                    constellationLines.add(constellationLine);
+                }
+            }
+        }
+        // --- END CONSTELLATION OUTLINES ---
+
         // The Moon (Foreground)
         const moonGeo = new THREE.SphereGeometry(15, 32, 32); // Reduced from 30
         const moonMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
