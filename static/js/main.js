@@ -148,6 +148,21 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('res-rashi').textContent = data.rashi.name;
         document.getElementById('res-lagna').textContent = data.lagna.name;
 
+        // Persist data for AI insights page
+        localStorage.setItem('lastPanchangaResult', JSON.stringify({
+            ...data,
+            input_datetime: `${document.getElementById('date').value} ${document.getElementById('time').value}`
+        }));
+
+        // Handle AI Insight Link
+        const aiLink = document.getElementById('ai-insight-link');
+        if (aiLink) {
+            aiLink.onclick = (e) => {
+                e.preventDefault();
+                window.location.href = '/insights';
+            };
+        }
+
         // Next Occurrence (v4.1)
         const eventTitle = document.getElementById('title').value || 'Event';
         document.getElementById('res-next-occurrence-label').textContent = `✨ Next occurrence as per Hindu Panchanga: ${eventTitle}`;

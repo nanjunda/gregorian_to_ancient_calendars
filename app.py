@@ -10,6 +10,7 @@ from panchanga.calculations import (
 from utils.astronomy import get_sidereal_longitude, get_sunrise_sunset, sun, moon, get_previous_new_moon, get_angular_data
 import os
 import base64
+from utils.ai_engine import ai_engine
 
 app = Flask(__name__)
 
@@ -317,6 +318,29 @@ def precession_visual():
     Serve the 3D Precession visualization.
     """
     return render_template('precession_visual.html')
+
+@app.route('/api/ai-explain', methods=['POST'])
+def ai_explain():
+    """
+    Generate AI-powered insights for the given astronomical configuration.
+    """
+    try:
+        data = request.json
+        # The frontend will send the full result data object
+        insight = ai_engine.get_explanation(data)
+        return jsonify({
+            "success": True,
+            "insight": insight
+        })
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/insights')
+def insights_page():
+    """
+    Serve the deep insights page.
+    """
+    return render_template('insights.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5080, debug=True)

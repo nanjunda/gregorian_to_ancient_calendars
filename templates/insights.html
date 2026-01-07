@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panchanga Insights | Cosmic Configuration</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;500;700&display=swap"
+        rel="stylesheet">
+    <!-- Marked for markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        .insight-content {
+            line-height: 1.8;
+            font-size: 1.1rem;
+            color: var(--text-white);
+        }
+
+        .insight-content h2,
+        .insight-content h3 {
+            color: var(--secondary);
+            margin-top: 2rem;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .insight-content p {
+            margin-bottom: 1.5rem;
+        }
+
+        .insight-content strong {
+            color: var(--secondary);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 2rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--secondary);
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 4rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Panchanga Insights</h1>
+            <p id="config-title">Astronomical Configuration</p>
+        </header>
+
+        <main>
+            <section class="card glass">
+                <div id="loading-insights" class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Consulting the Sages & Stars...</p>
+                </div>
+                <div id="insight-display" class="insight-content hidden">
+                    <!-- AI Content will be injected here -->
+                </div>
+            </section>
+
+            <a href="/" class="back-link">← Return to Converter</a>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Hindu Panchanga Engine | AI Powered Insights</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const insightData = JSON.parse(localStorage.getItem('lastPanchangaResult'));
+            const display = document.getElementById('insight-display');
+            const loader = document.getElementById('loading-insights');
+            const configTitle = document.getElementById('config-title');
+
+            if (!insightData) {
+                display.innerHTML = "<p>No configuration data found. Please go back and run a conversion first.</p>";
+                display.classList.remove('hidden');
+                loader.classList.add('hidden');
+                return;
+            }
+
+            configTitle.textContent = `${insightData.masa} ${insightData.samvatsara} | ${insightData.tithi}`;
+
+            try {
+                const response = await fetch('/api/ai-explain', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(insightData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    let htmlContent = marked.parse(result.insight);
+
+                    // Apply Interactive Glossary (v5.0)
+                    const glossary = {
+                        'epoch': 'A fixed point in time used as a reference point for calculating astronomical events or calendar dates.',
+                        'jovian': 'Relating to the planet Jupiter. In Panchanga, the Samvatsara cycle is based on Jupiter\'s orbital period.',
+                        'precession': 'The slow, conical motion of Earth\'s axis, which causes the position of the stars to appear to shift.',
+                        'sidereal': 'Measured relative to the distant stars, rather than the Sun.',
+                        'ayanamsha': 'The angular difference between the Tropical (fixed seasons) and Sidereal (fixed stars) zodiacs.',
+                        'solstice': 'The time when the Sun reaches its highest or lowest point in the sky at noon.',
+                        'equinox': 'The time when day and night are of approximately equal length.'
+                    };
+
+                    for (const [term, definition] of Object.entries(glossary)) {
+                        const regex = new RegExp(`\\b${term}\\b`, 'gi');
+                        htmlContent = htmlContent.replace(regex, (match) => {
+                            return `<span class="highlight-term">${match}<span class="tooltip-bubble">${definition}</span></span>`;
+                        });
+                    }
+
+                    display.innerHTML = htmlContent;
+                    display.classList.remove('hidden');
+                    loader.classList.add('hidden');
+                } else {
+                    display.innerHTML = `<p>Error generating insights: ${result.error}</p>`;
+                    display.classList.remove('hidden');
+                    loader.classList.add('hidden');
+                }
+            } catch (error) {
+                display.innerHTML = "<p>Failed to connect to the Wisdom Engine. Please try again later.</p>";
+                display.classList.remove('hidden');
+                loader.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+
+</html>

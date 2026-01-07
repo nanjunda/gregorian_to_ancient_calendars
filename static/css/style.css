@@ -566,3 +566,75 @@ footer {
 .flatpickr-current-month .numInputWrapper span {
     display: none !important;
 }
+
+/* Interactive Glossary Tooltips (v5.0) */
+.highlight-term {
+    border-bottom: 2px dotted var(--secondary);
+    cursor: help;
+    position: relative;
+    color: var(--secondary);
+    font-weight: 500;
+}
+
+.tooltip-bubble {
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10, 10, 30, 0.95);
+    border: 1px solid var(--secondary);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    width: 250px;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0.3s;
+    z-index: 1000;
+    pointer-events: none;
+    line-height: 1.4;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+}
+
+.highlight-term:hover .tooltip-bubble {
+    visibility: visible;
+    opacity: 1;
+}
+
+.tooltip-bubble::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--secondary) transparent transparent transparent;
+}
+
+.ai-insight-cta {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--glass-border);
+    text-align: center;
+}
+
+.insight-link {
+    color: var(--secondary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: rgba(255, 145, 0, 0.1);
+}
+
+.insight-link:hover {
+    background: rgba(255, 145, 0, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 145, 0, 0.2);
+}
