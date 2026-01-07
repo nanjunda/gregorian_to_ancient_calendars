@@ -139,7 +139,8 @@ class GeminiEngine(BaseAIEngine):
                     fallback_model = genai.GenerativeModel(fallback_name)
                     response = fallback_model.generate_content(prompt)
                     return response.text
-                except Exception:
+                except Exception as fallback_e:
+                    print(f"Fallback to {fallback_name} failed: {fallback_e}")
                     continue
             
             return f"Error generating insight: {str(e)}"
