@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Interactive 3D Zodiac with Moon</title>
+    <title>Sky Focus: Nakshatra Explorer</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         html,
@@ -12,6 +12,42 @@
             padding: 0;
             background: #05070c;
             overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        #ui {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: auto;
+        }
+
+        .toggle-btn {
+            background: rgba(0, 210, 255, 0.1);
+            border: 1px solid #00d2ff;
+            color: #00d2ff;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .toggle-btn:hover {
+            background: rgba(0, 210, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .toggle-btn.active {
+            background: #00d2ff;
+            color: #05070c;
         }
 
         #description {
@@ -20,7 +56,6 @@
             width: 100%;
             text-align: center;
             color: #00d2ff;
-            font-family: 'Inter', sans-serif;
             font-size: 14px;
             text-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
             pointer-events: none;
@@ -29,156 +64,178 @@
         }
     </style>
     <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+        }
     }
-  }
-  </script>
+    </script>
 </head>
 
 <body>
+    <div id="ui">
+        <button id="toggle-nakshatra" class="toggle-btn">Show 27 Nakshatras</button>
+    </div>
     <div id="description">Interactive 3D Zodiac belt with symbols and names. Moon is shown in the foreground with slow
-        orbital motion and simulated phases. Use mouse to rotate and zoom the view.</div>
+        orbital motion. Use mouse to rotate and zoom.</div>
+
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
 
-        // Get Rashi from URL for focus
+        // Get Params
         const params = new URLSearchParams(window.location.search);
         const targetRashi = (params.get('rashi') || 'Simha').split(' (')[0].trim();
 
-        // Mapping for focus
-        const rashiToModern = {
-            'Mesha': 'Aries', 'Vrishabha': 'Taurus', 'Mithuna': 'Gemini',
-            'Kataka': 'Cancer', 'Simha': 'Leo', 'Kanya': 'Virgo',
-            'Tula': 'Libra', 'Vrishchika': 'Scorpio', 'Dhanus': 'Sagittarius',
-            'Makara': 'Capricorn', 'Kumbha': 'Aquarius', 'Meena': 'Pisces'
-        };
+        // 12 Rashis
+        const rashis = [
+            { name: 'Mesha', modern: 'Aries', symbol: '♈' }, { name: 'Vrishabha', modern: 'Taurus', symbol: '♉' },
+            { name: 'Mithuna', modern: 'Gemini', symbol: '♊' }, { name: 'Kataka', modern: 'Cancer', symbol: '♋' },
+            { name: 'Simha', modern: 'Leo', symbol: '♌' }, { name: 'Kanya', modern: 'Virgo', symbol: '♍' },
+            { name: 'Tula', modern: 'Libra', symbol: '♎' }, { name: 'Vrishchika', modern: 'Scorpio', symbol: '♏' },
+            { name: 'Dhanus', modern: 'Sagittarius', symbol: '♐' }, { name: 'Makara', modern: 'Capricorn', symbol: '♑' },
+            { name: 'Kumbha', modern: 'Aquarius', symbol: '♒' }, { name: 'Meena', modern: 'Pisces', symbol: '♓' }
+        ];
+
+        // 27 Nakshatras
+        const nakshatras = [
+            "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", "Punarvasu", "Pushya", "Ashlesha",
+            "Magha", "Purva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha",
+            "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishta", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"
+        ];
 
         // Scene
         const scene = new THREE.Scene();
         scene.fog = new THREE.FogExp2(0x05070c, 0.0008);
-
-        // Camera
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
         camera.position.set(0, 150, 450);
 
-        // Renderer
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
-        // Controls
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        controls.screenSpacePanning = true;
 
-        // Dense starfield
+        // Space
         const starGeo = new THREE.BufferGeometry();
-        const starCount = 15000;
         const starPos = [];
-        for (let i = 0; i < starCount; i++) {
+        for (let i = 0; i < 10000; i++) {
             const r = 1200 * Math.random();
             const theta = Math.random() * Math.PI * 2;
             const phi = Math.acos(2 * Math.random() - 1);
             starPos.push(r * Math.sin(phi) * Math.cos(theta), r * Math.sin(phi) * Math.sin(theta), r * Math.cos(phi));
         }
         starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
-        const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.8, sizeAttenuation: true });
+        const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.8 });
         scene.add(new THREE.Points(starGeo, starMat));
 
-        // Zodiac 3D band
-        const bandRadius = 250;
-        const bandThickness = 12;
-        const bandGeom = new THREE.TorusGeometry(bandRadius, bandThickness, 32, 128);
-        const bandMat = new THREE.MeshStandardMaterial({
-            color: 0x996633,
-            emissive: 0x442200,
-            emissiveIntensity: 0.4,
-            metalness: 0.2,
-            roughness: 0.6,
-            transparent: true,
-            opacity: 0.25
-        });
-        const zodiacBand = new THREE.Mesh(bandGeom, bandMat);
-        zodiacBand.rotation.x = Math.PI / 2;
-
-        // Main container for rotation
+        // Zodiac Containers
         const mainGroup = new THREE.Group();
-        mainGroup.add(zodiacBand);
         scene.add(mainGroup);
 
-        // Zodiac symbols + names
-        const zodiac = [
-            { name: 'Aries', symbol: '♈' }, { name: 'Taurus', symbol: '♉' }, { name: 'Gemini', symbol: '♊' },
-            { name: 'Cancer', symbol: '♋' }, { name: 'Leo', symbol: '♌' }, { name: 'Virgo', symbol: '♍' },
-            { name: 'Libra', symbol: '♎' }, { name: 'Scorpio', symbol: '♏' }, { name: 'Sagittarius', symbol: '♐' },
-            { name: 'Capricorn', symbol: '♑' }, { name: 'Aquarius', symbol: '♒' }, { name: 'Pisces', symbol: '♓' }
-        ];
+        const bandRadius = 250;
 
-        let targetIndex = 4; // Default Leo
-        const modernTarget = rashiToModern[targetRashi] || 'Leo';
-        zodiac.forEach((z, i) => { if (z.name === modernTarget) targetIndex = i; });
+        // 1. Rashi Group
+        const rashiGroup = new THREE.Group();
+        mainGroup.add(rashiGroup);
 
-        const symbolGroup = new THREE.Group();
-        zodiac.forEach((z, i) => {
+        const bandMat = new THREE.MeshStandardMaterial({ color: 0x996633, emissive: 0x442200, transparent: true, opacity: 0.3 });
+        const band = new THREE.Mesh(new THREE.TorusGeometry(bandRadius, 12, 32, 128), bandMat);
+        band.rotation.x = Math.PI / 2;
+        rashiGroup.add(band);
+
+        let targetIdx = 4;
+        rashis.forEach((r, i) => {
+            if (r.name === targetRashi) targetIdx = i;
             const angle = (i / 12) * Math.PI * 2;
             const x = bandRadius * Math.cos(angle);
-            const zpos = bandRadius * Math.sin(angle);
+            const z = bandRadius * Math.sin(angle);
+
             const canvas = document.createElement('canvas');
-            canvas.width = 1024; canvas.height = 1024;
+            canvas.width = 512; canvas.height = 512;
             const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, 1024, 1024);
+            ctx.fillStyle = '#ffcc00'; ctx.font = 'bold 200px serif'; ctx.textAlign = 'center';
+            ctx.fillText(r.symbol, 256, 250);
+            ctx.fillStyle = '#ffffff'; ctx.font = '40px sans-serif';
+            ctx.fillText(r.name.toUpperCase(), 256, 350);
 
-            const isTarget = (i === targetIndex);
-            ctx.fillStyle = isTarget ? '#ffcc00' : '#ffd27d';
-            ctx.font = 'bold 360px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText(z.symbol, 512, 420);
-
-            ctx.font = 'bold 54px sans-serif';
-            ctx.fillStyle = isTarget ? '#00d2ff' : '#ffffff';
-            ctx.fillText((isTarget ? (targetRashi.toUpperCase() + " / ") : "") + z.name.toUpperCase(), 512, 620);
-
-            const texture = new THREE.CanvasTexture(canvas);
-            const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
-            const sprite = new THREE.Sprite(spriteMat);
-            sprite.position.set(x, 25, zpos);
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas) }));
+            sprite.position.set(x, 25, z);
             sprite.scale.set(70, 70, 1);
-            symbolGroup.add(sprite);
+            rashiGroup.add(sprite);
         });
-        mainGroup.add(symbolGroup);
 
-        // Rotate mainGroup so the target Rashi is facing the camera
-        // Band is in XZ plane. Angle 0 is X=250, Z=0.
-        // Camera is at Z=450. We want Z=250 for the target.
-        // So angle i should be at PI/2.
-        mainGroup.rotation.y = - (targetIndex / 12) * Math.PI * 2 + Math.PI / 2;
+        // 2. Nakshatra Group (Hidden by default)
+        const nakshatraGroup = new THREE.Group();
+        nakshatraGroup.visible = false;
+        mainGroup.add(nakshatraGroup);
+
+        const nakBandMat = new THREE.MeshStandardMaterial({ color: 0x00d2ff, emissive: 0x001122, transparent: true, opacity: 0.2 });
+        const nakBand = new THREE.Mesh(new THREE.TorusGeometry(bandRadius, 8, 32, 128), nakBandMat);
+        nakBand.rotation.x = Math.PI / 2;
+        nakshatraGroup.add(nakBand);
+
+        nakshatras.forEach((n, i) => {
+            const angle = (i / 27) * Math.PI * 2;
+            const x = bandRadius * Math.cos(angle);
+            const z = bandRadius * Math.sin(angle);
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#00d2ff'; ctx.font = 'bold 44px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText(n.toUpperCase(), 256, 80);
+
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas) }));
+            sprite.position.set(x, 20, z);
+            sprite.scale.set(60, 15, 1);
+            nakshatraGroup.add(sprite);
+
+            // Tick marks
+            const tGeo = new THREE.BoxGeometry(1, 15, 1);
+            const tMesh = new THREE.Mesh(tGeo, new THREE.MeshBasicMaterial({ color: 0x00d2ff }));
+            tMesh.position.set(x, 0, z);
+            tMesh.rotation.y = -angle;
+            nakshatraGroup.add(tMesh);
+        });
+
+        // Focus Camera on Target Rashi
+        mainGroup.rotation.y = - (targetIdx / 12) * Math.PI * 2 + Math.PI / 2;
+
+        // UI Logic
+        const toggleBtn = document.getElementById('toggle-nakshatra');
+        toggleBtn.onclick = () => {
+            const isNak = nakshatraGroup.visible;
+            nakshatraGroup.visible = !isNak;
+            rashiGroup.visible = isNak;
+            toggleBtn.classList.toggle('active');
+            toggleBtn.innerText = isNak ? "Show 27 Nakshatras" : "Show 12 Rashis";
+        };
+
+        // Moon
+        const moonGroup = new THREE.Group();
+        moonGroup.rotation.x = 0.1; // tilt
+        scene.add(moonGroup);
+        const moon = new THREE.Mesh(new THREE.SphereGeometry(15, 32, 32), new THREE.MeshStandardMaterial({ color: 0xcccccc }));
+        moon.position.set(0, 40, 150);
+        moonGroup.add(moon);
 
         // Lighting
-        scene.add(new THREE.AmbientLight(0xffffff, 0.45));
-        const dir = new THREE.DirectionalLight(0xffcc88, 0.8); dir.position.set(300, 600, 400); scene.add(dir);
-
-        // Moon (foreground with phase animation and 5.1 deg tilt)
-        const moonGeom = new THREE.SphereGeometry(20, 64, 64);
-        const moonMat = new THREE.MeshStandardMaterial({ color: 0xd9d9d9, roughness: 0.9, metalness: 0 });
-        const moon = new THREE.Mesh(moonGeom, moonMat);
-        const moonOrbit = new THREE.Group();
-        moonOrbit.rotation.x = THREE.MathUtils.degToRad(5.1);
-        moon.position.set(0, 50, 100);
-        moonOrbit.add(moon);
-        scene.add(moonOrbit);
-        const sunLight = new THREE.DirectionalLight(0xffffff, 1.0); sunLight.position.set(-500, 200, 300); scene.add(sunLight);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+        dirLight.position.set(100, 200, 100);
+        scene.add(dirLight);
 
         // Animate
         let moonAngle = 0;
         function animate() {
             requestAnimationFrame(animate);
-            mainGroup.rotation.y += 0.0003;
+            mainGroup.rotation.y += 0.0002;
             moonAngle += 0.002;
-            moon.position.x = 80 * Math.cos(moonAngle);
-            moon.position.z = 120 + 40 * Math.sin(moonAngle);
+            moon.position.x = 100 * Math.cos(moonAngle);
+            moon.position.z = 150 + 50 * Math.sin(moonAngle);
             controls.update();
             renderer.render(scene, camera);
         }

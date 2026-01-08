@@ -86,6 +86,47 @@
             color: var(--text-muted);
             font-size: 0.9rem;
         }
+
+        /* Reactive Glossary Styles */
+        .reactive-term {
+            color: var(--secondary);
+            font-weight: 600;
+            border-bottom: 1px dashed var(--secondary);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .reactive-term:hover {
+            background: rgba(0, 210, 255, 0.1);
+            border-bottom-style: solid;
+        }
+
+        .tooltip-bubble {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--card-bg);
+            color: var(--text-white);
+            text-align: center;
+            border-radius: 8px;
+            padding: 10px;
+            position: absolute;
+            z-index: 10;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border: 1px solid var(--secondary);
+            font-size: 0.85rem;
+            line-height: 1.4;
+            pointer-events: none;
+        }
+
+        .reactive-term:hover .tooltip-bubble {
+            visibility: visible;
+            opacity: 1;
+        }
     </style>
 </head>
 
@@ -107,7 +148,13 @@
                 </div>
             </section>
 
-            <a href="/" class="back-link">← Return to Converter</a>
+            <div class="actions" style="margin-top: 2rem; display: flex; gap: 1rem; align-items: center;">
+                <a href="/" class="back-link" style="margin-top: 0;">← Return to Converter</a>
+                <button id="audio-tutor-btn" class="btn glass hidden"
+                    style="background: rgba(0, 210, 255, 0.1); border: 1px solid var(--secondary); color: var(--secondary); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: 'Outfit', sans-serif; font-weight: 600;">
+                    <span id="audio-icon">🎙️</span> <span id="audio-text">Listen to Tutor</span>
+                </button>
+            </div>
         </main>
 
         <footer>
@@ -162,42 +209,46 @@
             if (result.success) {
                 let htmlContent = marked.parse(result.insight);
 
-                // Apply Interactive Glossary (v5.0)
+                // Interactive Glossary (v5.1 Reactive)
                 const glossary = {
-                    'epoch': 'A fixed point in time used as a reference point for calculating astronomical events or calendar dates.',
-                    'jovian': 'Relating to the planet Jupiter. In Panchanga, the Samvatsara cycle is based on Jupiter\'s orbital period.',
-                    'precession': 'The slow, conical motion of Earth\'s axis, which causes the position of the stars to appear to shift.',
-                    'sidereal': 'Measured relative to the distant stars, rather than the Sun.',
-                    'ayanamsha': 'The angular difference between the Tropical (fixed seasons) and Sidereal (fixed stars) zodiacs.',
-                    'solstice': 'The time when the Sun reaches its highest or lowest point in the sky at noon.',
-                    'equinox': 'The time when day and night are of approximately equal length.'
+                    'epoch': { def: 'A fixed point in time used as a reference point.', target: null },
+                    'jovian': { def: 'Relating to Jupiter. The 60-year Samvatsara cycle follows Jupiter\'s path.', target: null },
+                    'precession': { def: 'The slow conical wobble of Earth\'s axis (25,800 year cycle).', target: 'PRECESSION_WOBBLE' },
+                    'sidereal': { def: 'Measured relative to fixed stars (Hindu system).', target: 'ZODIAC_COMPARISON' },
+                    'ayanamsha': { def: 'The angular drift (24°) between seasons and stars.', target: 'ZODIAC_COMPARISON' },
+                    'tithi': { def: 'A lunar day, defined by every 12° of Sun-Moon separation.', target: 'MOON_PHASE_3D' },
+                    'nakshatra': { def: 'Star clusters the moon visits daily.', target: 'CONSTELLATION_MAP' }
                 };
 
-                for (const [term, definition] of Object.entries(glossary)) {
+                for (const [term, data] of Object.entries(glossary)) {
                     const regex = new RegExp(`\\b${term}\\b`, 'gi');
                     htmlContent = htmlContent.replace(regex, (match) => {
-                        return `<span class="highlight-term">${match}<span class="tooltip-bubble">${definition}</span></span>`;
+                        return `<span class="reactive-term" onclick="triggerVisualHighlight('${data.target}')">${match}<span class="tooltip-bubble">${data.def} ${data.target ? '<br><i>(Click to see 3D visual)</i>' : ''}</span></span>`;
                     });
                 }
 
                 // Dynamic 3D Tag Injection (v5.0 Penthouse Edition)
                 const renderTags = {
                     'ZODIAC_COMPARISON': {
+                        id: 'visual-zodiac',
                         url: '/visuals/zodiac-comparison',
                         caption: 'Interactive Zodiac Aligner',
                         significance: 'This simulation shows the "Great Drift" between Modern and Hindu astronomy. When the drift is 0°, Aries aligns perfectly with Mesha (as it was 1,500 years ago). As you move the slider, you see the 24° Ayanamsa gap created by Earth\'s wobble, showing why your Western sign usually differs from your Hindu Rashi.'
                     },
                     'MOON_PHASE_3D': {
+                        id: 'visual-moon',
                         url: '/visuals/moon-phase',
                         caption: 'Tithi Phase Protractor',
                         significance: 'A Tithi (Lunar Day) is not a 24-hour clock. It is a geometric measurement of the angle between the Sun and Moon. Every 12° of separation creates one Tithi. This protractor shows how the phases we see from Earth are actually results of this specific celestial angle.'
                     },
                     'PRECESSION_WOBBLE': {
+                        id: 'visual-precession',
                         url: '/visuals/precession',
                         caption: 'The Earth\'s Great Wobble',
                         significance: 'Imagine Earth as a spinning top that is starting to tilt. This "Precession" takes 25,800 years for one full circle. This wobble is the reason the Zodiac Aligner (above) needs a shift—the "beginning" of the stars has moved relative to our seasons!'
                     },
                     'CONSTELLATION_MAP': {
+                        id: 'visual-constellations',
                         url: '/visuals/constellations',
                         caption: 'Sky Focus: Lunar Tracking',
                         significance: 'Interactive 3D Zodiac belt with symbols and names. Moon is shown in the foreground with slow orbital motion and simulated phases. Use mouse to rotate and zoom the view.'
@@ -209,7 +260,7 @@
                         const tag = renderTags[tagName.trim()];
                         if (tag) {
                             return `
-                                <div class="visual-block-wrapper" style="margin: 2.5rem 0;">
+                                <div id="${tag.id}" class="visual-block-wrapper" style="margin: 2.5rem 0;">
                                     <div class="visual-block card glass" style="margin-bottom: 0;">
                                         <div class="visual-loading">Launching 3D Module...</div>
                                         <iframe class="visual-iframe" src="${tag.url}?samvatsara=${encodeURIComponent(insightData.samvatsara)}&tithi=${encodeURIComponent(insightData.tithi)}&rashi=${encodeURIComponent(insightData.rashi?.name || 'Leo')}" onload="this.previousElementSibling.style.display='none'"></iframe>
@@ -230,6 +281,49 @@
                 display.innerHTML = htmlContent;
                 display.classList.remove('hidden');
                 loader.classList.add('hidden');
+
+                // Audio Narration Logic (v5.1)
+                const audioBtn = document.getElementById('audio-tutor-btn');
+                audioBtn.classList.remove('hidden');
+
+                let utterance = null;
+                audioBtn.onclick = () => {
+                    if (window.speechSynthesis.speaking) {
+                        window.speechSynthesis.cancel();
+                        updateAudioUI(false);
+                        return;
+                    }
+
+                    // Clean text for speech (remove markdown symbols and render tags)
+                    const cleanText = result.insight
+                        .replace(/\[\[RENDER:.*?\]\]/g, '')
+                        .replace(/[#*`_]/g, '')
+                        .trim();
+
+                    utterance = new SpeechSynthesisUtterance(cleanText);
+                    utterance.rate = 1.0;
+                    utterance.pitch = 1.1; // "High energy" tutor vibe
+
+                    utterance.onstart = () => updateAudioUI(true);
+                    utterance.onend = () => updateAudioUI(false);
+                    utterance.onerror = () => updateAudioUI(false);
+
+                    window.speechSynthesis.speak(utterance);
+                };
+
+                function updateAudioUI(isPlaying) {
+                    const icon = document.getElementById('audio-icon');
+                    const text = document.getElementById('audio-text');
+                    if (isPlaying) {
+                        icon.innerText = "🛑";
+                        text.innerText = "Stop Narration";
+                        audioBtn.style.background = "rgba(255, 87, 51, 0.2)";
+                    } else {
+                        icon.innerText = "🎙️";
+                        text.innerText = "Listen to Tutor";
+                        audioBtn.style.background = "rgba(0, 210, 255, 0.1)";
+                    }
+                }
             } else {
                 display.innerHTML = `<p>Error generating insights: ${result.error}</p>`;
                 display.classList.remove('hidden');
@@ -241,6 +335,39 @@
             loader.classList.add('hidden');
         }
         });
+
+        // Global function for Reactive Glossary triggers
+        function triggerVisualHighlight(tagId) {
+            if (!tagId) return;
+
+            const renderTags = {
+                'ZODIAC_COMPARISON': 'visual-zodiac',
+                'MOON_PHASE_3D': 'visual-moon',
+                'PRECESSION_WOBBLE': 'visual-precession',
+                'CONSTELLATION_MAP': 'visual-constellations'
+            };
+
+            const elementId = renderTags[tagId];
+            const targetEl = document.getElementById(elementId);
+
+            if (targetEl) {
+                // 1. Smooth Scroll to Visual
+                targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // 2. Visual Feedback (Flash)
+                targetEl.style.transition = "box-shadow 0.5s";
+                targetEl.style.boxShadow = "0 0 30px var(--secondary)";
+                setTimeout(() => {
+                    targetEl.style.boxShadow = "none";
+                }, 1000);
+
+                // 3. Message Passing (v5.1 Advanced)
+                const iframe = targetEl.querySelector('iframe');
+                if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.postMessage({ action: 'pulse', term: tagId }, '*');
+                }
+            }
+        }
     </script>
 </body>
 

@@ -4,206 +4,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Precession: The Cosmic Top</title>
+    <title>Precession 2.0: The Earth's Great Wobble</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            background: #000;
-            font-family: 'Arial', sans-serif;
+            background: #020408;
+            font-family: 'Outfit', sans-serif;
+            color: #fff;
         }
 
-        #info {
+        #ui {
             position: absolute;
             top: 20px;
             left: 20px;
-            color: white;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            pointer-events: none;
+            background: rgba(13, 17, 23, 0.85);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            backdrop-filter: blur(10px);
+            width: 250px;
+            pointer-events: auto;
         }
 
-        #controls {
-            position: absolute;
-            bottom: 20px;
+        h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.2rem;
+            color: #00d2ff;
+        }
+
+        p {
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: #8b949e;
+            margin: 0 0 20px 0;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #00d2ff;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        input[type=range] {
             width: 100%;
-            text-align: center;
-            color: #aaa;
-            font-size: 12px;
-            pointer-events: none;
+            cursor: pointer;
+        }
+
+        .stats {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            color: #ffcc00;
         }
     </style>
 </head>
 
 <body>
-    <div id="info">
-        <h3 style="margin:0 0 5px 0; color:#4fc3f7;">The Great Wobble</h3>
-        <small>Earth spins like a top.<br>The axis traces a circle every 26,000 years.</small>
+    <div id="ui">
+        <h2>Precession 2.0</h2>
+        <p>Earth doesn't just spin; it wobbles like a slow-motion top! This cycle takes 25,800 years.</p>
+
+        <div class="control-group">
+            <label>Timeline (Year)</label>
+            <input type="range" id="year-slider" min="0" max="25800" value="0">
+            <div class="stats" id="year-display">Year: 0</div>
+        </div>
+
+        <div class="control-group">
+            <label>North Star Target</label>
+            <div id="target-star" style="color:#ffffff; font-weight:bold;">Polaris (Current)</div>
+        </div>
     </div>
-    <div id="controls">Drag to rotate • Watch the white axis pointer!</div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+        }
+    }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
+        // Scene Setup
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x000000, 0.002);
-
-        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 10, 100); // Lowered camera to see cone from below
-        camera.lookAt(0, 30, 0); // Look higher up at the cone
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 5000);
+        camera.position.set(0, 40, 120);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
-        // Lighting
-        const sunLight = new THREE.DirectionalLight(0xffffff, 1);
-        sunLight.position.set(50, 20, 50);
-        scene.add(sunLight);
-        scene.add(new THREE.AmbientLight(0x333333));
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
 
-        // Function to create text sprites - SCALED DOWN DRASTICALLY
-        function makeTextSprite(message, fontsize = 24, color = "rgba(255, 255, 255, 1.0)") {
-            const ctx = document.createElement('canvas').getContext('2d');
-            ctx.font = "Bold " + fontsize + "px Arial";
-            const width = ctx.measureText(message).width;
-            ctx.canvas.width = width + 20;
-            ctx.canvas.height = fontsize + 20;
-
-            ctx.font = "Bold " + fontsize + "px Arial";
-            ctx.fillStyle = color;
-            ctx.fillText(message, 10, fontsize);
-
-            const texture = new THREE.CanvasTexture(ctx.canvas);
-            const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
-            const sprite = new THREE.Sprite(spriteMaterial);
-            // SCALE REDUCED: Set to 0.05 (Half of previous 0.1)
-            sprite.scale.set(width * 0.05, (fontsize + 20) * 0.05, 1);
-            return sprite;
+        // Space Environment
+        const starCount = 8000;
+        const starGeo = new THREE.BufferGeometry();
+        const starPos = [];
+        for (let i = 0; i < starCount; i++) {
+            const r = 1000 + Math.random() * 1000;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            starPos.push(r * Math.sin(phi) * Math.cos(theta), r * Math.sin(phi) * Math.sin(theta), r * Math.cos(phi));
         }
+        starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
+        const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 1 });
+        scene.add(new THREE.Points(starGeo, starMat));
 
-        // Group to hold Earth + Axis (the "Top")
+        // Earth
         const earthGroup = new THREE.Group();
         scene.add(earthGroup);
 
-        // Earth
-        const earthGeo = new THREE.SphereGeometry(10, 32, 32);
-        const earthMat = new THREE.MeshPhongMaterial({
-            color: 0x2233ff,
-            emissive: 0x112244,
-            specular: 0x111111,
-            shininess: 10,
-            wireframe: true
+        const texLoader = new THREE.TextureLoader();
+        // Fallback to vibrant colors if textures aren't served correctly
+        const earthGeo = new THREE.SphereGeometry(20, 64, 64);
+        const earthMat = new THREE.MeshStandardMaterial({
+            color: 0x1a73e8,
+            roughness: 0.5,
+            metalness: 0.1,
+            emissive: 0x011627,
+            emissiveIntensity: 0.5
         });
         const earth = new THREE.Mesh(earthGeo, earthMat);
         earthGroup.add(earth);
 
-        // Axis Line (The Poker) - Longer
-        const axisGeo = new THREE.CylinderGeometry(0.2, 0.2, 60, 8);
-        const axisMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        // Tilt Container (The Poker)
+        const tiltGroup = new THREE.Group();
+        earthGroup.add(tiltGroup);
+
+        const axisGeo = new THREE.CylinderGeometry(0.5, 0.5, 80, 12);
+        const axisMat = new THREE.MeshBasicMaterial({ color: 0x00d2ff, transparent: true, opacity: 0.6 });
         const axis = new THREE.Mesh(axisGeo, axisMat);
-        axis.position.y = 20;
-        earthGroup.add(axis);
+        tiltGroup.add(axis);
 
-        // VISUAL CONE STRUCTURE (Stationary)
-        // A circle high above
-        const topY = 45;
-        const topRadius = 18; // Tan(23.5) * 45 approx
-
+        // Precession Cone Path
+        const pathRadius = 35; // approx tan(23.5) * distance
+        const pathY = 80;
         const pathPoints = [];
-        for (let i = 0; i <= 64; i++) {
-            const th = (i / 64) * Math.PI * 2;
-            pathPoints.push(new THREE.Vector3(Math.cos(th) * topRadius, topY, Math.sin(th) * topRadius));
+        for (let i = 0; i <= 100; i++) {
+            const angle = (i / 100) * Math.PI * 2;
+            pathPoints.push(new THREE.Vector3(Math.cos(angle) * pathRadius, pathY, Math.sin(angle) * pathRadius));
         }
-        const lineGeo = new THREE.BufferGeometry().setFromPoints(pathPoints);
-        const lineMat = new THREE.LineDashedMaterial({ color: 0x4fc3f7, dashSize: 1, gapSize: 1 });
-        const pathLine = new THREE.Line(lineGeo, lineMat);
-        pathLine.computeLineDistances();
+        const pathGeo = new THREE.BufferGeometry().setFromPoints(pathPoints);
+        const pathMat = new THREE.LineBasicMaterial({ color: 0xffcc00, transparent: true, opacity: 0.4 });
+        const pathLine = new THREE.Line(pathGeo, pathMat);
         scene.add(pathLine);
 
-        // Cone Lines (connecting earth to circle)
-        const coneMat = new THREE.LineBasicMaterial({ color: 0x4fc3f7, transparent: true, opacity: 0.2 });
-        for (let i = 0; i < 8; i++) {
-            const th = (i / 8) * Math.PI * 2;
-            const pts = [
-                new THREE.Vector3(0, 0, 0),
-                new THREE.Vector3(Math.cos(th) * topRadius, topY, Math.sin(th) * topRadius)
-            ];
-            const g = new THREE.BufferGeometry().setFromPoints(pts);
-            scene.add(new THREE.Line(g, coneMat));
-        }
-
-        // Labels
-        const stars = [
-            { name: "Polaris", x: 0, z: -topRadius },
-            { name: "Vega", x: 0, z: topRadius }
-        ];
-
-        stars.forEach(s => {
-            // Star Dot
-            const dot = new THREE.Mesh(new THREE.SphereGeometry(0.8), new THREE.MeshBasicMaterial({ color: 0xffff00 }));
-            dot.position.set(s.x, topY, s.z);
+        // Helper for North Stars
+        function addStar(name, x, y, z) {
+            const dot = new THREE.Mesh(new THREE.SphereGeometry(1.5), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+            dot.position.set(x, y, z);
             scene.add(dot);
 
-            // Text Label
-            const sprite = makeTextSprite(s.name, 48, "rgba(255, 255, 0, 1.0)");
-            sprite.position.set(s.x, topY + 5, s.z);
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 256; canvas.height = 64;
+            ctx.fillStyle = '#00d2ff'; ctx.font = 'bold 32px Inter, sans-serif';
+            ctx.textAlign = 'center'; ctx.fillText(name, 128, 44);
+            const tex = new THREE.CanvasTexture(canvas);
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex }));
+            sprite.scale.set(30, 7.5, 1);
+            sprite.position.set(x, y + 5, z);
             scene.add(sprite);
-        });
+        }
 
-        // Time Note - Positioned carefully
-        const timeLabel = makeTextSprite("One Cycle = ~26,000 Years", 60, "rgba(79, 195, 247, 1.0)");
-        timeLabel.position.set(25, topY, 0);
-        scene.add(timeLabel);
+        addStar("POLARIS (Now)", 0, pathY, -pathRadius);
+        addStar("VEGA (Year 12,000)", 0, pathY, pathRadius);
+        addStar("THUBAN (Ancient)", -pathRadius, pathY, 0);
 
+        // Lighting
+        const sunLight = new THREE.DirectionalLight(0xffffff, 2);
+        sunLight.position.set(200, 100, 200);
+        scene.add(sunLight);
+        scene.add(new THREE.AmbientLight(0x404040, 0.5));
 
         // Interaction
-        let isDragging = false;
-        let prevX = 0, prevY = 0;
-        document.addEventListener('mousedown', e => { isDragging = true; prevX = e.clientX; prevY = e.clientY; });
-        document.addEventListener('mouseup', () => isDragging = false);
-        document.addEventListener('mousemove', e => {
-            if (!isDragging) return;
-            const dx = (e.clientX - prevX) * 0.01;
-            const dy = (e.clientY - prevY) * 0.01;
-            scene.rotation.y += dx;
-            scene.rotation.x += dy;
-            prevX = e.clientX; prevY = e.clientY;
+        const slider = document.getElementById('year-slider');
+        const display = document.getElementById('year-display');
+        const targetText = document.getElementById('target-star');
+
+        let year = 0;
+        slider.addEventListener('input', (e) => {
+            year = parseInt(e.target.value);
+            display.innerText = `Year: ${year}`;
+
+            if (year < 5000) targetText.innerText = "Polaris (Current)";
+            else if (year < 18000) targetText.innerText = "Vega (Blue Giant)";
+            else targetText.innerText = "Thuban (The Dragon)";
         });
 
-        // Touch
-        document.addEventListener('touchstart', e => { isDragging = true; prevX = e.touches[0].clientX; prevY = e.touches[0].clientY; });
-        document.addEventListener('touchend', () => isDragging = false);
-        document.addEventListener('touchmove', e => {
-            if (!isDragging) return;
-            const dx = (e.touches[0].clientX - prevX) * 0.01;
-            const dy = (e.touches[0].clientY - prevY) * 0.01;
-            scene.rotation.y += dx;
-            scene.rotation.x += dy;
-            prevX = e.touches[0].clientX; prevY = e.touches[0].clientY;
+        // Add message listener for Reactive Glossary
+        window.addEventListener('message', (event) => {
+            if (event.data.action === 'pulse') {
+                // Flash the Earth to acknowledge the link
+                earthMat.emissive.setHex(0x00d2ff);
+                setTimeout(() => earthMat.emissive.setHex(0x011627), 500);
+            }
         });
 
-        // Zoom/Scroll
-        document.addEventListener('wheel', (e) => {
-            camera.position.z += e.deltaY * 0.1;
-        });
-
-        // Animation Loop
-        // Set initial angle to Math.PI to align with Polaris (Start Position)
-        let wobbleAngle = Math.PI;
         function animate() {
             requestAnimationFrame(animate);
 
-            // 1. Earth Spins
-            earth.rotation.y += 0.05;
+            // Earth Rotation
+            earth.rotation.y += 0.005;
 
-            // 2. Axis Wobbles
-            wobbleAngle += 0.005;
-            // Radius/Height = 18/45 = 0.4. ~21 deg tilt.
-            earthGroup.rotation.x = 0.4 * Math.cos(wobbleAngle);
-            earthGroup.rotation.z = 0.4 * Math.sin(wobbleAngle);
+            // Precession Calculation (25800 years = 360 degrees)
+            const precessionAngle = (year / 25800) * Math.PI * 2;
+            const tilt = 23.5 * (Math.PI / 180);
 
+            // Apply the wobble to the tilt group
+            tiltGroup.rotation.z = tilt * Math.cos(precessionAngle);
+            tiltGroup.rotation.x = tilt * Math.sin(precessionAngle);
+
+            // Sync Earth rotation to follow the tilt axis
+            earthGroup.rotation.copy(tiltGroup.rotation);
+
+            controls.update();
             renderer.render(scene, camera);
         }
         animate();
