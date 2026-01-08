@@ -130,9 +130,9 @@
 
         // Scene Setup
         const scene = new THREE.Scene();
-        // Adjust camera to be higher and look higher to center the full cone
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 5000);
-        camera.position.set(0, 80, 180);
+        // Wider perspective to see all stars and the full cone clearly
+        const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 5000);
+        camera.position.set(0, 150, 320); // Further back and higher for cinematic view
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -140,30 +140,27 @@
         document.body.appendChild(renderer.domElement);
 
         const controls = new OrbitControls(camera, renderer.domElement);
-        controls.target.set(0, 40, 0); // Point higher up at the center of the cycle
+        controls.target.set(0, 45, 0); // Center on the wobble zone
         controls.enableDamping = true;
 
         // Space Environment
-        const starCount = 8000;
         const starGeo = new THREE.BufferGeometry();
         const starPos = [];
-        for (let i = 0; i < starCount; i++) {
-            const r = 1000 + Math.random() * 1000;
+        for (let i = 0; i < 8000; i++) {
+            const r = 1200 + Math.random() * 800;
             const theta = Math.random() * Math.PI * 2;
             const phi = Math.acos(2 * Math.random() - 1);
             starPos.push(r * Math.sin(phi) * Math.cos(theta), r * Math.sin(phi) * Math.sin(theta), r * Math.cos(phi));
         }
         starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
-        const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 1 });
+        const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 1.2 });
         scene.add(new THREE.Points(starGeo, starMat));
 
         // Earth
         const earthGroup = new THREE.Group();
         scene.add(earthGroup);
 
-        const texLoader = new THREE.TextureLoader();
-        // Fallback to vibrant colors if textures aren't served correctly
-        const earthGeo = new THREE.SphereGeometry(20, 64, 64);
+        const earthGeo = new THREE.SphereGeometry(22, 64, 64);
         const earthMat = new THREE.MeshStandardMaterial({
             color: 0x1a73e8,
             roughness: 0.5,
@@ -174,43 +171,38 @@
         const earth = new THREE.Mesh(earthGeo, earthMat);
         earthGroup.add(earth);
 
-        // Tilt Container (The Poker)
+        // Axis
         const tiltGroup = new THREE.Group();
         earthGroup.add(tiltGroup);
-
-        const axisGeo = new THREE.CylinderGeometry(0.5, 0.5, 80, 12);
+        const axisGeo = new THREE.CylinderGeometry(0.6, 0.6, 95, 12);
         const axisMat = new THREE.MeshBasicMaterial({ color: 0x00d2ff, transparent: true, opacity: 0.6 });
         const axis = new THREE.Mesh(axisGeo, axisMat);
         tiltGroup.add(axis);
 
         // Precession Cone Path
-        const pathRadius = 35; // approx tan(23.5) * distance
-        const pathY = 80;
+        const pathRadius = 40;
+        const pathY = 95;
         const pathPoints = [];
-        for (let i = 0; i <= 100; i++) {
-            const angle = (i / 100) * Math.PI * 2;
+        for (let i = 0; i <= 128; i++) {
+            const angle = (i / 128) * Math.PI * 2;
             pathPoints.push(new THREE.Vector3(Math.cos(angle) * pathRadius, pathY, Math.sin(angle) * pathRadius));
         }
-        const pathGeo = new THREE.BufferGeometry().setFromPoints(pathPoints);
-        const pathMat = new THREE.LineBasicMaterial({ color: 0xffcc00, transparent: true, opacity: 0.4 });
-        const pathLine = new THREE.Line(pathGeo, pathMat);
+        const pathLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pathPoints), new THREE.LineBasicMaterial({ color: 0x00d2ff, transparent: true, opacity: 0.2 }));
         scene.add(pathLine);
 
         // North Stars
         function addStar(name, x, y, z) {
-            const dot = new THREE.Mesh(new THREE.SphereGeometry(1.5), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+            const dot = new THREE.Mesh(new THREE.SphereGeometry(2), new THREE.MeshBasicMaterial({ color: 0xffffff }));
             dot.position.set(x, y, z);
             scene.add(dot);
 
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.width = 256; canvas.height = 64;
-            ctx.fillStyle = '#00d2ff'; ctx.font = 'bold 32px Inter, sans-serif';
-            ctx.textAlign = 'center'; ctx.fillText(name, 128, 44);
-            const tex = new THREE.CanvasTexture(canvas);
-            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex }));
-            sprite.scale.set(30, 7.5, 1);
-            sprite.position.set(x, y + 5, z);
+            ctx.fillStyle = '#00d2ff'; ctx.font = 'bold 36px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(name, 128, 44);
+            const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas) }));
+            sprite.scale.set(40, 10, 1);
+            sprite.position.set(x, y + 8, z);
             scene.add(sprite);
         }
 
@@ -219,51 +211,56 @@
         addStar("THUBAN", -pathRadius, pathY, 0);
 
         // Lighting
-        const sunLight = new THREE.DirectionalLight(0xffffff, 2);
+        const sunLight = new THREE.DirectionalLight(0xffffff, 2.5);
         sunLight.position.set(200, 100, 200);
         scene.add(sunLight);
-        scene.add(new THREE.AmbientLight(0x404040, 0.5));
+        scene.add(new THREE.AmbientLight(0x404040, 0.7));
 
         // Interaction
         const slider = document.getElementById('year-slider');
         const display = document.getElementById('year-display');
         const targetText = document.getElementById('target-star');
 
-        let year = 0;
-        slider.addEventListener('input', (e) => {
-            year = parseInt(e.target.value);
-            display.innerText = `Year: ${year}${year === 0 ? ' (Now)' : ''}`;
+        // CALIBRATION:
+        // Slider 0 = Thuban era (approx -5000 years from now).
+        // Current Year = 5000 years passed.
+        // Full Cycle = 25800.
+        const startOffset = 5000;
+        slider.value = startOffset;
+        let yearsPassed = startOffset;
 
-            if (year < 5000) targetText.innerText = "Polaris";
-            else if (year < 18000) targetText.innerText = "Vega";
+        slider.addEventListener('input', (e) => {
+            yearsPassed = parseInt(e.target.value);
+            display.innerText = `Years Passed: ${yearsPassed} ${yearsPassed === startOffset ? '(Now)' : ''}`;
+
+            if (yearsPassed < 2000) targetText.innerText = "Thuban";
+            else if (yearsPassed < 8000) targetText.innerText = "Polaris";
+            else if (yearsPassed < 18000) targetText.innerText = "Vega";
             else targetText.innerText = "Thuban";
         });
 
-        // Add message listener for Reactive Glossary
         window.addEventListener('message', (event) => {
             if (event.data.action === 'pulse') {
-                // Flash the Earth to acknowledge the link
                 earthMat.emissive.setHex(0x00d2ff);
                 setTimeout(() => earthMat.emissive.setHex(0x011627), 500);
             }
         });
 
+        let autoWobble = 0;
         function animate() {
             requestAnimationFrame(animate);
-
-            // Earth Rotation
             earth.rotation.y += 0.005;
 
-            // Precession Calculation (25800 years = 360 degrees)
-            // Align Year 0 to Polaris (PI/2 rotation around X tilts top towards -Z)
-            const precessionAngle = (year / 25800) * Math.PI * 2 + Math.PI / 2;
+            // Auto-wobble: subtle rhythmic drift to show the "act" of wobbling (±0.5 year drift)
+            autoWobble += 0.05;
+            const visualYear = yearsPassed + (0.8 * Math.sin(autoWobble));
+
+            // Angle Math: Start at Thuban (PI rotation away)
+            const precessionAngle = (visualYear / 25800) * Math.PI * 2 + Math.PI;
             const tilt = 23.5 * (Math.PI / 180);
 
-            // Apply the wobble to the tilt group
             tiltGroup.rotation.z = tilt * Math.cos(precessionAngle);
             tiltGroup.rotation.x = tilt * Math.sin(precessionAngle);
-
-            // Sync Earth rotation to follow the tilt axis
             earthGroup.rotation.copy(tiltGroup.rotation);
 
             controls.update();
@@ -278,5 +275,4 @@
         });
     </script>
 </body>
-
 </html>
