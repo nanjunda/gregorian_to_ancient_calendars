@@ -156,61 +156,60 @@
         const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 1.2 });
         scene.add(new THREE.Points(starGeo, starMat));
 
-        // Earth
-        const earthGroup = new THREE.Group();
-        scene.add(earthGroup);
+        // --- HIERARCHY FOR CONICAL PRECESSION ---
+        // 1. Precession Container (Rotates slowly around Global Y)
+        const precessionGroup = new THREE.Group();
+        scene.add(precessionGroup);
 
+        // 2. Earth Container (Fixed Tilt of 23.5 deg within Precession Container)
+        const earthContainer = new THREE.Group();
+        earthContainer.rotation.z = 23.5 * (Math.PI / 180); // Fixed axial tilt
+        precessionGroup.add(earthContainer);
+
+        // 3. Earth Entity (Spins on its own axis)
         const earthGeo = new THREE.SphereGeometry(22, 64, 64);
-        const earthMat = new THREE.MeshStandardMaterial({
-            color: 0x1a73e8,
-            roughness: 0.5,
-            metalness: 0.1,
-            emissive: 0x011627,
-            emissiveIntensity: 0.5
-        });
+        const earthMat = new THREE.MeshStandardMaterial({ color: 0x1a73e8, roughness: 0.5, metalness: 0.1, emissive: 0x011627, emissiveIntensity: 0.5 });
         const earth = new THREE.Mesh(earthGeo, earthMat);
-        earthGroup.add(earth);
+        earthContainer.add(earth);
 
-        // Axis
-        const tiltGroup = new THREE.Group();
-        earthGroup.add(tiltGroup);
-        const axisGeo = new THREE.CylinderGeometry(0.6, 0.6, 95, 12);
-        const axisMat = new THREE.MeshBasicMaterial({ color: 0x00d2ff, transparent: true, opacity: 0.6 });
-        const axis = new THREE.Mesh(axisGeo, axisMat);
-        tiltGroup.add(axis);
+        // Axis Visual (Long rod through the Earth)
+        const axisMat = new THREE.MeshBasicMaterial({ color: 0x00d2ff, transparent: true, opacity: 0.7 });
+        const axisRod = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 110, 12), axisMat);
+        earthContainer.add(axisRod);
 
-        // Precession Cone Path
-        const pathRadius = 40;
-        const pathY = 95;
+        // Guide Circle (The celestial circle the axis traces)
+        const pathRadius = 110 * Math.sin(23.5 * Math.PI / 180);
+        const pathY = 55 * Math.cos(23.5 * Math.PI / 180);
         const pathPoints = [];
         for (let i = 0; i <= 128; i++) {
             const angle = (i / 128) * Math.PI * 2;
             pathPoints.push(new THREE.Vector3(Math.cos(angle) * pathRadius, pathY, Math.sin(angle) * pathRadius));
         }
-        const pathLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pathPoints), new THREE.LineBasicMaterial({ color: 0x00d2ff, transparent: true, opacity: 0.2 }));
-        scene.add(pathLine);
+        scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pathPoints), new THREE.LineBasicMaterial({ color: 0xffcc00, transparent: true, opacity: 0.3 })));
 
-        // North Stars
-        function addStar(name, x, y, z) {
+        // Stars Positions (Fixed in Global Space)
+        function addStar(name, angle) {
+            const x = Math.cos(angle) * pathRadius;
+            const z = Math.sin(angle) * pathRadius;
             const dot = new THREE.Mesh(new THREE.SphereGeometry(2), new THREE.MeshBasicMaterial({ color: 0xffffff }));
-            dot.position.set(x, y, z);
+            dot.position.set(x, pathY, z);
             scene.add(dot);
 
-            const canvas = document.createElement('canvas');
+            const canvas = document.createElement('canvas'); canvas.width = 256; canvas.height = 64;
             const ctx = canvas.getContext('2d');
-            canvas.width = 256; canvas.height = 64;
             ctx.fillStyle = '#00d2ff'; ctx.font = 'bold 36px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(name, 128, 44);
             const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas) }));
             sprite.scale.set(40, 10, 1);
-            sprite.position.set(x, y + 8, z);
+            sprite.position.set(x, pathY + 8, z);
             scene.add(sprite);
         }
 
-        addStar("POLARIS", 0, pathY, -pathRadius);
-        addStar("VEGA", 0, pathY, pathRadius);
-        addStar("THUBAN", -pathRadius, pathY, 0);
+        // Star Alignment: Polaris is at -Z (angle 3PI/2 or -PI/2 in 3js coordinates)
+        addStar("POLARIS", -Math.PI / 2);
+        addStar("VEGA", Math.PI / 2);
+        addStar("THUBAN", Math.PI);
 
-        // Lighting
+        // Light
         const sunLight = new THREE.DirectionalLight(0xffffff, 2.5);
         sunLight.position.set(200, 100, 200);
         scene.add(sunLight);
@@ -222,16 +221,16 @@
         const targetText = document.getElementById('target-star');
 
         // CALIBRATION:
-        // Slider 0 = Thuban era (approx -5000 years from now).
-        // Current Year = 5000 years passed.
+        // Slider 0 = Thuban era (approx -5000 years ago)
+        // Now = 5000 passed.
         // Full Cycle = 25800.
-        const startOffset = 5000;
-        slider.value = startOffset;
-        let yearsPassed = startOffset;
+        const nowOffset = 5000;
+        slider.value = nowOffset;
+        let yearsPassed = nowOffset;
 
         slider.addEventListener('input', (e) => {
             yearsPassed = parseInt(e.target.value);
-            display.innerText = `Years Passed: ${yearsPassed} ${yearsPassed === startOffset ? '(Now)' : ''}`;
+            display.innerText = `Years Passed: ${yearsPassed} ${yearsPassed === nowOffset ? '(Now)' : ''}`;
 
             if (yearsPassed < 2000) targetText.innerText = "Thuban";
             else if (yearsPassed < 8000) targetText.innerText = "Polaris";
@@ -246,22 +245,23 @@
             }
         });
 
-        let autoWobble = 0;
+        let autoWobbleFrame = 0;
         function animate() {
             requestAnimationFrame(animate);
-            earth.rotation.y += 0.005;
+            earth.rotation.y += 0.005; // Earth spin
 
-            // Auto-wobble: subtle rhythmic drift to show the "act" of wobbling (±0.5 year drift)
-            autoWobble += 0.05;
-            const visualYear = yearsPassed + (0.8 * Math.sin(autoWobble));
+            // Auto-wobble: subtle rhythmic drift (0.5 year amplitude)
+            autoWobbleFrame += 0.05;
+            const visualYears = yearsPassed + (0.5 * Math.sin(autoWobbleFrame));
 
-            // Angle Math: Start at Thuban (PI rotation away)
-            const precessionAngle = (visualYear / 25800) * Math.PI * 2 + Math.PI;
-            const tilt = 23.5 * (Math.PI / 180);
+            // ROTATION LOGIC:
+            // Calculate angle based on years passed. 
+            // At Year 0, Angle = PI. At Year 5000, Angle = PI + (5000/25800 * 2PI) = PI + ~1.2 rad.
+            // To align Year 5000 with Polaris (-PI/2), we need an offset.
+            const rawAngle = (visualYears / 25800) * Math.PI * 2;
+            const precessionAngle = rawAngle + Math.PI - (nowOffset / 25800 * Math.PI * 2) - (Math.PI / 2);
 
-            tiltGroup.rotation.z = tilt * Math.cos(precessionAngle);
-            tiltGroup.rotation.x = tilt * Math.sin(precessionAngle);
-            earthGroup.rotation.copy(tiltGroup.rotation);
+            precessionGroup.rotation.y = -precessionAngle; // Negative for correct direction
 
             controls.update();
             renderer.render(scene, camera);
@@ -275,4 +275,5 @@
         });
     </script>
 </body>
+
 </html>
