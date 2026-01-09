@@ -32,18 +32,22 @@ echo "🏎️  Cloning Cosmic Masterclass (V5.3)..."
 git clone "$REPO_URL"
 
 # 5. Execute the core deployment script
-# This script handles /opt relocation, SELinux, and Gunicorn/Nginx setup
-cd "$APP_FOLDER"
-echo "🚀 Launching Deployment Engine..."
+if [ ! -d "$APP_FOLDER" ]; then
+    echo "❌ Error: Could not find $APP_FOLDER after clone."
+    exit 1
+fi
 
-# Ensure deploy script is executable
+cd "$APP_FOLDER"
+echo "🚀 Launching Deployment Engine in $(pwd)..."
+
+# Ensure deploy script is executable and run using bash explicitly
 chmod +x deploy.sh
 
 # Pass the current environment's GOOGLE_API_KEY if it exists
 if [ ! -z "$GOOGLE_API_KEY" ]; then
-    sudo GOOGLE_API_KEY="$GOOGLE_API_KEY" ./deploy.sh
+    sudo GOOGLE_API_KEY="$GOOGLE_API_KEY" bash ./deploy.sh
 else
-    sudo ./deploy.sh
+    sudo bash ./deploy.sh
 fi
 
 echo "================================================================="
