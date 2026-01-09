@@ -81,7 +81,13 @@ echo "🐍 Installing Python packages..."
 sudo -u $CURRENT_USER ./venv/bin/pip install --upgrade pip
 sudo -u $CURRENT_USER ./venv/bin/pip install -r requirements.txt
 
-# 5. Pre-download Skyfield data
+# 5. Pre-launch Syntax Check (v5.6.1)
+echo "🔍 Validating code integrity..."
+if ! sudo -u $CURRENT_USER ./venv/bin/python3 -m py_compile $DEPLOY_DIR/app.py $DEPLOY_DIR/utils/ai_engine.py; then
+    echo "❌ CRITICAL ERROR: Syntax error detected in the code!"
+    echo "   Check the output above for the specific line number."
+    exit 1
+fi
 echo "🛰️  Pre-downloading astronomical data files..."
 sudo -u $CURRENT_USER ./venv/bin/python3 -c "from skyfield.api import load; load('de421.bsp'); load.timescale()"
 

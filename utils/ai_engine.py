@@ -92,7 +92,7 @@ class GeminiEngine(BaseAIEngine):
         - Bridge Ancient Panchanga with Modern Astrophysics for Grades 6-12.
         - Tone: High-energy, precise, and visual.
         """
-        
+        try:
             response = self.model.generate_content(prompt)
             return response.text
         except Exception as e:
