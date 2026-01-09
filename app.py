@@ -350,11 +350,15 @@ def ai_explain():
     Generate AI-powered insights (Markdown + Audio Summary).
     """
     try:
+        print("DEBUG: Received AI Explain Request", flush=True)
         data = request.get_json()
         if not data:
+            print("DEBUG: No data in AI Explain request", flush=True)
             return jsonify({"success": False, "error": "No data received."}), 400
             
+        print("DEBUG: Calling AI Engine for Explanation...", flush=True)
         raw_output = ai_engine.get_explanation(data)
+        print(f"DEBUG: AI Explain Response Length: {len(raw_output)}", flush=True)
         
         # Parse the JSON from AI
         import json
@@ -375,6 +379,10 @@ def ai_explain():
                 "insight": raw_output,
                 "audio_summary": "I've analyzed your celestial alignment. Here is the full report."
             })
+    except Exception as e:
+        print(f"DEBUG: CRITICAL ERROR in /api/ai-explain: {str(e)}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        return jsonify({"success": False, "error": str(e)}), 500
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500

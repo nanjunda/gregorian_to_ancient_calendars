@@ -95,9 +95,13 @@ class GeminiEngine(BaseAIEngine):
         - Tone: High-energy, precise, and visual.
         """
         try:
+            print("DEBUG: Generating content via Gemini...", file=sys.stderr)
             response = self.model.generate_content(prompt)
+            print("DEBUG: Gemini response received.", file=sys.stderr)
             return response.text
         except Exception as e:
+            print(f"ERROR in generate_insight: {str(e)}", file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
             # Fallback logic remains same...
             return f"Error: {str(e)}"
 
