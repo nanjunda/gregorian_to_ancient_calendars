@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Guide | Cosmic Explorer Masterclass</title>
+    <title>Masterclass Student Guide | Cosmic Explorer</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;500;700&display=swap"
@@ -18,17 +18,19 @@
 
         .guide-content h2 {
             color: var(--secondary);
-            margin-top: 3rem;
+            margin-top: 3.5rem;
             font-family: 'Outfit', sans-serif;
-            font-size: 2rem;
-            border-bottom: 1px solid var(--border-color);
+            font-size: 2.2rem;
+            border-bottom: 1px solid var(--glass-border);
             padding-bottom: 0.5rem;
+            letter-spacing: -0.5px;
         }
 
         .guide-content h3 {
             color: var(--secondary);
-            margin-top: 2rem;
+            margin-top: 2.5rem;
             font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
         }
 
         .guide-content p {
@@ -39,54 +41,61 @@
             color: var(--secondary);
         }
 
-        .back-link {
-            display: inline-block;
-            margin-top: 2rem;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.3s;
-        }
-
-        .back-link:hover {
-            color: var(--secondary);
+        .guide-content blockquote {
+            border-left: 4px solid var(--secondary);
+            padding-left: 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            background: rgba(255, 145, 0, 0.05);
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+            border-radius: 0 16px 16px 0;
         }
 
         /* 3D Visual Containers */
+        .visual-block-wrapper {
+            margin: 3rem 0;
+            scroll-margin-top: 100px;
+        }
+
         .visual-block {
-            margin: 2rem 0;
             background: rgba(0, 0, 0, 0.4);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
             overflow: hidden;
             position: relative;
-            min-height: 480px;
+            min-height: 500px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
         .visual-iframe {
             width: 100%;
-            height: 480px;
+            height: 500px;
             border: none;
             display: block;
         }
 
         .visual-caption {
-            padding: 1rem;
-            background: rgba(13, 17, 23, 0.8);
-            font-size: 0.85rem;
+            padding: 1.2rem;
+            background: rgba(13, 17, 23, 0.9);
+            font-size: 0.9rem;
             color: var(--secondary);
             text-align: center;
-            border-top: 1px solid var(--border-color);
+            border-top: 1px solid var(--glass-border);
+            font-weight: 500;
         }
 
         .visual-significance {
-            padding: 1rem;
+            padding: 1.5rem;
             background: rgba(0, 210, 255, 0.05);
-            border-left: 3px solid var(--secondary);
+            border-left: 4px solid var(--secondary);
             font-size: 0.95rem;
-            line-height: 1.6;
+            line-height: 1.7;
             color: var(--text-white);
-            margin-bottom: 2rem;
+            margin-top: -1px;
+            border-radius: 0 0 20px 20px;
+            border: 1px solid var(--glass-border);
+            border-top: none;
         }
 
         /* Reactive Glossary Styles */
@@ -97,197 +106,356 @@
             cursor: pointer;
             position: relative;
             transition: all 0.3s;
+            padding: 0 2px;
         }
 
         .reactive-term:hover {
-            background: rgba(0, 210, 255, 0.1);
+            background: rgba(0, 210, 255, 0.15);
             border-bottom-style: solid;
+            border-radius: 4px;
         }
 
         .tooltip-bubble {
             visibility: hidden;
-            width: 200px;
-            background-color: var(--card-bg);
-            color: var(--text-white);
+            width: 240px;
+            background-color: #1a1a2e;
+            color: #fff;
             text-align: center;
-            border-radius: 8px;
-            padding: 10px;
+            border-radius: 12px;
+            padding: 15px;
             position: absolute;
-            z-index: 10;
-            bottom: 125%;
+            z-index: 1000;
+            bottom: 140%;
             left: 50%;
-            margin-left: -100px;
+            transform: translateX(-50%);
             opacity: 0;
-            transition: opacity 0.3s;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             border: 1px solid var(--secondary);
             font-size: 0.85rem;
-            line-height: 1.4;
+            line-height: 1.5;
             pointer-events: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
         .reactive-term:hover .tooltip-bubble {
             visibility: visible;
             opacity: 1;
+            bottom: 125%;
         }
 
         .highlight-flash {
-            animation: flash-border 1.5s ease;
+            animation: pulse-glow 2s ease;
         }
 
-        @keyframes flash-border {
+        @keyframes pulse-glow {
             0% {
-                border-color: var(--border-color);
+                border-color: var(--glass-border);
                 box-shadow: none;
             }
 
             50% {
                 border-color: var(--secondary);
-                box-shadow: 0 0 20px var(--secondary);
+                box-shadow: 0 0 30px rgba(255, 145, 0, 0.4);
             }
 
             100% {
-                border-color: var(--border-color);
+                border-color: var(--glass-border);
                 box-shadow: none;
             }
+        }
+
+        .back-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .anga-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .anga-icon {
+            font-size: 2rem;
+            background: rgba(255, 145, 0, 0.1);
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: var(--secondary);
+            flex-shrink: 0;
+        }
+
+        .anga-info h4 {
+            color: var(--secondary);
+            margin-bottom: 0.3rem;
+            font-size: 1.1rem;
+        }
+
+        .anga-info p {
+            margin-bottom: 0;
+            font-size: 0.95rem;
+            color: var(--text-muted);
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
+    <div class="container" style="max-width: 900px;">
         <header>
-            <h1>Cosmic Explorer</h1>
-            <p>Student Master-Guide to the Stars</p>
+            <h1>Cosmic Masterclass</h1>
+            <p>The Advanced Student's Guide to Time & Space</p>
         </header>
 
         <main>
-            <div class="actions" style="margin-bottom: 2rem; display: flex; gap: 1rem; align-items: center;">
-                <a href="/" class="back-link" style="margin-top: 0;">← Return to Converter</a>
+            <div class="back-nav">
+                <a href="/" class="insight-link" style="background: rgba(255,255,255,0.05);">← Return to Converter</a>
                 <button id="audio-tutor-btn" class="btn glass"
-                    style="background: rgba(0, 210, 255, 0.1); border: 1px solid var(--secondary); color: var(--secondary); padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: 'Outfit', sans-serif; font-weight: 600;">
-                    <span id="audio-icon">🎙️</span> <span id="audio-text">Listen to Tutor</span>
+                    style="background: rgba(0, 210, 255, 0.1); border: 1px solid var(--secondary); color: var(--secondary); padding: 0.6rem 1.2rem; border-radius: 50px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.9rem;">
+                    <span id="audio-icon">🎙️</span> <span id="audio-text">Listen to Maestro</span>
                 </button>
             </div>
 
             <section class="card glass guide-content">
-                <h2>Welcome, Time Traveler!</h2>
+                <h2>1. The Two Clocks of Earth</h2>
                 <p>
-                    Have you ever wondered what the universe looked like the exact moment you were born?
-                    The sky is a giant, living clock. For thousands of years, civilizations mastered the art of reading
-                    this clock without a single piece of electronic hardware.
-                    <br><br>
-                    This guide will teach you how to read the "Cosmic Dashboard" by understanding the 3D physics behind
-                    <strong>Sidereal</strong> time, the Earth's <strong>Precession</strong>, and the geometry of
-                    <strong>Tithis</strong>.
+                    Every culture has a "Map of Time." To build one, you need a clock that never stops.
+                </p>
+                <p>
+                    <strong>The Western Calendar (Solar)</strong>: Imagine Earth's journey around the Sun as a circular
+                    race track. The Western calendar is tuned to the <strong>Seasons</strong>. It measures the ~365.24
+                    days it takes to return to the Spring Equinox. To stay centered with the Sun, we add a "Leap Day"
+                    every 4 years.
+                </p>
+                <p>
+                    <strong>The Hindu Panchanga (Luni-Solar-Sidereal)</strong>: The Panchanga is more like a
+                    multi-dimensional dashboard. It doesn't just look at the Sun; it tracks the Sun, the Moon, and the
+                    **Fixed Stars** simultaneously. While the Western clock tells you the "Season," the Panchanga tells
+                    you the "Position" in the galaxy.
                 </p>
 
-                <h2>1. The Great Wobble (Precession)</h2>
+                <h2>2. The 5 Limbs (Angas) of Time</h2>
                 <p>
-                    Imagine Earth as a giant spinning top. As a top starts to slow down, it begins to "wobble." Earth
-                    does the same thing! This wobble is super slow—it takes <strong>25,800 years</strong> to make one
-                    full circle. This is called <span class="reactive-term"
-                        onclick="triggerVisualHighlight('PRECESSION_WOBBLE')">Precession<span class="tooltip-bubble">The
-                            slow conical wobble of Earth's axis (25,800 year cycle). <br><i>(Click to see 3D
-                                visual)</i></span></span>.
+                    "Panchanga" literally means "Five Limbs." These five elements are the DNA of any specific moment.
                 </p>
 
-                <div id="PRECESSION_WOBBLE" class="visual-block-wrapper">
-                    <div class="visual-block">
-                        <iframe class="visual-iframe" src="/visuals/precession"></iframe>
-                        <div class="visual-caption">🖥️ Interactive Precession Module</div>
-                    </div>
-                    <div class="visual-significance">
-                        <strong>Significance:</strong> Because of this wobble, the "North Star" isn't always the same.
-                        Right now it's Polaris, but in 12,000 years, it will be Vega. This wobble is why our maps of the
-                        stars must be updated over centuries.
+                <div class="anga-card">
+                    <div class="anga-icon">📅</div>
+                    <div class="anga-info">
+                        <h4>Vara (Weekday)</h4>
+                        <p>The solar day, ruled by the 7 major planets visible to the naked eye.</p>
                     </div>
                 </div>
 
-                <h2>2. Ancient vs. Modern (The Zodiac Aligner)</h2>
-                <p>
-                    There are two main ways to look at the sky. <strong>Western Astrology</strong> (Tropical) uses a map
-                    from 2,000 years ago. <strong>Hindu Astronomy</strong> (Sidereal) uses the real-time positions of
-                    the stars today.
-                    <br><br>
-                    The difference between these two is called <span class="reactive-term"
-                        onclick="triggerVisualHighlight('ZODIAC_COMPARISON')">Ayanamsha<span class="tooltip-bubble">The
-                            angular drift (24°) between seasons and stars. <br><i>(Click to see 3D
-                                visual)</i></span></span>. It is currently about 24 degrees—roughly the width of one
-                    entire Zodiac sign!
-                </p>
-
-                <div id="ZODIAC_COMPARISON" class="visual-block-wrapper">
-                    <div class="visual-block">
-                        <iframe class="visual-iframe" src="/visuals/zodiac-comparison"></iframe>
-                        <div class="visual-caption">🖥️ Tropical vs. Sidereal Aligner</div>
-                    </div>
-                    <div class="visual-significance">
-                        <strong>Significance:</strong> This is why your "Star Sign" in a Western magazine is different
-                        from your Rashi in this app. The Hindu system accounts for the 2,000 years of "drift" caused by
-                        the Earth's wobble.
+                <div class="anga-card">
+                    <div class="anga-icon">🌙</div>
+                    <div class="anga-info">
+                        <h4>Tithi (Lunar Day)</h4>
+                        <p>Based on the geometric angle between Sun and Moon. Not a 24-hour clock!</p>
                     </div>
                 </div>
 
-                <h2>3. The Geometry of a Tithi</h2>
-                <p>
-                    In the Hindu calendar, a "day" is not just 24 hours. A <span class="reactive-term"
-                        onclick="triggerVisualHighlight('MOON_PHASE_3D')">Tithi<span class="tooltip-bubble">A lunar day,
-                            defined by every 12° of Sun-Moon separation. <br><i>(Click to see 3D
-                                visual)</i></span></span> is a measurement of the <strong>angle</strong> between the Sun
-                    and the Moon as seen from Earth.
-                    Every 12 degrees of separation creates a new Tithi.
-                </p>
-
-                <div id="MOON_PHASE_3D" class="visual-block-wrapper">
-                    <div class="visual-block">
-                        <iframe class="visual-iframe" src="/visuals/moon-phase"></iframe>
-                        <div class="visual-caption">🖥️ Tithi Phase Protractor</div>
-                    </div>
-                    <div class="visual-significance">
-                        <strong>Significance:</strong> When the Sun and Moon are together (0°), it is Amavasya (New
-                        Moon). When they are opposite (180°), it is Purnima (Full Moon). A Tithi tracks the precise
-                        geometric relationship between these two lights.
+                <div class="anga-card" onclick="triggerVisualHighlight('CONSTELLATION_MAP')" style="cursor: pointer;">
+                    <div class="anga-icon">⭐</div>
+                    <div class="anga-info">
+                        <h4>Nakshatra (Star Mansion)</h4>
+                        <p>The specific star cluster the Moon is visiting. High-resolution time tracking.</p>
                     </div>
                 </div>
 
-                <h2>4. The Galactic Clock (Nakshatras)</h2>
-                <p>
-                    The Moon moves very fast—it travels through the entire sky in about 27 days. Ancient astronomers
-                    divided the sky into 27 equal "Lunar Mansions" called <span class="reactive-term"
-                        onclick="triggerVisualHighlight('CONSTELLATION_MAP')">Nakshatras<span
-                            class="tooltip-bubble">Star clusters the moon visits daily. <br><i>(Click to see 3D
-                                visual)</i></span></span>.
-                </p>
+                <div class="anga-card">
+                    <div class="anga-icon">🔄</div>
+                    <div class="anga-info">
+                        <h4>Yoga (Addition)</h4>
+                        <p>Mathematical sum of Sun and Moon's longitudes. Represents the "mood" of the day.</p>
+                    </div>
+                </div>
 
-                <div id="CONSTELLATION_MAP" class="visual-block-wrapper">
+                <div class="anga-card">
+                    <div class="anga-icon">✂️</div>
+                    <div class="anga-info">
+                        <h4>Karana (Half-Tithi)</h4>
+                        <p>The active interval. There are 2 Karanas in every Tithi.</p>
+                    </div>
+                </div>
+
+                <div class="visual-block-wrapper" id="CONSTELLATION_MAP">
                     <div class="visual-block">
                         <iframe class="visual-iframe" src="/visuals/constellations"></iframe>
-                        <div class="visual-caption">🖥️ Sky Focus: Nakshatra Grid</div>
+                        <div class="visual-caption">🖥️ Sky Focus: The 27 Nakshatra Grid</div>
                     </div>
                     <div class="visual-significance">
-                        <strong>Significance:</strong> While the Zodiac (12 signs) tracks the Sun's yearly journey, the
-                        Nakshatras (27 signs) track the Moon's daily movement. It is a much more precise way to measure
-                        time.
+                        <strong>Significance:</strong> While the Western calendar uses 12 Zodiac signs, the Hindu system
+                        sub-divides the sky into **27 Nakshatras**. This allows us to track the Moon's movement with
+                        incredible precision—one Nakshatra per day.
                     </div>
                 </div>
 
-                <h2>Summary: Privacy & Precision</h2>
+                <h2>3. The Cosmic Stadium (Zodiac)</h2>
                 <p>
-                    This app uses NASA's JPL Ephemeris data to ensure that when you see a planet in a sign, it is
-                    <strong>scientifically there</strong>. We do not store any of your data; all calculations happen in
-                    real-time and are erased the moment you leave.
+                    The planets don't just wander anywhere. They all stick to a specific path called the **Ecliptic**.
+                    Ancient astronomers divided this path into 12 zones called the **Zodiac**.
+                </p>
+                <blockquote>
+                    "Imagine a stadium where the players (planets) run around the field, and the Zodiac signs are the
+                    giant advertisements on the stadium walls in the distance."
+                </blockquote>
+
+                <div class="visual-block-wrapper" id="ZODIAC_STADIUM">
+                    <div class="visual-block">
+                        <iframe class="visual-iframe" src="/visuals/zodiac"></iframe>
+                        <div class="visual-caption">🖥️ 3D Zodiac Stadium Perspective</div>
+                    </div>
+                    <div class="visual-significance">
+                        <strong>Significance:</strong> From Earth's perspective, we say "Sun is in Aries" because Aries
+                        is the billboard behind the Sun at that moment. Toggle the view to see how the Rashi names like
+                        Mesha correspond to Western Aries.
+                    </div>
+                </div>
+
+                <h2>4. The Great Wobble (Precession)</h2>
+                <p>
+                    Here is the mind-blowing part: **The North Star isn't permanent.**
+                </p>
+                <p>
+                    Earth is like a spinning top that is beginning to tilt. This is <span class="reactive-term"
+                        onclick="triggerVisualHighlight('PRECESSION_WOBBLE')">Precession<span class="tooltip-bubble">The
+                            slow conical wobble of Earth's axis (25,800 year cycle). <br><i>(Click to see 3D
+                                visual)</i></span></span>. It takes 25,800 years for the Earth's axis to draw one slow
+                    circle in the sky.
                 </p>
 
-                <div style="text-align: center; margin-top: 3rem;">
+                <div class="visual-block-wrapper" id="PRECESSION_WOBBLE">
+                    <div class="visual-block">
+                        <iframe class="visual-iframe" src="/visuals/precession"></iframe>
+                        <div class="visual-caption">🖥️ The Earth's Axial Wobble (25,800 yr Cycle)</div>
+                    </div>
+                    <div class="visual-significance">
+                        <strong>Significance:</strong> Right now, the axis points to **Polaris**. In the time of Ancient
+                        Egypt, it pointed to **Thuban**. In 12,000 years, **Vega** will be our North Star. This wobble
+                        causes a drift between the seasons and the stars.
+                    </div>
+                </div>
+
+                <h3>Tropical vs Sidereal (The Aligner)</h3>
+                <p>
+                    Because of this wobble, the sky has shifted by about 24 degrees since 2,000 years ago.
+                </p>
+                <ul>
+                    <li><strong>Western (Tropical)</strong>: Ignores the wobble. It says "Aries starts on the first day
+                        of Spring," even if the stars aren't there anymore.</li>
+                    <li><strong>Hindu (Sidereal)</strong>: Accounts for the wobble. It tracks the <span
+                            class="reactive-term" onclick="triggerVisualHighlight('ZODIAC_COMPARISON')">Ayanamsha<span
+                                class="tooltip-bubble">The angular drift (24°) between seasons and stars. <br><i>(Click
+                                    to see 3D visual)</i></span></span> to tell you where the planets *actually* are.
+                    </li>
+                </ul>
+
+                <div class="visual-block-wrapper" id="ZODIAC_COMPARISON">
+                    <div class="visual-block">
+                        <iframe class="visual-iframe" src="/visuals/zodiac-comparison"></iframe>
+                        <div class="visual-caption">🖥️ The "Great Drift" Aligner</div>
+                    </div>
+                    <div class="visual-significance">
+                        <strong>Significance:</strong> Use the slider to see the 24-degree gap. This is why your "Star
+                        Sign" in local newspapers is usually one sign off from your real astronomical position in the
+                        sky.
+                    </div>
+                </div>
+
+                <h2>5. The Shadow Planets (Rahu & Ketu)</h2>
+                <p>
+                    In ancient stories, Rahu and Ketu were demons who swallowed the Sun. Scientifically, they are
+                    something even more fascinating: **The Lunar Nodes**.
+                </p>
+                <p>
+                    Imagine the Earth's orbit as a flat yellow disc. The Moon's orbit is another disc, but it's tilted
+                    by 5 degrees. These two discs cut through each other at exactly two points in space. These
+                    mathematical intersection points are the <span class="reactive-term"
+                        onclick="triggerVisualHighlight('LUNAR_NODES')">Lunar Nodes<span
+                            class="tooltip-bubble">Mathematical intersection points where the Moon's tilted orbit
+                            crosses the Earth's path. <br><i>(Click to see 3D visual)</i></span></span>.
+                </p>
+
+                <div class="visual-block-wrapper" id="LUNAR_NODES">
+                    <div class="visual-block">
+                        <iframe class="visual-iframe" src="/visuals/lunar-nodes"></iframe>
+                        <div class="visual-caption">🖥️ Rahu & Ketu: Intersecting Orbital Planes</div>
+                    </div>
+                    <div class="visual-significance">
+                        <strong>Significance:</strong> **RAHU** (North Node) is where the Moon crosses UP through the
+                        Earth's path. **KETU** (South Node) is where it crosses DOWN. These are the ONLY places where
+                        eclipses can occur. They are "Shadow Planets" because they have weight in math and physics, but
+                        no physical body.
+                    </div>
+                </div>
+
+                <h2>6. The Celestial Race</h2>
+                <p>
+                    Why do we call Saturn "slow" and the Moon "fast"? It's all about the size of their track.
+                </p>
+                <ul>
+                    <li><strong>The Moon</strong>: Running on the inner lane. It finishes a lap of the Zodiac every **27
+                        days**.</li>
+                    <li><strong>Jupiter</strong>: A massive middle track. It takes **12 years** to finish one lap.</li>
+                    <li><strong>Saturn (Shani)</strong>: The outermost lane. It takes nearly **30 years** to finish the
+                        same circle!</li>
+                </ul>
+                <p>
+                    When you look at the "Cosmic Alignment" map on your results page, you are seeing these runners at
+                    one frozen moment in their multi-year race.
+                </p>
+
+                <h2>7. The Sun's "Swing"</h2>
+                <p>
+                    Have you noticed the Sun is high in the sky in Summer and low in Winter? From Earth's perspective,
+                    the Sun appears to "swing" North and South over the year.
+                </p>
+                <ul>
+                    <li><strong>Uttarayana</strong>: The 6-month period when the Sun is moving Northward.</li>
+                    <li><strong>Dakshinayana</strong>: The 6-month period when the Sun is moving Southward.</li>
+                </ul>
+                <p>
+                    This is caused entirely by Earth's 23.5-degree slant relative to its orbit. It's why we have
+                    seasons!
+                </p>
+
+                <h2>8. Retrograde: The Great Optical Illusion</h2>
+                <p>
+                    You might hear that "Mercury is in Retrograde," meaning it is moving backward. **Planets never
+                    actually move backward.**
+                </p>
+                <blockquote>
+                    "Imagine you are in a fast car passing a slower truck on the highway. For a few seconds, as you pass
+                    the truck, it looks like the truck is moving backward relative to you. That's Retrograde."
+                </blockquote>
+                <p>
+                    Because Earth is moving at a different speed than other planets, they occasionally *appear* to loop
+                    backward in the sky. It is a stunning geometric illusion!
+                </p>
+
+                <div
+                    style="text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--glass-border);">
+                    <p style="font-size: 1.3rem; margin-bottom: 2.5rem;">Ready to see your own cosmic signature?</p>
                     <a href="/" class="btn"
-                        style="padding: 1rem 2.5rem; border-radius: 50px; background: var(--secondary); color: #000; font-weight: 700; text-decoration: none;">Launch
-                        the Converter</a>
+                        style="padding: 1.2rem 3rem; border-radius: 50px; background: var(--secondary); color: #000; font-weight: 700; text-decoration: none; font-size: 1.1rem; box-shadow: 0 10px 20px rgba(255, 145, 0, 0.2);">Run
+                        New Conversion</a>
                 </div>
             </section>
         </main>
 
-        <footer>
-            <p>&copy; 2025 Hindu Panchanga Engine | Student Education Initiative</p>
+        <footer style="padding: 4rem 0;">
+            <p>&copy; 2025 Hindu Panchanga Engine | Student Masterclass Initiative</p>
+            <p style="margin-top: 1rem; opacity: 0.5;">Scientific calculations powered by NASA JPL Ephemerides.</p>
         </footer>
     </div>
 
@@ -298,7 +466,7 @@
             if (el) {
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 el.classList.add('highlight-flash');
-                setTimeout(() => el.classList.remove('highlight-flash'), 2000);
+                setTimeout(() => el.classList.remove('highlight-flash'), 2500);
 
                 // Signal the iframe to pulse if it supports it
                 const iframe = el.querySelector('iframe');
@@ -319,10 +487,23 @@
                 return;
             }
 
-            const guideText = document.querySelector('.guide-content').innerText;
-            utterance = new SpeechSynthesisUtterance(guideText);
-            utterance.pitch = 1.1;
-            utterance.rate = 1.0;
+            // Extract text but be smart about it
+            const content = document.querySelector('.guide-content');
+            const walkText = (node) => {
+                if (node.nodeType === 3) return node.nodeValue;
+                if (node.classList && node.classList.contains('tooltip-bubble')) return "";
+                if (node.tagName === "IFRAME") return "";
+                let text = "";
+                for (let child of node.childNodes) text += walkText(child);
+                return text;
+            };
+
+            const fullText = walkText(content);
+            utterance = new SpeechSynthesisUtterance(fullText);
+
+            // Premium voice settings
+            utterance.pitch = 1.0;
+            utterance.rate = 0.95;
 
             utterance.onstart = () => updateAudioUI(true);
             utterance.onend = () => updateAudioUI(false);
@@ -336,12 +517,14 @@
             const text = document.getElementById('audio-text');
             if (isPlaying) {
                 icon.innerText = "🛑";
-                text.innerText = "Stop Narration";
+                text.innerText = "Stop Masterclass";
                 audioBtn.style.background = "rgba(231, 76, 60, 0.2)";
+                audioBtn.style.borderColor = "#e74c3c";
             } else {
                 icon.innerText = "🎙️";
-                text.innerText = "Listen to Tutor";
+                text.innerText = "Listen to Maestro";
                 audioBtn.style.background = "rgba(0, 210, 255, 0.1)";
+                audioBtn.style.borderColor = "var(--secondary)";
             }
         }
     </script>
