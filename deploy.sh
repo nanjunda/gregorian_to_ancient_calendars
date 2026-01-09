@@ -47,11 +47,6 @@ if [ "$FAST_MODE" = false ]; then
             libX11 libXext libXrender freetype libpng rsync
         sudo systemctl enable --now nginx
         
-        # Allow Nginx network connect (Critical)
-        echo "🛡️ Enabling Nginx network connections..."
-        sudo setsebool -P httpd_can_network_connect 1
-        sudo setsebool -P httpd_can_network_relay 1 || true
-
         # Open Firewall Port (Security Port 58921)
         if command -v firewall-cmd &> /dev/null; then
             echo "🔥 Opening Firewall Port 58921..."
@@ -70,6 +65,15 @@ else
     fi
 fi
 
+# CRITICAL: Always ensure Nginx connectivity (regardless of Fast Mode)
+if [ "$PKG_MGR" == "dnf" ]; then
+    echo "🛡️  Ensuring Nginx SE booleans are enabled..."
+    # These can take a while, so we only run if not already set
+    [[ $(getsebool httpd_can_network_connect) == *"off"* ]] && sudo setsebool -P httpd_can_network_connect 1 || true
+    [[ $(getsebool httpd_can_network_relay) == *"off"* ]] && sudo setsebool -P httpd_can_network_relay 1 || true
+    [[ $(getsebool httpd_unified) == *"off"* ]] && sudo setsebool -P httpd_unified 1 || true
+fi
+
 # 2. Relocate Application to /opt
 echo "🚚 Syncing application to $DEPLOY_DIR..."
 # Create directory
@@ -79,8 +83,15 @@ sudo mkdir -p $DEPLOY_DIR
 echo "   Syncing files via rsync..."
 sudo rsync -av --exclude='venv' --exclude='.git' --exclude='__pycache__' "$SOURCE_DIR/" "$DEPLOY_DIR/"
 
-# Fix ownership
+# Fix ownership and traversal permissions
+echo "   Setting permissions on $DEPLOY_DIR..."
 sudo chown -R $CURRENT_USER:$HTTP_GROUP $DEPLOY_DIR
+# Ensure directories are traversable by Nginx
+sudo find $DEPLOY_DIR -type d -exec chmod 755 {} +
+# Ensure files are readable
+sudo find $DEPLOY_DIR -type f -exec chmod 644 {} +
+# Re-apply executable bit to venv/bin and scripts
+sudo chmod -R +x $DEPLOY_DIR/scripts 2>/dev/null || true
 
 # 3. Setup Virtual Environment in NEW location
 cd $DEPLOY_DIR
@@ -238,6 +249,12 @@ echo "🎉 Deployment complete (v5.4)!"
 echo "🕵️  Self-Diagnostic: Checking Service Health..."
 if systemctl is-active --quiet $APP_NAME; then
     echo "   ✅ Gunicorn Service is RUNNING."
+    echo "   🕵️  Checking backend response (localhost:8000)..."
+    if curl -s -I http://127.0.0.1:8000 | grep -q "200 OK\|302 Found\|301 Moved"; then
+        echo "   ✅ Backend is RESPONDING."
+    else
+        echo "   ⚠️  Backend is NOT responding on port 8000. Check logs."
+    fi
 else
     echo "   ❌ ERROR: Gunicorn Service is NOT running. Check 'sudo journalctl -u $APP_NAME'"
 fi
