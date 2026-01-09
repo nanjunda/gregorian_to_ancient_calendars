@@ -206,6 +206,158 @@
             font-size: 0.95rem;
             color: var(--text-muted);
         }
+
+        /* Cosmic Chatbot Styles */
+        #chat-widget-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        #chat-window {
+            width: 350px;
+            height: 450px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--secondary);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(20px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #chat-window.active {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .chat-header {
+            padding: 1rem;
+            background: linear-gradient(to right, rgba(255, 145, 0, 0.2), rgba(255, 111, 0, 0.1));
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h4 {
+            margin: 0;
+            font-size: 1rem;
+            color: var(--secondary);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .message.bot {
+            background: rgba(255, 255, 255, 0.05);
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+
+        .message.user {
+            background: var(--secondary);
+            color: #000;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+            font-weight: 500;
+        }
+
+        .chat-input-area {
+            padding: 1rem;
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        #chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 0.5rem 0.8rem;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        #chat-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        #chat-toggle-btn {
+            width: 60px;
+            height: 60px;
+            background: var(--secondary);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(255, 145, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        #chat-toggle-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .dots {
+            display: inline-block;
+        }
+
+        .dots::after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+
+        @keyframes dots {
+
+            0%,
+            20% {
+                content: '.';
+            }
+
+            40% {
+                content: '..';
+            }
+
+            60% {
+                content: '...';
+            }
+
+            80%,
+            100% {
+                content: '';
+            }
+        }
     </style>
 </head>
 
@@ -459,6 +611,30 @@
         </footer>
     </div>
 
+    <!-- Cosmic Chatbot Widget -->
+    <div id="chat-widget-container">
+        <div id="chat-window">
+            <div class="chat-header">
+                <h4>✨ Chat with the Maestro</h4>
+                <button onclick="toggleChat()"
+                    style="background:none; border:none; color:white; cursor:pointer; font-size:1.2rem;">×</button>
+            </div>
+            <div id="chat-messages" class="chat-messages">
+                <div class="message bot">
+                    Greetings, cosmic traveler! I am the Maestro. Ask me anything about the stars, the Panchanga,
+                    or how ancient civilizations read the sky.
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Ask about the stars..."
+                    onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()"
+                    style="background:var(--secondary); border:none; border-radius:8px; padding:0 10px; cursor:pointer;">➔</button>
+            </div>
+        </div>
+        <button id="chat-toggle-btn" onclick="toggleChat()">✨</button>
+    </div>
+
     <script>
         // Reactive Highlights
         function triggerVisualHighlight(tagId) {
@@ -476,7 +652,7 @@
             }
         }
 
-        // Audio Narration Logic
+        // Audio Narration Logic (v5.4 Summary Refined)
         const audioBtn = document.getElementById('audio-tutor-btn');
         let utterance = null;
 
@@ -487,19 +663,10 @@
                 return;
             }
 
-            // Extract text but be smart about it
-            const content = document.querySelector('.guide-content');
-            const walkText = (node) => {
-                if (node.nodeType === 3) return node.nodeValue;
-                if (node.classList && node.classList.contains('tooltip-bubble')) return "";
-                if (node.tagName === "IFRAME") return "";
-                let text = "";
-                for (let child of node.childNodes) text += walkText(child);
-                return text;
-            };
+            // High-level overview instead of reading everything
+            const summaryText = "Welcome to the Cosmic Masterclass. In this guide, we bridge two worlds: the Western solar calendar (seasons) and the Hindu Panchanga (fixed stars). We explore the five limbs of time, the 24-degree drift of Earth's wobble, and the mathematical intersection of the lunar nodes known as Rahu and Ketu. Use the 3D modules and the interactive glossary to see how the ancients turned the sky into a high-precision GPS. I am here to guide you through the geometry of the heavens.";
 
-            const fullText = walkText(content);
-            utterance = new SpeechSynthesisUtterance(fullText);
+            utterance = new SpeechSynthesisUtterance(summaryText);
 
             // Premium voice settings
             utterance.pitch = 1.0;
@@ -526,6 +693,56 @@
                 audioBtn.style.background = "rgba(0, 210, 255, 0.1)";
                 audioBtn.style.borderColor = "var(--secondary)";
             }
+        }
+
+        // Chatbot Functionality (v5.4)
+        function toggleChat() {
+            const window = document.getElementById('chat-window');
+            window.classList.toggle('active');
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const messages = document.getElementById('chat-messages');
+            const text = input.value.trim();
+            if (!text) return;
+
+            // 1. Append User Message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user';
+            userMsg.textContent = text;
+            messages.appendChild(userMsg);
+            input.value = '';
+            messages.scrollTop = messages.scrollHeight;
+
+            // 2. Append Loading Dots
+            const botMsg = document.createElement('div');
+            botMsg.className = 'message bot';
+            botMsg.innerHTML = 'Consulting the Sages<span class="dots"></span>';
+            messages.appendChild(botMsg);
+            messages.scrollTop = messages.scrollHeight;
+
+            try {
+                // For guide.html, we use a general cosmic context
+                const context = {
+                    address: "Cosmic Explorer Academy",
+                    samvatsara: "Universal Cycle",
+                    tithi: "Lunar Geometry",
+                    nakshatra: "Fixed Stars"
+                };
+
+                const response = await fetch('/api/ai-chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text, context })
+                });
+
+                const result = await response.json();
+                botMsg.textContent = result.success ? result.response : "The star-link is fuzzy... " + result.error;
+            } catch (err) {
+                botMsg.textContent = "The Maestro is currently observing the stars and cannot be reached.";
+            }
+            messages.scrollTop = messages.scrollHeight;
         }
     </script>
 </body>

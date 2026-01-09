@@ -343,28 +343,58 @@ def precession_visual():
 @app.route('/api/ai-explain', methods=['POST'])
 def ai_explain():
     """
-    Generate AI-powered insights for the given astronomical configuration.
+    Generate AI-powered insights (Markdown + Audio Summary).
     """
     try:
         data = request.get_json()
         if not data:
-            return jsonify({"success": False, "error": "No data received in request."}), 400
+            return jsonify({"success": False, "error": "No data received."}), 400
             
-        # The frontend will send the full result data object
-        insight = ai_engine.get_explanation(data)
+        raw_output = ai_engine.get_explanation(data)
+        
+        # Parse the JSON from AI
+        import json
+        try:
+            # Handle potential markdown wrapping from AI
+            clean_json = raw_output.replace('```json', '').replace('```', '').strip()
+            parsed = json.loads(clean_json)
+            return jsonify({
+                "success": True,
+                "insight": parsed.get('insight', raw_output),
+                "audio_summary": parsed.get('audio_summary', "The stars are telling a complex story. Let's look at the details below.")
+            })
+        except Exception as json_err:
+            print(f"AI JSON Parse Error: {json_err}. Raw: {raw_output[:200]}")
+            # Fallback if AI didn't return valid JSON
+            return jsonify({
+                "success": True,
+                "insight": raw_output,
+                "audio_summary": "I've analyzed your celestial alignment. Here is the full report."
+            })
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/ai-chat', methods=['POST'])
+def ai_chat():
+    """
+    Handle questions from students about the current cosmic alignment.
+    """
+    try:
+        data = request.get_json()
+        message = data.get('message')
+        context = data.get('context', {}) # Contains Tithi, Nakshatra etc.
+
+        if not message:
+            return jsonify({"success": False, "error": "Missing message"}), 400
+            
+        response = ai_engine.chat_with_tutor(message, context)
         return jsonify({
             "success": True,
-            "insight": insight
+            "response": response
         })
     except Exception as e:
-        import traceback
-        error_details = f"{type(e).__name__}: {str(e)}"
-        print(f"CRITICAL: /api/ai-explain failed: {error_details}")
-        traceback.print_exc()
-        return jsonify({
-            "success": False, 
-            "error": f"Server Error: {error_details}. Check logs for traceback."
-        }), 500
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/insights', methods=['GET', 'POST'], strict_slashes=False)
 def insights_page():

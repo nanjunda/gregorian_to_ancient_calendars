@@ -64,8 +64,8 @@ class GeminiEngine(BaseAIEngine):
 
         prompt = f"""
         Role: The "Astro-Tutor" (Scientific YouTuber meets Coding Instructor).
-        Objective: Generate a comprehensive "Cosmic Dashboard" report. Bridge the gap between Ancient Indian Astronomy (Panchanga) and Modern Astrophysics for Grades 6–12. 
-        You are the 'orchestrator' of a 3D educational environment. 
+        Objective: Generate a summary and a detailed "Cosmic Dashboard" report. 
+        Format: You MUST return a VALID JSON object with exactly two keys: "audio_summary" and "insight".
 
         Input Data:
         - Date: {date_part}
@@ -79,80 +79,59 @@ class GeminiEngine(BaseAIEngine):
         - Rashi (Moon Sign): {rashi}
         - Yoga: {yoga}
         - Karana: {karana}
-        - Ayanamsa (Calculated): {ayanamsa}
+        - Ayanamsa: {ayanamsa}
 
-        CRITICAL REQUIREMENT:
-        You must contrast the Western (Tropical) and Hindu (Sidereal) systems. You MUST use the following **Active Render Tags** whenever you describe a visualization. Place these tags on their own line. These tags will trigger real 3D interactive modules in the app.
-
-        ACTIVE RENDER TAGS:
-        - [[RENDER:ZODIAC_COMPARISON]] -> Triggers a 3D dual-ring zodiac (Western Signs vs. Hindu Rashis).
-        - [[RENDER:MOON_PHASE_3D]] -> Triggers an interactive Moon-Sun angle calculator showing Tithi geometry.
-        - [[RENDER:PRECESSION_WOBBLE]] -> Triggers a 3D Earth axis wobble simulation (Precession).
-        - [[RENDER:CONSTELLATION_MAP]] -> Triggers a 3D star map focused on the current Nakshatra star cluster.
-
-        Instructions for Output Structure:
-
-        1. Introduction: The "Time-Keeping" Engine
-        - Define "Panchanga" (Pancha = Five, Anga = Limbs/Components). It is a "Five-Dimensional" calendar!
-        - Briefly explain the 5 Limbs in a way that sounds cool (e.g., "The DNA of Time"):
-            - **Vara** (The Sun's Day): The standard weekday we all know.
-            - **Tithi** (The Moon’s Phase): A "Lunar Day" based on the Sun-Moon angle.
-            - **Nakshatra** (The Moon’s Home): Which star cluster is the Moon visiting?
-            - **Yoga** (The Cosmic Vibe): The combined energy of Sun and Moon longitude.
-            - **Karana** (The Half-Pulse): Half of a Tithi, the fine detail of time.
-        - Contrast this with the Western Calendar (Solar/Season-based).
-        - Analogy: Standard Watch vs. GPS Tracker.
-
-        2. The Zodiac Belt (The Sky Map)
-        - Explain the difference between Rashi (Hindu) and Signs (Western).
-        - Explain Precession (The Wobble) and Ayanamsa (The drift).
-        - Use Analogy: "Moving Stickers" (Seasons) vs. "Fixed Background" (Stars).
-        - INSERT [[RENDER:ZODIAC_COMPARISON]] here.
-
-        3. The "Birthday Algorithm" (The 11-Day Lag)
-        - Show the math: Solar Year (365.25) - Lunar Year (354) = ~11 days.
-        - Explain why a Hindu birthday drifts backward every year.
-
-        4. The Deep Dive (Technical Analysis)
-        - Section A: The Geometry (Tithi & Yoga). INSERT [[RENDER:MOON_PHASE_3D]].
-        - Section B: The GPS Coordinates (Nakshatra & Rashi). INSERT [[RENDER:CONSTELLATION_MAP]].
-        - Section C: The Mythology (Story Mode): Deities and symbolic vibes for this moment.
-
-        5. The Cosmic Cheat Sheet (Vocabulary)
-        - Define: Equinox, Precession, Ayanamsa, and Ecliptic using simple analogies (seesaws, spinning tops).
-        - INSERT [[RENDER:PRECESSION_WOBBLE]].
-
-        Tone: High-energy, precise, visual, and encouraging. Use Markdown formatting (bolding, bullet points). Use the term 'Panchanga' instead of 'Vedic'.
+        JSON Structure Requirements:
+        1. "audio_summary": A high-level, 3-4 sentence conversational "voice-over" summary. Imagine you are a museum guide or a radio host. Make it intriguing. Focus on the 'vibe' and most unique astronomical aspect of this specific moment.
+        2. "insight": The full technical Markdown report. 
+        
+        Detailed 'insight' requirements:
+        - Contrast Western (Tropical) and Hindu (Sidereal) systems.
+        - Use Active Render Tags: [[RENDER:ZODIAC_COMPARISON]], [[RENDER:MOON_PHASE_3D]], [[RENDER:PRECESSION_WOBBLE]], [[RENDER:CONSTELLATION_MAP]].
+        - Explain the 5 Angas (DNA of Time).
+        - Bridge Ancient Panchanga with Modern Astrophysics for Grades 6-12.
+        - Tone: High-energy, precise, and visual.
         """
         
-        try:
             response = self.model.generate_content(prompt)
             return response.text
         except Exception as e:
-            # Multi-stage Fallback (v5.0 robustness for 2026)
-            # We try the newest models first, cascading down to legacy versions.
-            fallback_models = [
-                'gemini-3-flash',        # Latest 2026 model
-                'gemini-2.5-flash',      # High-performance 2025/26 stable
-                'gemini-2.5-flash-latest', 
-                'gemini-2.0-flash',      # Stable 2.0 release
-                'gemini-1.5-flash'       # Legacy safety net
-            ]
+            # Fallback logic remains same...
+            return f"Error: {str(e)}"
+
+    def chat_with_tutor(self, message, context_data):
+        if not self.model:
+            return "AI Engine not configured."
             
-            for fallback_name in fallback_models:
-                if fallback_name == self.model_name:
-                    continue
-                    
-                try:
-                    print(f"Model {self.model_name} failed. Attempting fallback to {fallback_name}...")
-                    fallback_model = genai.GenerativeModel(fallback_name)
-                    response = fallback_model.generate_content(prompt)
-                    return response.text
-                except Exception as fallback_e:
-                    print(f"Fallback to {fallback_name} failed: {fallback_e}")
-                    continue
-            
-            return f"Error generating insight: {str(e)}"
+        system_prompt = f"""
+        Role: The "Astro-Tutor" (The Maestro of the Cosmic Explorer).
+        Person: You are an encouraging, highly knowledgeable astronomer who bridges Ancient Indian Panchanga with Modern Astrophysics.
+        Tone: Enthusiastic, clear, and educational.
+        
+        The Scope: You ONLY answer questions about:
+        1. Hindu Panchanga (Tithis, Nakshatras, Angas).
+        2. Modern Astronomy (Planets, Orbits, Physics, Precession).
+        3. Cross-cultural calendars (Mayan, Inca, Egyptian, Gregorian).
+        4. The "Cosmic Explorer" app features.
+        
+        Diversion Rule: If the student asks about unrelated topics (politics, sports, general recipes, celebrities), politely redirect them: "That's a fascinating question, but as your Astro-Tutor, my eyes are fixed on the heavens! Let's get back to [Panchanga/Astronomy topic]."
+        
+        Historical Strategy: Whenever explaining a challenge in timekeeping (like leap years or lunar cycles), mention how other civilizations solved it (e.g., Mayan Haab', Egyptian solar alignments, or Inca celestial pillars).
+        
+        Current Context for this User:
+        - Location: {context_data.get('address')}
+        - Samvatsara: {context_data.get('samvatsara')}
+        - Tithi: {context_data.get('tithi')}
+        - Nakshatra: {context_data.get('nakshatra')}
+        
+        User Message: {message}
+        """
+
+        try:
+            response = self.model.generate_content(system_prompt)
+            return response.text
+        except Exception as e:
+            return f"The star-link is fuzzy... (Error: {str(e)})"
 
 # Factory or Manager to handle future expansion
 class AIEngineManager:
@@ -164,6 +143,9 @@ class AIEngineManager:
 
     def get_explanation(self, config_data):
         return self.engine.generate_insight(config_data)
+
+    def chat_with_tutor(self, message, context_data):
+        return self.engine.chat_with_tutor(message, context_data)
 
 # Singleton instance for easy import
 ai_engine = AIEngineManager()
