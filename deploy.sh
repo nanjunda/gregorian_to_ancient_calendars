@@ -10,7 +10,8 @@ echo "⚠️  RELOCATING App to /opt/panchanga to bypass SELinux Home Dir restri
 APP_NAME="panchanga"
 SOURCE_DIR=$(pwd)
 DEPLOY_DIR="/opt/$APP_NAME"
-CURRENT_USER=$(whoami)
+# Use SUDO_USER if running via sudo, otherwise the current user
+CURRENT_USER=${SUDO_USER:-$(whoami)}
 
 # Detect Package Manager
 if command -v dnf &> /dev/null; then
@@ -116,6 +117,9 @@ if command -v semanage &> /dev/null; then
     # Explicitly ensure Gunicorn is bin_t (Critical for 203/EXEC)
     sudo chcon -t bin_t $DEPLOY_DIR/venv/bin/gunicorn
     
+    # Allow Nginx to connect to the Gunicorn port (8000)
+    echo "🛡️ Explicitly allowing Nginx to connect to port 8000..."
+    sudo semanage port -m -t http_port_t -p tcp 8000 || sudo semanage port -a -t http_port_t -p tcp 8000 || true
 
 
     # CRITICAL ORACLE LINUX 9 FIX: Check for fapolicyd (Application Whitelisting)
@@ -204,6 +208,20 @@ fi
 
 sudo nginx -t && sudo systemctl restart nginx
 
-echo "🎉 Deployment complete (v5.0)!"
+echo "🎉 Deployment complete (v5.4)!"
+echo "🕵️  Self-Diagnostic: Checking Service Health..."
+if systemctl is-active --quiet $APP_NAME; then
+    echo "   ✅ Gunicorn Service is RUNNING."
+else
+    echo "   ❌ ERROR: Gunicorn Service is NOT running. Check 'sudo journalctl -u $APP_NAME'"
+fi
+
+if systemctl is-active --quiet nginx; then
+    echo "   ✅ Nginx is RUNNING."
+else
+    echo "   ❌ ERROR: Nginx is NOT running. Check 'sudo nginx -t'"
+fi
+
+echo "================================================================="
 echo "App is SECURE at: https://$PUBLIC_IP:58921"
 echo "Note: Accept the self-signed certificate warning in browser."
