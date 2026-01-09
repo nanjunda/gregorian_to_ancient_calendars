@@ -36,6 +36,9 @@ git clone "$REPO_URL"
 cd "$APP_FOLDER"
 echo "🚀 Launching Deployment Engine..."
 
+# Ensure deploy script is executable
+chmod +x deploy.sh
+
 # Pass the current environment's GOOGLE_API_KEY if it exists
 if [ ! -z "$GOOGLE_API_KEY" ]; then
     sudo GOOGLE_API_KEY="$GOOGLE_API_KEY" ./deploy.sh
