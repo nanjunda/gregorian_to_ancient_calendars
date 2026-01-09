@@ -214,9 +214,8 @@ def generate_skymap(
     ax.plot(moon_rad, moon_r, 'o', markersize=28, color='#ffd700', 
             markeredgecolor='#ffffff', markeredgewidth=2, zorder=10)
     
-    # Add moon phase symbol
-    moon_symbol = get_moon_phase_symbol(phase_angle)
-    ax.text(moon_rad, moon_r, moon_symbol, fontsize=20, ha='center', va='center', zorder=11)
+    # Add moon phase symbol (Removed emoji to fix font warning on Oracle Linux 9)
+    # ax.text(moon_rad, moon_r, moon_symbol, fontsize=20, ha='center', va='center', zorder=11)
     
     # Draw Earth at center
     ax.plot(0, 0, 'o', markersize=20, color='#4a90d9', 

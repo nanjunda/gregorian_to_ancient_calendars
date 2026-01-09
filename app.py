@@ -11,6 +11,10 @@ from utils.astronomy import get_sidereal_longitude, get_sunrise_sunset, sun, moo
 import os
 import base64
 from utils.ai_engine import ai_engine
+import warnings
+
+# Suppress Python 3.9 FutureWarnings from Google Auth
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 app = Flask(__name__)
 
