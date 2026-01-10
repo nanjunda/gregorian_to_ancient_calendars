@@ -439,7 +439,9 @@
                                 <div id="${tag.id}" class="visual-block-wrapper" style="margin: 2.5rem 0;">
                                     <div class="visual-block card glass" style="margin-bottom: 0;">
                                         <div class="visual-loading">Launching 3D Module...</div>
-                                        <iframe class="visual-iframe" src="${tag.url}?samvatsara=${encodeURIComponent(insightData.samvatsara)}&tithi=${encodeURIComponent(insightData.tithi)}&rashi=${encodeURIComponent(insightData.rashi?.name || 'Leo')}" onload="this.previousElementSibling.style.display='none'"></iframe>
+                                        <div class="visual-wrapper">
+                                            <iframe class="visual-iframe" src="${tag.url}?samvatsara=${encodeURIComponent(insightData.samvatsara)}&tithi=${encodeURIComponent(insightData.tithi)}&rashi=${encodeURIComponent(insightData.rashi?.name || 'Leo')}" onload="this.parentElement.previousElementSibling.style.display='none'"></iframe>
+                                        </div>
                                         <div class="visual-caption">🖥️ ${tag.caption}</div>
                                     </div>
                                     <div class="visual-significance" style="padding: 1rem; background: rgba(0, 210, 255, 0.05); border-left: 3px solid var(--secondary); font-size: 0.95rem; line-height: 1.6; color: var(--text-white);">
