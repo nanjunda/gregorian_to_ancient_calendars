@@ -383,7 +383,22 @@
             const result = await response.json();
 
             if (result.success) {
-                let htmlContent = marked.parse(result.insight);
+                let rawInsight = result.insight;
+
+                // V6.0 Mobile Fix: Check if content is actually a JSON string (due to cache or legacy response)
+                if (typeof rawInsight === 'string' && rawInsight.trim().startsWith('{')) {
+                    try {
+                        const parsed = JSON.parse(rawInsight);
+                        if (parsed.insight) {
+                            rawInsight = parsed.insight;
+                            console.log("Recovered from nested JSON string.");
+                        }
+                    } catch (e) {
+                        console.warn("Attempted to parse nested JSON but failed, using raw text.");
+                    }
+                }
+
+                let htmlContent = marked.parse(rawInsight);
 
                 // Interactive Glossary (v5.1 Reactive)
                 const glossary = {
