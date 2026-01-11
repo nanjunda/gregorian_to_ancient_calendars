@@ -16,15 +16,16 @@
 
         #ui {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(13, 17, 23, 0.75);
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(0, 210, 255, 0.2);
-            backdrop-filter: blur(5px);
+            top: 15px;
+            right: 15px;
+            background: rgba(13, 17, 23, 0.85);
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            backdrop-filter: blur(8px);
             pointer-events: none;
             z-index: 100;
+            max-width: 200px;
         }
 
         .legend {
@@ -85,14 +86,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 2000);
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 2500);
 
-        // Mobile-First Responsive Scaling (Conservative)
+        // Final Defensive Scaling (Guaranteed fit in 900px height)
         const isMobile = window.innerWidth < 650;
-        const baseRadius = isMobile ? (window.innerWidth / 2) - 50 : 310;
+        const baseRadius = isMobile ? (window.innerWidth / 2) - 60 : 220;
 
-        // High Top-Down perspective (Raised to ensure full coverage)
-        camera.position.set(0, 850, 50);
+        // High Top-Down perspective (Elevated for wider angle)
+        camera.position.set(0, 1000, 0);
         camera.lookAt(0, 0, 0);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -100,8 +101,8 @@
         document.body.appendChild(renderer.domElement);
 
         scene.add(new THREE.AmbientLight(0x404040, 2));
-        const sun = new THREE.PointLight(0xffffff, 2.5);
-        sun.position.set(200, 400, 200);
+        const sun = new THREE.PointLight(0xffffff, 2);
+        sun.position.set(150, 400, 150);
         scene.add(sun);
 
         // Core Earth - High Detail Glow
