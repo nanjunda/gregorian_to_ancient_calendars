@@ -86,8 +86,13 @@
     <script>
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
-        // Improved Top-Down perspective (higher Y, less extreme Z)
-        camera.position.set(0, 700, 450);
+
+        // Mobile-First Responsive Scaling
+        const isMobile = window.innerWidth < 600;
+        const baseRadius = isMobile ? (window.innerWidth / 2) - 40 : 350;
+
+        // High Top-Down perspective to prevent "squashing" 
+        camera.position.set(0, 800, 100);
         camera.lookAt(0, 0, 0);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -95,20 +100,25 @@
         document.body.appendChild(renderer.domElement);
 
         scene.add(new THREE.AmbientLight(0x404040, 2));
-        const sun = new THREE.PointLight(0xffffff, 2);
-        sun.position.set(100, 200, 100);
+        const sun = new THREE.PointLight(0xffffff, 2.5);
+        sun.position.set(200, 400, 200);
         scene.add(sun);
 
-        // Core Earth - Upgraded with atmosheric glow feel
-        const earthGeo = new THREE.SphereGeometry(45, 32, 32);
+        // Core Earth - High Detail Glow
+        const earthGeo = new THREE.SphereGeometry(isMobile ? 30 : 45, 32, 32);
         const earthMat = new THREE.MeshPhongMaterial({
-            color: 0x2244ff,
+            color: 0x3366ff,
             emissive: 0x112244,
             shininess: 100,
-            specular: 0x4488ff
+            specular: 0xffffff
         });
         const earth = new THREE.Mesh(earthGeo, earthMat);
         scene.add(earth);
+
+        // Atmosphere Glow
+        const glowGeo = new THREE.SphereGeometry((isMobile ? 30 : 45) * 1.05, 32, 32);
+        const glowMat = new THREE.MeshBasicMaterial({ color: 0x00d2ff, transparent: true, opacity: 0.2, side: THREE.BackSide });
+        earth.add(new THREE.Mesh(glowGeo, glowMat));
 
         const westernSigns = ["ARIES", "TAURUS", "GEMINI", "CANCER", "LEO", "VIRGO", "LIBRA", "SCORPIO", "SAGITTARIUS", "CAPRICORN", "AQUARIUS", "PISCES"];
         const hinduRashis = ["MESHA", "VRISHABHA", "MITHUNA", "KATAKA", "SIMHA", "KANYA", "TULA", "VRISHCHIKA", "DHANUS", "MAKARA", "KUMBHA", "MEENA"];
@@ -120,39 +130,40 @@
 
         function createRing(parent, radius, labels, color, opacity) {
             const seg = (Math.PI * 2) / 12;
+            const ringWidth = isMobile ? 30 : 40;
             labels.forEach((text, i) => {
                 const angle = i * seg;
-                const geometry = new THREE.RingGeometry(radius, radius + 40, 64, 1, angle, seg);
-                const material = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide, transparent: true, opacity: opacity, wireframe: false });
+                const geometry = new THREE.RingGeometry(radius, radius + ringWidth, 64, 1, angle, seg);
+                const material = new THREE.MeshBasicMaterial({ color: color, side: THREE.DoubleSide, transparent: true, opacity: opacity });
                 const mesh = new THREE.Mesh(geometry, material);
                 mesh.rotation.x = -Math.PI / 2;
                 parent.add(mesh);
 
                 // Borders
                 const edges = new THREE.EdgesGeometry(geometry);
-                const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.5 }));
+                const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.4 }));
                 line.rotation.x = -Math.PI / 2;
                 parent.add(line);
 
-                // Labels (using simple Plane for speed)
+                // Labels
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 canvas.width = 128; canvas.height = 32;
-                ctx.fillStyle = 'white'; ctx.font = 'bold 20px Inter, Arial';
+                ctx.fillStyle = 'white'; ctx.font = `bold ${isMobile ? '16px' : '20px'} Inter, Arial`;
                 ctx.textAlign = 'center';
                 ctx.fillText(text, 64, 24);
                 const tex = new THREE.CanvasTexture(canvas);
                 const spriteMat = new THREE.SpriteMaterial({ map: tex });
                 const sprite = new THREE.Sprite(spriteMat);
                 const mid = angle + seg / 2;
-                sprite.position.set(Math.cos(mid) * (radius + 20), 5, -Math.sin(mid) * (radius + 20));
-                sprite.scale.set(60, 15, 1);
+                sprite.position.set(Math.cos(mid) * (radius + (ringWidth / 2)), 5, -Math.sin(mid) * (radius + (ringWidth / 2)));
+                sprite.scale.set(isMobile ? 40 : 60, isMobile ? 10 : 15, 1);
                 parent.add(sprite);
             });
         }
 
-        createRing(outerRing, 350, westernSigns, 0xff5733, 0.1); // Tropical
-        createRing(innerRing, 280, hinduRashis, 0x33ff57, 0.15); // Sidereal
+        createRing(outerRing, baseRadius, westernSigns, 0xff5733, 0.1);
+        createRing(innerRing, baseRadius * 0.8, hinduRashis, 0x33ff57, 0.15);
 
         const slider = document.getElementById('drift-slider');
         const gapVal = document.getElementById('ayanamsa-val');

@@ -79,16 +79,18 @@ class GeminiEngine(BaseAIEngine):
             response = self.model.generate_content(prompt)
             text = response.text
             
-            # Safeguard: If Gemini still returns JSON (due to instruction bias), extract the 'insight' field
-            if text.strip().startswith('{') and '"insight":' in text:
+            # Safeguard: Remove Markdown Code Blocks if AI wraps the entire report
+            clean_text = text.strip()
+            if clean_text.startswith('```markdown'): clean_text = clean_text[11:]
+            elif clean_text.startswith('```'): clean_text = clean_text[3:]
+            if clean_text.endswith('```'): clean_text = clean_text[:-3]
+            text = clean_text.strip()
+
+            # Safeguard: If Gemini still returns JSON, extract the 'insight' field
+            if text.startswith('{') and '"insight":' in text:
                 import json
                 try:
-                    # Clean markdown code blocks if present
-                    clean_text = text.strip()
-                    if clean_text.startswith('```json'): clean_text = clean_text[7:]
-                    if clean_text.endswith('```'): clean_text = clean_text[:-3]
-                    
-                    data = json.loads(clean_text)
+                    data = json.loads(text)
                     return data.get('insight', text)
                 except:
                     pass
