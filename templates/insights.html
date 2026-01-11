@@ -17,7 +17,7 @@
             font-size: 1.15rem;
             color: var(--text-white);
             font-family: 'Inter', sans-serif;
-            white-space: pre-wrap !important;
+            white-space: normal;
             word-wrap: break-word;
             overflow-wrap: break-word;
             word-break: break-word;
@@ -76,12 +76,12 @@
             border-radius: 16px;
             overflow: hidden;
             position: relative;
-            min-height: 900px;
+            min-height: 480px;
         }
 
         .visual-iframe {
             width: 100%;
-            height: 900px;
+            height: 480px;
             border: none;
             display: block;
         }
@@ -507,23 +507,18 @@
 
                 let htmlContent = "";
                 function robustMarkdown(text) {
-                    let parsed = text;
-                    try {
-                        if (typeof marked.parse === 'function') parsed = marked.parse(text);
-                        else if (typeof marked === 'function') parsed = marked(text);
-                    } catch (e) { console.error("Marked error:", e); }
+                    if (typeof marked.parse === 'function') return marked.parse(text);
+                    if (typeof marked === 'function') return marked(text);
 
-                    // If parsing didn't happen (still contains raw headers) or returned same text
-                    if (parsed === text || (typeof parsed === 'string' && parsed.includes('# '))) {
-                        console.warn("Marked failed or bypassed, applying robust regex.");
-                        parsed = parsed
-                            .replace(/^[\s\n]*# (.*$)/gim, '<h1 style="color:var(--secondary);border-bottom:2px solid var(--secondary);padding-bottom:10px;margin-bottom:20px;">🚀 $1</h1>')
-                            .replace(/^[\s\n]*## (.*$)/gim, '<h2 style="color:var(--secondary);margin-top:30px;">🛰️ $1</h2>')
-                            .replace(/^[\s\n]*### (.*$)/gim, '<h3 style="color:var(--secondary);margin-top:20px;">🔬 $1</h3>')
-                            .replace(/^\s*[\-\*] (.*$)/gim, '<li style="margin-left:20px;list-style:none;">✨ $1</li>')
-                            .replace(/\*\*(.*?)\*\*/gim, '<strong style="color:var(--secondary);">$1</strong>');
-                    }
-                    return (typeof parsed === 'string') ? parsed.replace(/\n/g, '<br>') : parsed;
+                    console.warn("Marked library not found, using robust fallback.");
+                    // Custom high-resilience student-friendly fallback
+                    return text
+                        .replace(/^# (.*$)/gim, '<h1 style="color:var(--secondary);border-bottom:2px solid var(--secondary);padding-bottom:10px;margin-bottom:20px;">🚀 $1</h1>')
+                        .replace(/^## (.*$)/gim, '<h2 style="color:var(--secondary);margin-top:30px;">🛰️ $1</h2>')
+                        .replace(/^### (.*$)/gim, '<h3 style="color:var(--secondary);margin-top:20px;">🔬 $1</h3>')
+                        .replace(/^\s*[\-\*] (.*$)/gim, '<li style="margin-left:20px;list-style:none;">✨ $1</li>')
+                        .replace(/\*\*(.*?)\*\*/gim, '<strong style="color:var(--secondary);">$1</strong>')
+                        .replace(/\n/g, '<br>');
                 }
 
                 try {
