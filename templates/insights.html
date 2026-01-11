@@ -13,20 +13,31 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         .insight-content {
-            line-height: 1.8;
-            font-size: 1.1rem;
+            line-height: 1.7;
+            font-size: 1.15rem;
             color: var(--text-white);
+            font-family: 'Inter', sans-serif;
+            white-space: normal;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
         }
 
         .insight-content h2,
         .insight-content h3 {
             color: var(--secondary);
-            margin-top: 2rem;
+            margin-top: 2.5rem;
             font-family: 'Outfit', sans-serif;
+            border-bottom: 1px solid rgba(255, 145, 0, 0.2);
+            padding-bottom: 0.5rem;
         }
 
         .insight-content p {
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .insight-content li {
+            margin-bottom: 0.8rem;
         }
 
         .insight-content strong {
@@ -484,9 +495,17 @@
             const result = await response.json();
 
             if (result.success) {
-                let htmlContent = marked.parse(result.insight);
+                // Defensive Parsing
+                let rawInsight = result.insight || "";
+                if (typeof rawInsight !== 'string') rawInsight = JSON.stringify(rawInsight);
 
-                // Interactive Glossary (v5.1 Reactive)
+                let htmlContent = "";
+                try {
+                    htmlContent = typeof marked.parse === 'function' ? marked.parse(rawInsight) : marked(rawInsight);
+                } catch (pe) {
+                    console.error("Markdown parse failed:", pe);
+                    htmlContent = rawInsight.replace(/\n/g, '<br>');
+                }
                 const glossary = {
                     'epoch': { def: 'A fixed point in time used as a reference point.', target: null },
                     'jovian': { def: 'Relating to Jupiter. The 60-year Samvatsara cycle follows Jupiter\'s path.', target: null },
@@ -529,6 +548,12 @@
                         url: '/visuals/constellations',
                         caption: 'Sky Focus: Lunar Tracking',
                         significance: 'Interactive 3D Zodiac belt with symbols and names. Moon is shown in the foreground with slow orbital motion and simulated phases. Use mouse to rotate and zoom the view.'
+                    },
+                    'SAMVATSARA_RESONANCE': {
+                        id: 'visual-samvatsara',
+                        url: '/visuals/samvatsara',
+                        caption: 'Jovian-Saturn Samvatsara Resonance',
+                        significance: 'This visual shows why the Samvatsara cycle is 60 years. It tracks the resonance between Jupiter (~11.86y) and Saturn (~29.46y). Broadly, every 5 Jupiter orbits align with 2 Saturn orbits, creating a rhythmic "Great Conjunction" that resets the traditional calendar cycle.'
                     }
                 };
 

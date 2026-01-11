@@ -59,7 +59,7 @@ class GeminiEngine(BaseAIEngine):
 
         Phase II: The Library of Atoms (Terminology)
         Provide detailed physics/geometric deconstructions for:
-        - **Samvatsara**: Explain as the 60-year Jupiter-Saturn resonance/alignment cycle.
+        - **Samvatsara**: Explain as the 60-year Jupiter-Saturn resonance/alignment cycle. Use [[RENDER:SAMVATSARA_RESONANCE]].
         - **Masa**: Explain how it's named based on the Sun's transit sign during the New Moon.
         - **Nakshatra**: 13°20' sectors used as a "Lunar Speedometer" to track the Moon's 27.3-day orbit. Use [[RENDER:CONSTELLATION_MAP]].
         - **Tithi**: Defined strictly as Every 12° of angular separation between Sun and Moon. Use [[RENDER:MOON_PHASE_3D]].

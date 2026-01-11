@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Samvatsara Resonance: Jupiter-Saturn Cycle</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 14px;
+            max-width: 320px;
+            z-index: 100;
+            border: 1px solid rgba(255, 145, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        #info h3 {
+            margin: 0 0 10px 0;
+            color: #ff9100;
+        }
+
+        .legend-item {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .color-box {
+            width: 30px;
+            height: 15px;
+            margin-right: 10px;
+            border-radius: 4px;
+        }
+
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: white;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .resonance-stat {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #4fc3f7;
+            color: #4fc3f7;
+        }
+
+        .resonance-stat .big {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="info">
+        <h3>Samvatsara: Planetary Resonance</h3>
+        <p style="font-size: 0.8rem; color: #b0b0b0; margin-bottom: 12px;">Archaeoastronomy Module v6.0</p>
+
+        <div class="legend-item">
+            <div class="color-box" style="background: #ffcc80;"></div>
+            <span><strong>Jupiter</strong> (~11.86y orbit)</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background: #ce93d8;"></div>
+            <span><strong>Saturn</strong> (~29.46y orbit)</span>
+        </div>
+
+        <div
+            style="margin-top: 15px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; line-height: 1.4;">
+            <strong style="color: #ff9100;">The Science of 60 Years:</strong><br>
+            The Samvatsara cycle isn't arbitrary—it's the <strong>Great Conjunction</strong> resonance. Every 60 years,
+            Jupiter completes exactly 5 orbits caught in a rhythmic dance with Saturn (2 orbits). This resets their
+            relative positions against the stars!
+        </div>
+    </div>
+
+    <div class="resonance-stat">
+        <div class="big">5 : 2</div>
+        <div>Orbital Resonance</div>
+    </div>
+
+    <div id="controls">
+        Drag to Orbit • Scroll to Zoom<br>
+        <small>Watch them align at the markers!</small>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 5000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        camera.position.set(0, 600, 800);
+        camera.lookAt(0, 0, 0);
+
+        // Lighting
+        scene.add(new THREE.AmbientLight(0x333333));
+        const sunLight = new THREE.PointLight(0xffffff, 2, 2000);
+        scene.add(sunLight);
+
+        // Stars
+        const starGeo = new THREE.BufferGeometry();
+        const starPos = [];
+        for (let i = 0; i < 3000; i++) {
+            starPos.push((Math.random() - 0.5) * 4000, (Math.random() - 0.5) * 4000, (Math.random() - 0.5) * 4000);
+        }
+        starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
+        scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 1.5 })));
+
+        // Sun
+        const sun = new THREE.Mesh(
+            new THREE.SphereGeometry(40, 32, 32),
+            new THREE.MeshBasicMaterial({ color: 0xffd700 })
+        );
+        scene.add(sun);
+
+        // Orbits
+        function createOrbit(radius, color) {
+            const curve = new THREE.EllipseCurve(0, 0, radius, radius);
+            const points = curve.getPoints(128);
+            const geo = new THREE.BufferGeometry().setFromPoints(points.map(p => new THREE.Vector3(p.x, 0, p.y)));
+            const mat = new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.3 });
+            return new THREE.Line(geo, mat);
+        }
+
+        const jupOrbit = createOrbit(250, 0xffcc80);
+        const satOrbit = createOrbit(450, 0xce93d8);
+        scene.add(jupOrbit);
+        scene.add(satOrbit);
+
+        // Planets
+        const jupiter = new THREE.Mesh(
+            new THREE.SphereGeometry(18, 32, 32),
+            new THREE.MeshPhongMaterial({ color: 0xffcc80, shininess: 50 })
+        );
+        const saturn = new THREE.Mesh(
+            new THREE.SphereGeometry(15, 32, 32),
+            new THREE.MeshPhongMaterial({ color: 0xce93d8, shininess: 50 })
+        );
+
+        // Saturn Rings
+        const ringGeo = new THREE.RingGeometry(20, 35, 64);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0xce93d8, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
+        const rings = new THREE.Mesh(ringGeo, ringMat);
+        rings.rotation.x = Math.PI / 2.5;
+        saturn.add(rings);
+
+        scene.add(jupiter);
+        scene.add(saturn);
+
+        // Conjunction Markers
+        const markerGeo = new THREE.BoxGeometry(10, 2, 40);
+        const markerMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.2 });
+        for (let i = 0; i < 3; i++) {
+            const marker = new THREE.Mesh(markerGeo, markerMat);
+            const angle = (i * 120) * Math.PI / 180;
+            marker.position.set(Math.cos(angle) * 350, 0, Math.sin(angle) * 350);
+            marker.lookAt(0, 0, 0);
+            scene.add(marker);
+        }
+
+        // Animation State
+        let time = 0;
+        const jupSpeed = 0.01; // Scale: 12 years
+        const satSpeed = jupSpeed * (11.86 / 29.46);
+
+        // Interaction
+        let isDragging = false;
+        let prevMouse = { x: 0, y: 0 };
+
+        window.onmousedown = (e) => { isDragging = true; prevMouse = { x: e.clientX, y: e.clientY }; };
+        window.onmouseup = () => isDragging = false;
+        window.onmousemove = (e) => {
+            if (!isDragging) return;
+            const dx = (e.clientX - prevMouse.x) * 0.005;
+            const dy = (e.clientY - prevMouse.y) * 0.005;
+            camera.position.applyQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -dx));
+            camera.lookAt(0, 0, 0);
+            prevMouse = { x: e.clientX, y: e.clientY };
+        };
+        window.onwheel = (e) => {
+            camera.position.multiplyScalar(1 + e.deltaY * 0.001);
+        };
+
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.5;
+
+            // Update Positions
+            const jupAngle = time * jupSpeed;
+            const satAngle = time * satSpeed;
+
+            jupiter.position.set(Math.cos(jupAngle) * 250, 0, Math.sin(jupAngle) * 250);
+            saturn.position.set(Math.cos(satAngle) * 450, 0, Math.sin(satAngle) * 450);
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        window.onresize = () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        };
+    </script>
+</body>
+
+</html>

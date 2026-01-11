@@ -344,6 +344,13 @@ def precession_visual():
     """
     return render_template('precession_visual.html')
 
+@app.route('/visuals/samvatsara')
+def samvatsara_visual():
+    """
+    Serve the 3D Jupiter-Saturn Samvatsara resonance visual.
+    """
+    return render_template('samvatsara_visual.html')
+
 @app.route('/api/ai-explain', methods=['POST'])
 def ai_explain():
     """
