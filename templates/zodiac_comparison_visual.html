@@ -86,7 +86,8 @@
     <script>
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
-        camera.position.set(0, 500, 600);
+        // Improved Top-Down perspective (higher Y, less extreme Z)
+        camera.position.set(0, 700, 450);
         camera.lookAt(0, 0, 0);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -94,12 +95,18 @@
         document.body.appendChild(renderer.domElement);
 
         scene.add(new THREE.AmbientLight(0x404040, 2));
-        const sun = new THREE.PointLight(0xffffff, 1.5);
+        const sun = new THREE.PointLight(0xffffff, 2);
+        sun.position.set(100, 200, 100);
         scene.add(sun);
 
-        // Core Earth
-        const earthGeo = new THREE.SphereGeometry(40, 32, 32);
-        const earthMat = new THREE.MeshPhongMaterial({ color: 0x2233ff, emissive: 0x112244 });
+        // Core Earth - Upgraded with atmosheric glow feel
+        const earthGeo = new THREE.SphereGeometry(45, 32, 32);
+        const earthMat = new THREE.MeshPhongMaterial({
+            color: 0x2244ff,
+            emissive: 0x112244,
+            shininess: 100,
+            specular: 0x4488ff
+        });
         const earth = new THREE.Mesh(earthGeo, earthMat);
         scene.add(earth);
 
