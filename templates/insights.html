@@ -76,12 +76,10 @@
             border-radius: 16px;
             overflow: hidden;
             position: relative;
-            min-height: 480px;
         }
 
         .visual-iframe {
             width: 100%;
-            height: 480px;
             border: none;
             display: block;
         }
@@ -549,30 +547,35 @@
                     'ZODIAC_COMPARISON': {
                         id: 'visual-zodiac',
                         url: '/visuals/zodiac-comparison',
+                        preferredHeight: '800px',
                         caption: 'Interactive Zodiac Aligner',
                         significance: 'This simulation shows the "Great Drift" between Modern and Hindu astronomy. When the drift is 0°, Aries aligns perfectly with Mesha (as it was 1,500 years ago). As you move the slider, you see the 24° Ayanamsa gap created by Earth\'s wobble, showing why your Western sign usually differs from your Hindu Rashi.'
                     },
                     'MOON_PHASE_3D': {
                         id: 'visual-moon',
                         url: '/visuals/moon-phase',
+                        preferredHeight: '520px',
                         caption: 'Tithi Phase Protractor',
                         significance: 'A Tithi (Lunar Day) is not a 24-hour clock. It is a geometric measurement of the angle between the Sun and Moon. Every 12° of separation creates one Tithi. This protractor shows how the phases we see from Earth are actually results of this specific celestial angle.'
                     },
                     'PRECESSION_WOBBLE': {
                         id: 'visual-precession',
                         url: '/visuals/precession',
+                        preferredHeight: '520px',
                         caption: 'The Earth\'s Great Wobble',
                         significance: 'Imagine Earth as a spinning top that is starting to tilt. This "Precession" takes 25,800 years for one full circle. This wobble is the reason the Zodiac Aligner (above) needs a shift—the "beginning" of the stars has moved relative to our seasons!'
                     },
                     'CONSTELLATION_MAP': {
                         id: 'visual-constellations',
                         url: '/visuals/constellations',
+                        preferredHeight: '520px',
                         caption: 'Sky Focus: Lunar Tracking',
                         significance: 'Interactive 3D Zodiac belt with symbols and names. Moon is shown in the foreground with slow orbital motion and simulated phases. Use mouse to rotate and zoom the view.'
                     },
                     'SAMVATSARA_RESONANCE': {
                         id: 'visual-samvatsara',
                         url: '/visuals/samvatsara',
+                        preferredHeight: '520px',
                         caption: 'Jovian-Saturn Samvatsara Resonance',
                         significance: 'This visual shows why the Samvatsara cycle is 60 years. It tracks the resonance between Jupiter (~11.86y) and Saturn (~29.46y). Broadly, every 5 Jupiter orbits align with 2 Saturn orbits, creating a rhythmic "Great Conjunction" that resets the traditional calendar cycle.'
                     }
@@ -586,8 +589,8 @@
                                 <div id="${tag.id}" class="visual-block-wrapper" style="margin: 2.5rem 0;">
                                     <div class="visual-block card glass" style="margin-bottom: 0;">
                                         <div class="visual-loading">Launching 3D Module...</div>
-                                        <div class="visual-wrapper">
-                                            <iframe class="visual-iframe" src="${tag.url}?samvatsara=${encodeURIComponent(insightData.samvatsara)}&tithi=${encodeURIComponent(insightData.tithi)}&rashi=${encodeURIComponent(insightData.rashi?.name || 'Leo')}" onload="this.parentElement.previousElementSibling.style.display='none'"></iframe>
+                                        <div class="visual-wrapper" style="height: ${tag.preferredHeight};">
+                                            <iframe class="visual-iframe" style="height: 100%;" src="${tag.url}?samvatsara=${encodeURIComponent(insightData.samvatsara)}&tithi=${encodeURIComponent(insightData.tithi)}&rashi=${encodeURIComponent(insightData.rashi?.name || 'Leo')}" onload="this.parentElement.previousElementSibling.style.display='none'"></iframe>
                                         </div>
                                         <div class="visual-caption">🖥️ ${tag.caption}</div>
                                     </div>

@@ -16,15 +16,16 @@
 
         #ui {
             position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(13, 17, 23, 0.75);
-            padding: 12px;
-            border-radius: 8px;
+            top: 20px;
+            right: 20px;
+            background: rgba(13, 17, 23, 0.8);
+            padding: 8px 12px;
+            border-radius: 6px;
             border: 1px solid rgba(0, 210, 255, 0.2);
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
             pointer-events: none;
             z-index: 100;
+            max-width: 180px;
         }
 
         .legend {
@@ -85,9 +86,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
-        // Improved Top-Down perspective (higher Y, less extreme Z)
-        camera.position.set(0, 700, 450);
+        const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 2000);
+
+        // Final Defensive Scaling (Guaranteed fit in 800px height)
+        const isMobile = window.innerWidth < 650;
+        const baseRadius = isMobile ? (window.innerWidth / 2) - 50 : 280;
+
+        // High Top-Down perspective (Elevated for full vertical coverage)
+        camera.position.set(0, 850, 20);
         camera.lookAt(0, 0, 0);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -95,8 +101,8 @@
         document.body.appendChild(renderer.domElement);
 
         scene.add(new THREE.AmbientLight(0x404040, 2));
-        const sun = new THREE.PointLight(0xffffff, 2);
-        sun.position.set(100, 200, 100);
+        const sun = new THREE.PointLight(0xffffff, 2.5);
+        sun.position.set(150, 400, 150);
         scene.add(sun);
 
         // Core Earth - Upgraded with atmosheric glow feel
