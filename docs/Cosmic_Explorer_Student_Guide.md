@@ -35,6 +35,12 @@ Rahu and Ketu are not planets; they are the **Lunar Nodes**.
 - These are the specific mathematical points where the Moon's tilted orbit crosses the Earth's path. 
 - In the 3D **Lunar Nodes Simulator**, you can see why Eclipses only happen when the Moon hits these specific "high-traffic" zones.
 
+## 7. Live Scientific Support: Chat with the Maestro
+Need help navigating the simulation? Or want to know more about a specific star?
+- **Floating Chat Widget**: Look for the ✨ icon in the bottom-right corner.
+- **Expert Guidance**: The **Maestro** is an AI science educator integrated directly into the app. You can ask him functional questions like *"Where do I find the Moons phases?"* or deep scientific questions like *"Why is Rahu called a ghost planet?"*
+- **App Support**: If you get stuck or a simulation isn't loading, the Maestro can guide you through the interface.
+
 ---
 
 ## 🎓 The Maestro's Challenge
