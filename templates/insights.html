@@ -339,33 +339,75 @@
         }
 
         .drift-viz {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
             margin-top: 2rem;
             position: relative;
-            padding: 2rem 0;
+            padding: 1rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
         }
 
-        .drift-viz::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--glass-border);
-            z-index: 1;
-        }
-
-        .drift-node {
-            width: 12px;
-            height: 12px;
-            background: var(--secondary);
-            border-radius: 50%;
-            position: relative;
-            z-index: 2;
+        .timeline-slider {
+            width: 100%;
+            -webkit-appearance: none;
+            background: transparent;
             cursor: pointer;
+            z-index: 10;
+            position: relative;
+        }
+
+        .timeline-slider::-webkit-slider-runnable-track {
+            height: 4px;
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+            border-radius: 2px;
+        }
+
+        .timeline-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            background: var(--text-white);
+            border: 3px solid var(--secondary);
+            border-radius: 50%;
+            margin-top: -10px;
+            box-shadow: 0 0 15px var(--secondary);
+            transition: transform 0.2s;
+        }
+
+        .timeline-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .sync-meter {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1rem;
+            position: relative;
+        }
+
+        .sync-indicator {
+            width: 4px;
+            height: 30px;
+            background: #ffcc00;
+            position: absolute;
+            transition: left 0.3s ease-out;
+            box-shadow: 0 0 10px #ffcc00;
+        }
+
+        .sync-scale {
+            width: 100%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+
+        .sync-label {
+            position: absolute;
+            top: 15px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
         }
 
         .drift-node::after {
@@ -410,13 +452,39 @@
                     <p id="quiz-feedback" style="margin-top:1rem; font-weight:600;"></p>
                 </div>
 
-                <!-- Birthday Time-Machine Container -->
+                <!-- Birthday Time-Machine Container (v6.0.1 Timeline Explorer) -->
                 <div id="time-machine-section" class="time-machine-container hidden">
-                    <h3 style="margin-top:0;">⏳ Birthday Time-Machine</h3>
-                    <p>Observe how your birthday synchronizes with the stars over 100 years. The gap between solar and
-                        lunar calendars creates this "Birthday Drift".</p>
-                    <div class="drift-viz" id="drift-viz"></div>
-                    <p id="drift-explanation" style="margin-top:1.5rem; font-size:0.9rem; color:var(--text-muted);"></p>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <h3 style="margin-top:0;">⏳ Birthday Time-Machine</h3>
+                            <p style="font-size: 0.9rem;">Scrub through the century to see how your birthdays drift and
+                                synchronize.</p>
+                        </div>
+                        <div id="year-display-huge" style="font-size: 2rem; font-weight: 800; color: var(--secondary);">
+                            2025</div>
+                    </div>
+
+                    <div class="drift-viz">
+                        <input type="range" id="timeline-scrubber" class="timeline-slider" min="1950" max="2100"
+                            value="2025">
+                        <div
+                            style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.7rem; color: var(--text-muted);">
+                            <span>1950</span>
+                            <span>2100</span>
+                        </div>
+                    </div>
+
+                    <div class="sync-meter">
+                        <div class="sync-scale"></div>
+                        <div id="sync-pointer" class="sync-indicator" style="left: 50%;"></div>
+                        <span class="sync-label" style="left: 50%; transform: translateX(-50%);">IDEAL SYNC</span>
+                        <span class="sync-label" style="left: 10%;">EARLY</span>
+                        <span class="sync-label" style="right: 10%;">LATE</span>
+                    </div>
+
+                    <p id="drift-explanation"
+                        style="margin-top:1.5rem; font-size:0.95rem; line-height: 1.6; color:var(--text-white); background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--secondary);">
+                    </p>
                 </div>
             </section>
 
@@ -768,30 +836,50 @@
 
         function initBirthdayTimeMachine() {
             const tmSection = document.getElementById('time-machine-section');
-            const viz = document.getElementById('drift-viz');
+            const scrubber = document.getElementById('timeline-scrubber');
+            const yearDisplay = document.getElementById('year-display-huge');
+            const pointer = document.getElementById('sync-pointer');
             const expl = document.getElementById('drift-explanation');
 
-            viz.innerHTML = '';
             tmSection.classList.remove('hidden');
 
-            const years = [2000, 2025, 2050, 2075, 2100];
-            years.forEach((year, idx) => {
-                const node = document.createElement('div');
-                node.className = 'drift-node';
-                node.setAttribute('data-year', year);
-                if (year === 2025) node.classList.add('active');
+            function updateTimeMachine(year) {
+                yearDisplay.textContent = year;
 
-                node.onmouseover = () => {
-                    document.querySelectorAll('.drift-node').forEach(n => n.classList.remove('active'));
-                    node.classList.add('active');
-                    const driftDays = Math.floor(Math.random() * 20) - 10;
-                    expl.innerHTML = `<strong>In ${year}:</strong> Your Panchanga birthday falls roughly <strong>${Math.abs(driftDays)} days ${driftDays > 0 ? 'later' : 'earlier'}</strong> than your Gregorian birthday. This is due to the cosmic synchronization of <i>Adhika Masa</i>!`;
-                };
+                // Deterministic Drift Physics (v6.0.1)
+                // Base: Lunar year is 11 days shorter than Solar.
+                // Reset: Every 3 years (approx) an Adhika Masa (30 days) pulls it back.
+                const anchorYear = 2025;
+                const yearsPassed = year - anchorYear;
 
-                viz.appendChild(node);
-            });
+                // Cumulative raw drift in days
+                let rawDrift = yearsPassed * 11;
 
-            expl.innerHTML = "Hover over the cosmic nodes to see how time shifts across the century.";
+                // Number of Adhika Masas added (approx 1 every 2.7 years)
+                const leapMonths = Math.floor((yearsPassed + 1.2) / 2.7);
+                const effectiveDrift = (rawDrift - (leapMonths * 30)) % 30;
+
+                // Map effectiveDrift (-15 to +15 ideally) to the Sync Meter (10% to 90%)
+                const percentage = 50 + (effectiveDrift * 2.5);
+                pointer.style.left = `${Math.max(5, Math.min(95, percentage))}%`;
+
+                const driftAbs = Math.abs(Math.round(effectiveDrift));
+                const direction = effectiveDrift > 0 ? "later" : "earlier";
+
+                let physicsNote = "";
+                if (driftAbs < 3) {
+                    physicsNote = " ✨ <strong>COSMIC SYNC!</strong> In this year, the solar and lunar cycles align perfectly.";
+                } else if (leapMonths !== Math.floor((year - 1 - anchorYear + 1.2) / 2.7)) {
+                    physicsNote = " 🚀 <strong>ADHIKA MASA RESET!</strong> A leap month was added recently to stop your birthday from drifting out of its season.";
+                }
+
+                expl.innerHTML = `<strong>Year ${year}:</strong> Your Panchanga birthday falls approximately <strong>${driftAbs} days ${direction}</strong> than your Gregorian birthday. Since the Moon travels faster than our seasonal calendar, it creates this rhythmic drift.${physicsNote}`;
+            }
+
+            scrubber.oninput = (e) => updateTimeMachine(parseInt(e.target.value));
+
+            // Start at 2025
+            updateTimeMachine(2025);
         }
 
         // Add to main initialization
