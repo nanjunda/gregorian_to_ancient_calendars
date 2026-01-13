@@ -60,7 +60,12 @@ class GeminiEngine(BaseAIEngine):
         Phase II: The Library of Atoms (Terminology)
         Provide detailed physics/geometric deconstructions for:
         - **Samvatsara**: Explain as the 60-year Jupiter-Saturn resonance/alignment cycle. Use [[RENDER:SAMVATSARA_RESONANCE]].
-        - **Masa**: Explain how it's named based on the Sun's transit sign during the New Moon.
+        - **Masa: The Cosmic Month**: Explain the two ways to measure a month:
+          1. **Saura Mana (The Solar Runner)**: The steady 30-day month defined by the Sun entering a new sign (e.g., Mesha).
+          2. **Chandra Mana (The Lunar Sprinter)**: The fast 29.5-day month defined by the Moon's phases.
+          *   **The Naming Secret**: Explain that Lunar months are named after the star the Moon is near when it is full (e.g., Full Moon near **Chitta/Spica** = **Chaitra**, Full Moon near **Krittika/Pleiades** = **Karthika**).
+          *   **The Drift**: Explain that the Moon is faster than the Sun by ~11 days a year.
+          *   **The Pit Stop (Adhik Masa)**: Explain that every 3 years, the Moon takes a "Pit Stop" (Extra Month) to let the Sun catch up.
         - **Nakshatra**: 13°20' sectors used as a "Lunar Speedometer" to track the Moon's 27.3-day orbit. Use [[RENDER:CONSTELLATION_MAP]].
         - **Tithi**: Defined strictly as Every 12° of angular separation between Sun and Moon. Use [[RENDER:MOON_PHASE_3D]].
         - **Yoga**: Combined longitudinal momentum (Sum of longitudes).

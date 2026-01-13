@@ -35,7 +35,29 @@ Rahu and Ketu are not planets; they are the **Lunar Nodes**.
 - These are the specific mathematical points where the Moon's tilted orbit crosses the Earth's path. 
 - In the 3D **Lunar Nodes Simulator**, you can see why Eclipses only happen when the Moon hits these specific "high-traffic" zones.
 
-## 7. Live Scientific Support: Chat with the Maestro
+## 8. Two Ways to Measure a Month
+In the Hindu system, a "Month" (Masa) isn't just one thing. It's a relationship between the Sun and the Moon.
+
+### The Cosmic Race Analogy
+Imagine the Sun and Moon are runners on a track (the Zodiac).
+1.  **The Solar Runner (Saura Mana)**: The Sun is steady. It spends about **30 days** in each sign. When it crosses the finish line into a new sign (e.g., Aries/Mesha), a new Solar Month begins.
+    *   *Used for:* Harvest festivals like Pongal and Baisakhi.
+2.  **The Lunar Sprinter (Chandra Mana)**: The Moon is fast! It laps the zodiac in just **27 days** but takes **29.5 days** to go from New Moon to New Moon.
+    *   *Used for:* Most festivals like Diwali and Holi.
+
+### The Naming Secret
+How do they get their names?
+*   **Solar Names**: Named after the Sign the Sun enters (e.g., **Mesha** Masa).
+*   **Lunar Names**: Named after the Star (Nakshatra) the Moon is near when it is **FULL**.
+    *   *Example 1:* If the Full Moon is near the star **Chitta** (Spica), the month is **Chaitra**.
+    *   *Example 2:* If the Full Moon is near **Krittika** (Pleiades), the month is **Karthika**.
+
+### The Pit Stop (Adhik Masa)
+Because the Lunar Sprinter is faster, it finishes its year in ~354 days (11 days early!). To keep the runners together, the Lunar calendar takes a **"Pit Stop"** (Adhik Masa / Extra Month) every ~3 years to let the Sun catch up.
+
+---
+
+## 9. Live Scientific Support: Chat with the Maestro
 Need help navigating the simulation? Or want to know more about a specific star?
 - **Floating Chat Widget**: Look for the ✨ icon in the bottom-right corner.
 - **Expert Guidance**: The **Maestro** is an AI science educator integrated directly into the app. You can ask him functional questions like *"Where do I find the Moons phases?"* or deep scientific questions like *"Why is Rahu called a ghost planet?"*

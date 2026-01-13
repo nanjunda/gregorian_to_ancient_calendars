@@ -600,7 +600,11 @@
                     'sidereal': { def: 'Measured relative to fixed stars (Hindu system).', target: 'ZODIAC_COMPARISON' },
                     'ayanamsha': { def: 'The angular drift (24°) between seasons and stars.', target: 'ZODIAC_COMPARISON' },
                     'tithi': { def: 'A lunar day, defined by every 12° of Sun-Moon separation.', target: 'MOON_PHASE_3D' },
-                    'nakshatra': { def: 'Star clusters the moon visits daily.', target: 'CONSTELLATION_MAP' }
+                    'nakshatra': { def: 'Star clusters the moon visits daily.', target: 'CONSTELLATION_MAP' },
+                    'masa': { def: 'A month in the Hindu calendar. It can be Solar (Saura) or Lunar (Chandra).', target: null },
+                    'saura mana': { def: 'Solar Month system. Defined by the Sun\'s entry into a new Zodiac sign.', target: 'ZODIAC_COMPARISON' },
+                    'chandra mana': { def: 'Luni-Solar Month system. Defined by the Moon\'s phase cycle.', target: 'MOON_PHASE_3D' },
+                    'adhik masa': { def: 'The \'Extra Month\' (Pit Stop) added every ~3 years to let the Sun catch up.', target: 'CALENDAR_DRIFT' }
                 };
 
                 for (const [term, data] of Object.entries(glossary)) {
@@ -698,7 +702,8 @@
                 'MOON_PHASE_3D': 'visual-moon',
                 'PRECESSION_WOBBLE': 'visual-precession',
                 'CONSTELLATION_MAP': 'visual-constellations',
-                'SAMVATSARA_RESONANCE': 'visual-samvatsara'
+                'SAMVATSARA_RESONANCE': 'visual-samvatsara',
+                'CALENDAR_DRIFT': 'time-machine-section'
             };
 
             const elementId = renderTags[tagId];
