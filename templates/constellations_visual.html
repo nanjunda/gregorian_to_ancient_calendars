@@ -316,14 +316,22 @@
         dirLight.position.set(100, 200, 100);
         scene.add(dirLight);
 
-        // Animate
-        let moonAngle = 0;
+        // Loop
         function animate() {
             requestAnimationFrame(animate);
             mainGroup.rotation.y += 0.0002;
+
+            // True Geocentric Orbit logic
             moonAngle += 0.002;
-            moon.position.x = 100 * Math.cos(moonAngle);
-            moon.position.z = 150 + 50 * Math.sin(moonAngle);
+            const orbitRadius = 200; // Just inside the main Zodiac band (250)
+
+            // Circular path along X/Z plane
+            moon.position.x = orbitRadius * Math.cos(moonAngle);
+            moon.position.z = orbitRadius * Math.sin(moonAngle);
+
+            // 5-degree Nodal Tilt (Oscillation in Y)
+            moon.position.y = 20 * Math.sin(moonAngle);
+
             controls.update();
             renderer.render(scene, camera);
         }
