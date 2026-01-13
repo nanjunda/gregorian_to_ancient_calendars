@@ -84,7 +84,9 @@ The **"Saka Varsha"** (Saka Era) shown on the dashboard is the **Official Civil 
 > [!NOTE]
 > **⚔️ The Legend of 78 AD**
 > 
-> In **78 AD**, the legendary Indian Emperor **Shalivahana** achieved a decisive military victory over the invading **Saka kings** (Scythians from Central Asia). To commemorate this triumph of indigenous rule and mark a new chapter in Indian sovereignty, he established a new Era—the **Shalivahana Saka**.
+> In **78 AD**, the legendary Indian Emperor **Shalivahana** achieved a decisive military victory over the invading **Saka kings** (Scythians). The Sakas were nomadic warriors from the **Central Asian steppes**—regions that today include parts of **Kazakhstan, Uzbekistan, and Turkmenistan**. They had migrated southward through the mountain passes and established kingdoms in what is now Afghanistan and northwestern India.
+> 
+> Shalivahana's triumph marked the end of Saka dominance in the Deccan region and the restoration of indigenous rule. To commemorate this historic victory and mark a new chapter in Indian sovereignty, he established a new Era—the **Shalivahana Saka**.
 > 
 > Centuries later, when the Government of India adopted an official civil calendar in **1957**, they chose this specific timeline to honor India's rich history and cultural continuity. Today, the Saka Era appears on all official documents, from currency notes to government gazettes.
 
