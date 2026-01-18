@@ -3,11 +3,11 @@
 # Exit on any error
 set -e
 
-echo "🚀 Starting Hindu Panchanga v6.0 Deployment (Scientific Masterclass)..."
+echo "🚀 Starting Gregorian to Ancient Calendars v1.0 Deployment..."
 echo "ℹ️  Mode: Nginx Reverse Proxy (Port 5080) -> Gunicorn"
-echo "⚠️  RELOCATING App to /opt/panchanga for SELinux stability"
+echo "⚠️  RELOCATING App to /opt/ancient_calendars for SELinux stability"
 
-APP_NAME="panchanga"
+APP_NAME="ancient_calendars"
 SOURCE_DIR=$(pwd)
 DEPLOY_DIR="/opt/$APP_NAME"
 CURRENT_USER=${SUDO_USER:-$(whoami)}
@@ -58,9 +58,9 @@ fi
 # 1.5 Generate Self-Signed SSL Certificate (required for Nginx)
 echo "🔐 Generating Self-Signed SSL Certificate..."
 sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout /etc/ssl/private/panchanga-selfsigned.key \
-    -out /etc/ssl/certs/panchanga-selfsigned.crt \
-    -subj "/C=IN/ST=Karnataka/L=Bangalore/O=AstroTutor/OU=Education/CN=panchanga.local"
+    -keyout /etc/ssl/private/ancient_calendars-selfsigned.key \
+    -out /etc/ssl/certs/ancient_calendars-selfsigned.crt \
+    -subj "/C=IN/ST=Karnataka/L=Bangalore/O=AstroTutor/OU=Education/CN=ancient_calendars.local"
 
 # 2. Relocate Application to /opt
 echo "🚚 Moving application to $DEPLOY_DIR..."
@@ -131,7 +131,7 @@ sed -e "s|{{USER}}|$CURRENT_USER|g" \
     -e "s|{{GROUP}}|$HTTP_GROUP|g" \
     -e "s|{{APP_PATH}}|$DEPLOY_DIR|g" \
     -e "s|{{GOOGLE_API_KEY}}|$GOOGLE_API_KEY|g" \
-    $DEPLOY_DIR/panchanga.service.template | sudo tee /etc/systemd/system/$APP_NAME.service > /dev/null
+    $DEPLOY_DIR/ancient_calendars.service.template | sudo tee /etc/systemd/system/$APP_NAME.service > /dev/null
 
 sudo systemctl daemon-reload
 sudo systemctl enable $APP_NAME
@@ -142,7 +142,7 @@ echo "🌐 Configuring Nginx..."
 PUBLIC_IP=$(curl -s ifconfig.me || echo "localhost")
 sed -e "s|{{DOMAIN_OR_IP}}|$PUBLIC_IP|g" \
     -e "s|{{APP_PATH}}|$DEPLOY_DIR|g" \
-    $DEPLOY_DIR/panchanga.nginx.template | sudo tee $NGINX_CONF_DIR/$APP_NAME.conf > /dev/null
+    $DEPLOY_DIR/ancient_calendars.nginx.template | sudo tee $NGINX_CONF_DIR/$APP_NAME.conf > /dev/null
 
 if [ -n "$NGINX_LINK_DIR" ]; then
     sudo ln -sf $NGINX_CONF_DIR/$APP_NAME.conf $NGINX_LINK_DIR/
@@ -158,7 +158,7 @@ if systemctl is-active --quiet $APP_NAME; then
     if curl -s -I http://127.0.0.1:8000 | grep -q "200 OK\|302 Found\|301 Moved"; then
         echo "   ✅ Backend is RESPONDING."
     else
-        echo "   ⚠️  Backend is NOT responding. Check logs: journalctl -u panchanga"
+        echo "   ⚠️  Backend is NOT responding. Check logs: journalctl -u $APP_NAME"
     fi
 else
     echo "   ❌ ERROR: Gunicorn failed to start."

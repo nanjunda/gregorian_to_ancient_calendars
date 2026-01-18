@@ -1,4 +1,4 @@
-# Hindu Panchanga Converter v5.5 (Masterclass Ed.)
+# Gregorian to Ancient Calendars v1.0 (Constellation Hub)
 
 A high-precision tool to convert **any Gregorian event** into its Traditional Panchanga equivalent, featuring high-fidelity cosmic visualizations, interactive educational modules, and an AI-powered "Astro-Tutor."
 
@@ -31,15 +31,15 @@ Once the script finishes, it will print your public IP. You can access the appli
 ### Cloud Deployment (Native Linux VM)
 Simply run the bootstrap script on your VM (Oracle Linux 9 / RHEL recommended):
 ```bash
-git clone https://github.com/nanjunda/gregorian_to_hindu_calendar.git
-cd gregorian_to_hindu_calendar
+git clone https://github.com/nanjunda/gregorian_to_ancient_calendars.git
+cd gregorian_to_ancient_calendars
 sudo bash ./deploy.sh
 ```
 
 ### MAINTENANCE: Pulling Updates
 To quickly update your live application to the latest version:
 ```bash
-cd ~/gregorian_to_hindu_calendar
+cd ~/gregorian_to_ancient_calendars
 chmod +x update_app.sh
 ./update_app.sh
 ```
