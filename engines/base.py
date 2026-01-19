@@ -1,0 +1,30 @@
+from abc import ABC, abstractmethod
+
+class BaseCalendar(ABC):
+    """
+    Standard interface for all Ancient Calendar Engines.
+    This ensures the Hub can communicate with any calendar (Panchanga, Mayan, etc.) 
+    using the same protocol.
+    """
+
+    @abstractmethod
+    def calculate_data(self, date_obj, location_data):
+        """
+        Performs the core astronomical/calendar calculations.
+        Returns a dictionary containing the primary results.
+        """
+        pass
+
+    @abstractmethod
+    def get_visual_configs(self, calculated_data):
+        """
+        Returns metadata for the 3D visual modules based on the calculation.
+        """
+        pass
+
+    @abstractmethod
+    def get_ai_context(self, calculated_data):
+        """
+        Returns the data structure formatted for the AI Maestro's prompt.
+        """
+        pass
