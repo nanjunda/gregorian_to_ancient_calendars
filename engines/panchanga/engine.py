@@ -11,6 +11,11 @@ from utils.astronomy import get_sidereal_longitude, get_sunrise_sunset, sun, moo
 from panchanga.recurrence import find_recurrences
 from utils.zodiac import get_zodiac_name, ZODIAC_SIGNS
 from utils.astronomy import get_rashi, get_lagna
+from utils.ical_gen import create_ical_content
+from utils.skyshot import generate_skymap, get_cache_key as get_sky_cache, get_cached_image as get_sky_cached
+from utils.solar_system import generate_solar_system, get_cache_key as get_solar_cache, get_cached_image as get_solar_cached
+import base64
+import os
 
 class PanchangaEngine(BaseCalendar):
     def calculate_data(self, date_str, time_str, location_name, lang='EN'):
@@ -108,3 +113,58 @@ class PanchangaEngine(BaseCalendar):
         Returns data formatted for AI Maestro.
         """
         return data  # Panchanga uses the full data object for AI
+
+    def generate_ical(self, date_str, time_str, location_name, title, lang):
+        """
+        Generates iCal content for 20 years of recurrences.
+        """
+        loc = get_location_details(location_name)
+        dt_str = f"{date_str} {time_str}"
+        naive_dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
+        local_tz = pytz.timezone(loc["timezone"])
+        local_dt = local_tz.localize(naive_dt)
+
+        occurrences = find_recurrences(local_dt, loc, num_entries=20, lang=lang)
+        return create_ical_content(title, occurrences)
+
+    def get_rich_visuals(self, date_str, time_str, location_name, title):
+        """
+        Generates SkyMap and Solar System views as Base64.
+        """
+        loc = get_location_details(location_name)
+        dt_str = f"{date_str} {time_str}"
+        naive_dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
+        local_tz = pytz.timezone(loc["timezone"])
+        local_dt = local_tz.localize(naive_dt)
+        utc_dt = local_dt.astimezone(pytz.utc)
+
+        # 1. SkyShot
+        sky_cache = get_sky_cache(date_str, time_str, loc["latitude"], loc["longitude"])
+        sky_img_path = get_sky_cached(sky_cache)
+        
+        if not sky_img_path:
+            from utils.skyshot import CACHE_DIR
+            sky_img_path = str(CACHE_DIR / f"{sky_cache}.png")
+            moon_lon = get_sidereal_longitude(utc_dt, moon)
+            ang = get_angular_data(local_dt, loc["latitude"], loc["longitude"], loc["timezone"])
+            nak, pada = calculate_nakshatra(moon_lon, lang='EN')
+            generate_skymap(moon_lon, nak, pada, ang["phase_angle"], sky_img_path, 
+                           event_title=title, rahu_longitude=ang["rahu_sidereal"], ketu_longitude=ang["ketu_sidereal"])
+
+        # 2. Solar System
+        sol_cache = get_solar_cache(date_str, time_str)
+        sol_img_path = get_solar_cached(sol_cache)
+        
+        if not sol_img_path:
+            from utils.solar_system import CACHE_DIR as SOL_CACHE_DIR
+            sol_img_path = str(SOL_CACHE_DIR / f"{sol_cache}.png")
+            generate_solar_system(utc_dt, sol_img_path, event_title=title)
+
+        # Convert to Base64
+        results = {}
+        for key, path in [("skyshot", sky_img_path), ("solar_system", sol_img_path)]:
+            with open(path, "rb") as f:
+                encoded = base64.b64encode(f.read()).decode('utf-8')
+                results[key] = f"data:image/png;base64,{encoded}"
+        
+        return results

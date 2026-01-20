@@ -28,3 +28,17 @@ class BaseCalendar(ABC):
         Returns the data structure formatted for the AI Maestro's prompt.
         """
         pass
+
+    @abstractmethod
+    def generate_ical(self, date_str, time_str, location_name, title, lang):
+        """
+        Generates iCal (.ics) content for the calendar.
+        """
+        pass
+
+    @abstractmethod
+    def get_rich_visuals(self, date_str, time_str, location_name, title):
+        """
+        Returns binary/base64 visual data (e.g., SkyMap, Solar System).
+        """
+        pass

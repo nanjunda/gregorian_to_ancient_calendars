@@ -2,12 +2,9 @@ import warnings
 # Suppress Python 3.9 FutureWarnings from Google Auth
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response, make_response
 from datetime import datetime
 import pytz
-from utils.location import get_location_details
-from panchanga.calculations import calculate_nakshatra
-from utils.astronomy import get_sidereal_longitude, get_angular_data, sun, moon
 from engines.factory import EngineFactory
 import os
 import base64
@@ -20,12 +17,6 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return render_template('index.html')
-
-from panchanga.recurrence import find_recurrences
-from utils.ical_gen import create_ical_content
-from utils.skyshot import generate_skymap, get_cache_key, get_cached_image, CACHE_DIR
-from utils.solar_system import generate_solar_system, get_cache_key as get_solar_cache_key, get_cached_image as get_solar_cached_image, CACHE_DIR as SOLAR_CACHE_DIR
-from flask import Response, make_response
 
 @app.route('/api/generate-ical', methods=['POST'])
 def generate_ical():
@@ -40,20 +31,11 @@ def generate_ical():
         return jsonify({"error": "Missing required fields"}), 400
 
     try:
-        # 1. Resolve Location
-        loc = get_location_details(location_name)
+        # Resolve engine
+        engine = EngineFactory.get_engine("panchanga")
         
-        # 2. Parse DateTime
-        dt_str = f"{date_str} {time_str}"
-        naive_dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
-        local_tz = pytz.timezone(loc["timezone"])
-        local_dt = local_tz.localize(naive_dt)
-
-        # 3. Find Recurrences (Exactly next 20 entries)
-        occurrences = find_recurrences(local_dt, loc, num_entries=20, lang=lang)
-        
-        # 4. Generate iCal content
-        ical_data = create_ical_content(title, occurrences)
+        # Generate iCal using the engine (Logic moved to spoke)
+        ical_data = engine.generate_ical(date_str, time_str, location_name, title, lang)
         
         response = make_response(ical_data)
         response.headers["Content-Disposition"] = f"attachment; filename={title.replace(' ', '_')}.ics"
@@ -79,61 +61,16 @@ def get_skyshot():
         return jsonify({"success": False, "error": "Missing required fields"}), 400
     
     try:
-        # 1. Resolve location
-        loc = get_location_details(location_name)
+        # Resolve engine
+        engine = EngineFactory.get_engine("panchanga")
         
-        # 2. Check cache first
-        cache_key = get_cache_key(date_str, time_str, loc["latitude"], loc["longitude"])
-        cached_path = get_cached_image(cache_key)
-        
-        if cached_path:
-            with open(cached_path, "rb") as image_file:
-                encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-            return jsonify({
-                "success": True,
-                "image_data": f"data:image/png;base64,{encoded_string}",
-                "cached": True
-            })
-        
-        # 3. Parse DateTime and calculate astronomical data
-        dt_str = f"{date_str} {time_str}"
-        naive_dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
-        local_tz = pytz.timezone(loc["timezone"])
-        local_dt = local_tz.localize(naive_dt)
-        utc_dt = local_dt.astimezone(pytz.utc)
-        
-        # 4. Get Moon position and angular data
-        moon_lon = get_sidereal_longitude(utc_dt, moon)
-        angular_data = get_angular_data(local_dt, loc["latitude"], loc["longitude"], loc["timezone"])
-        
-        # 5. Get Nakshatra info
-        nakshatra, nak_pada = calculate_nakshatra(moon_lon, lang='EN')
-        
-        # 6. Generate sky map
-        output_path = str(CACHE_DIR / f"{cache_key}.png")
-        generate_skymap(
-            moon_longitude=moon_lon,
-            nakshatra_name=nakshatra,
-            nakshatra_pada=nak_pada,
-            phase_angle=angular_data["phase_angle"],
-            output_path=output_path,
-            event_title=title if title else None,
-            rahu_longitude=angular_data["rahu_sidereal"],
-            ketu_longitude=angular_data["ketu_sidereal"]
-        )
-        
-        # 7. Convert to Base64 for privacy (No public URL)
-        with open(output_path, "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+        # Get rich visuals from engine
+        visuals = engine.get_rich_visuals(date_str, time_str, location_name, title)
         
         return jsonify({
             "success": True,
-            "image_data": f"data:image/png;base64,{encoded_string}",
-            "cached": False,
-            "nakshatra": nakshatra,
-            "moon_longitude": round(moon_lon, 2),
-            "rahu_longitude": round(angular_data["rahu_sidereal"], 2),
-            "ketu_longitude": round(angular_data["ketu_sidereal"], 2)
+            "image_data": visuals.get("skyshot"),
+            "cached": "N/A" # Cache management is now internal to Engine
         })
         
     except Exception as e:
@@ -154,45 +91,16 @@ def get_solar_system():
         return jsonify({"success": False, "error": "Missing required fields"}), 400
     
     try:
-        # 1. Resolve location (needed to get timezone for UTC conversion)
-        loc = get_location_details(location_name)
+        # Resolve engine
+        engine = EngineFactory.get_engine("panchanga")
         
-        # 2. Check cache (heliocentric view only depends on date/time)
-        cache_key = get_solar_cache_key(date_str, time_str)
-        cached_path = get_solar_cached_image(cache_key)
+        # Get rich visuals from engine
+        visuals = engine.get_rich_visuals(date_str, time_str, location_name, title)
         
-        if cached_path:
-            with open(cached_path, "rb") as image_file:
-                encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-            return jsonify({
-                "success": True,
-                "image_data": f"data:image/png;base64,{encoded_string}",
-                "cached": True
-            })
-        
-        # 3. Get UTC time
-        dt_str = f"{date_str} {time_str}"
-        naive_dt = datetime.strptime(dt_str, "%Y-%m-%d %H:%M")
-        local_tz = pytz.timezone(loc["timezone"])
-        local_dt = local_tz.localize(naive_dt)
-        utc_dt = local_dt.astimezone(pytz.utc)
-        
-        # 4. Generate Solar System view
-        output_path = str(SOLAR_CACHE_DIR / f"{cache_key}.png")
-        generate_solar_system(
-            utc_dt=utc_dt,
-            output_path=output_path,
-            event_title=title if title else None
-        )
-        
-        # 5. Convert to Base64 for privacy (No public URL)
-        with open(output_path, "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-            
         return jsonify({
             "success": True,
-            "image_data": f"data:image/png;base64,{encoded_string}",
-            "cached": False
+            "image_data": visuals.get("solar_system"),
+            "cached": "N/A"
         })
         
     except Exception as e:
@@ -245,6 +153,7 @@ def api_v2_calculate():
     time_str = input_data.get('time')
     location_name = input_data.get('location')
     lang = input_data.get('lang', 'EN')
+    title = input_data.get('title', 'Event')
     client_profile = input_data.get('client_profile', {})
 
     if not all([date_str, time_str, location_name]):
@@ -260,8 +169,11 @@ def api_v2_calculate():
         # 3. Get metadata and AI context
         visual_configs = engine.get_visual_configs(raw_results)
         ai_context = engine.get_ai_context(raw_results)
+        
+        # 4. Generate Rich Visuals (Skyshot, Solar) - New v2.0 capability
+        rich_visuals = engine.get_rich_visuals(date_str, time_str, location_name, title)
 
-        # 4. Construct v2.0 Response (The Contract)
+        # 5. Construct v2.0 Response (The Contract)
         response = {
             "status": "success",
             "metadata": {
@@ -292,6 +204,10 @@ def api_v2_calculate():
                     "angular_data": raw_results.get("angular_data"),
                     "next_birthday": raw_results.get("next_birthday")
                 }
+            },
+            "visuals": {
+                "sky_shot_base64": rich_visuals.get("skyshot"),
+                "solar_system_base64": rich_visuals.get("solar_system")
             },
             "education": {
                 "summary": f"Calculated {calendar_type.capitalize()} alignment for {date_str}.",
