@@ -1,17 +1,14 @@
-# Gregorian to Ancient Calendars v1.0 (Constellation Hub)
+# Gregorian to Ancient Calendars v2.0 (Headless Edition)
 
 A high-precision tool to convert **any Gregorian event** into its Traditional Panchanga equivalent, featuring high-fidelity cosmic visualizations, interactive educational modules, and an AI-powered "Astro-Tutor."
 
-### Key Features (V6.0)
-- **High-Precision Converter:** Handles events from 1900 to 2100 with location-aware precision.
-- **Scientific Masterclass (AI):** Multi-phase technical deconstructions of orbital mechanics.
-- **Universal Context:** Explains the "Great Drift" (Precession) and "Birthday Drift" (Lunar-Solar gap).
-- **3D Celestial Modules:** Interactive Zodiac Comparison, Moon Phase Protractor, and Precession Wobble.
-- **Interactive Engagement:** Maestro's Challenge (Quizzes) and Birthday Time-Machine (100-year drift).
-- **iCal Integration:** Generate recurring Traditional dates for 20 years.
-    - **iCal Export:** One-click download for the next 20 occurrences (.ics).
-    - **Precision:** Uses `skyfield` and Lahiri Ayanamsha for sub-arcsecond accuracy.
-- **Web UI:** Premium Glassmorphism interface with "Astronomical Insights" educational section.
+### v2.0 Architectural Pillars
+- **Headless Design:** Completely decoupled UI and Application Logic for multi-device support.
+- **Framework Agnostic:** Core logic is independent of Flask, enabling deployment on generic servers (Apache/Nginx).
+- **Multi-Civilization Hub:** Standardized engine interface to support Panchanga, Mayan, and Chinese calendars.
+- **Scientific Masterclass (AI 2.0):** Configurable AI engines (OpenRouter default) for age-appropriate, science-only insights.
+- **3D Celestial Modules:** Interactive visual units optimized for various device form factors.
+- **iCal Precision:** Location-aware traditional date recurring calculation and export.
 
 ## Installation & Deployment
 

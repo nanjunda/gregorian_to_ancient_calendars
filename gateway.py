@@ -20,6 +20,6 @@ application = DispatcherMiddleware(legacy_app, {
 
 if __name__ == "__main__":
     from werkzeug.serving import run_simple
-    print("🚀 Starting Constellation Hub Gateway...")
-    print("   Mounting Legacy App at /")
+    print("🚀 Starting Ancient Calendars Hub v2.0 (Headless Edition)...")
+    print("   Mounting Multi-Calendar Gateway at /")
     run_simple('0.0.0.0', 5080, application, use_reloader=True, use_debugger=True)
