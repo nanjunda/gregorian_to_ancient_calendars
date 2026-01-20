@@ -17,17 +17,24 @@ BRANCH=${1:-"main"}
 echo "🌌 Starting Fresh Installation of Hindu Panchanga..."
 echo "🌿 Target Branch: $BRANCH"
 
-# --- AI Configuration Discovery ---
-# Support for user's alias from .bashrc
+# --- Bulletproof Environment Discovery ---
+# 1. Capture from Shell (Priority)
+# 2. Support for aliases
 export GOOGLE_API_KEY="${GOOGLE_API_KEY:-$GOOGLE_GEMINI_API_KEY}"
 export AI_PROVIDER="${AI_PROVIDER}"
 export OPENROUTER_API_KEY="${OPENROUTER_API_KEY}"
 export AI_MODEL_OVERRIDE="${AI_MODEL_OVERRIDE}"
 
-echo "🤖 AI Engine Discovery:"
+echo "🤖 AI Engine Discovery Results:"
 [ -n "$GOOGLE_API_KEY" ] && echo "   ✅ Google Gemini Key: DETECTED"    || echo "   ⚪ Google Gemini Key: MISSING"
 [ -n "$OPENROUTER_API_KEY" ] && echo "   ✅ OpenRouter Key:    DETECTED" || echo "   ⚪ OpenRouter Key:    MISSING"
-[ -n "$AI_PROVIDER" ] && echo "   🎯 AI Provider:       $AI_PROVIDER" || echo "   🎯 AI Provider:       Auto-Detect"
+[ -n "$AI_PROVIDER" ] && echo "   🎯 AI Provider:       ${AI_PROVIDER:-'Auto-Detect'}"
+[ -n "$AI_MODEL_OVERRIDE" ] && echo "   🚀 AI Model Override: ${AI_MODEL_OVERRIDE:-'Default'}"
+
+if [ -z "$GOOGLE_API_KEY" ] && [ -z "$OPENROUTER_API_KEY" ]; then
+    echo "💡 TIP: If keys are set in your shell but not detected here, run:"
+    echo "   export OPENROUTER_API_KEY=\"your_key\"; bash <(curl -L [URL])"
+fi
 
 # 1. Clean up old installer traces
 if [ -d "$INSTALL_DIR" ]; then
