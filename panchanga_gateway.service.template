@@ -8,6 +8,9 @@ Group={{GROUP}}
 WorkingDirectory={{APP_PATH}}
 Environment="PATH={{APP_PATH}}/venv/bin"
 Environment="GOOGLE_API_KEY={{GOOGLE_API_KEY}}"
+Environment="AI_PROVIDER={{AI_PROVIDER}}"
+Environment="AI_MODEL_OVERRIDE={{AI_MODEL_OVERRIDE}}"
+Environment="OPENROUTER_API_KEY={{OPENROUTER_API_KEY}}"
 # Standardized production entry point (Phase 2.0 Hub)
 ExecStart={{APP_PATH}}/venv/bin/gunicorn --workers 3 --timeout 120 --bind 127.0.0.1:5080 -m 007 wsgi:application
 # Basic security hardening that sometimes helps with SELinux transitions

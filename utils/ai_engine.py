@@ -10,12 +10,35 @@ import re
 
 class BaseAIEngine(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def generate_insight(self, config_data):
+    def generate_insight(self, config_data, context_instructions=None):
         pass
     
     @abc.abstractmethod
     def chat_with_tutor(self, message, context_data):
         pass
+
+FOUNDATION_PROMPT = """
+Role: The "Astro-Tutor" (The Maestro - An enthusiastic, high-energy Science Educator).
+Target Audience: Students (Grades 6-12).
+Setting: A pure physical science and archaeoastronomy application.
+
+Safety & Integrity: 
+Ensure all explanations are scientifically accurate and age-appropriate for minors. 
+Strictly avoid any pseudoscientific claims or destiny-based predictions. 
+If the data suggests astrological interpretations, pivot exclusively to the mathematical and physical phenomena involved. 
+Refuse to discuss "effects" on human destiny.
+
+Strict Constraint: 
+- DO NOT use the term "Vedic". 
+- DO NOT mention or associate any concept with Astrology, Horoscopes, or Superstition. 
+- Format: Return ONLY raw technical Markdown. DO NOT Wrap in JSON.
+
+Instruction on Visuals: 
+When asked to use a visual loop like [[RENDER:MODULE_NAME]], insert that specific tag VERBATIM into the text where it fits. 
+DO NOT generate data or properties for the visual. Just place the tag.
+
+Tone: "Cool Science YouTuber" - high energy, fascinating, and precise.
+"""
 
 class OpenRouterEngine(BaseAIEngine):
     def __init__(self, api_key=None):
@@ -89,62 +112,19 @@ class OpenRouterEngine(BaseAIEngine):
         # If loop finishes without return, all models failed
         return f"AI Generation Failed. All models exhausted. Last error: {last_error}"
 
-    def generate_insight(self, config_data):
-        prompt_tmpl = f"""
-        Role: The "Astro-Tutor" (The Maestro - An enthusiastic, high-energy Science Educator for Grades 6-12).
-        Target Audience: Middle and High School students (Grades 6-12).
-        Setting: A pure physical science and archaeoastronomy application designed for educational exploration.
-        Objective: Generate a comprehensive, 3-Phase "Scientific Masterclass" report in Markdown.
-        Strict Constraint: DO NOT use the term "Vedic". DO NOT mention or associate any concept with Astrology, Horoscopes, Numerology, or Superstition. This is a PURE physical science and archaeoastronomy app.
-        Format: Return ONLY the technical Markdown report. DO NOT Wrap in JSON. DO NOT output a JSON object. Return raw Markdown text.
-
-        Instruction on Visuals: When asked to use a visual loop like [[RENDER:ZODIAC_COMPARISON]], insert that specific tag VERBATIM into the text where it fits. DO NOT generate data or properties for the visual. Just place the tag.
-
-        Safety & Integrity: Ensure all explanations are scientifically accurate and age-appropriate for minors. Strictly avoid any pseudoscientific claims or destiny-based predictions. If the data suggests astrological interpretations, pivot exclusively to the mathematical and physical phenomena involved. Refuse to discuss "effects" on human destiny.
+    def generate_insight(self, config_data, context_instructions=None):
+        instructions = context_instructions or "Explain the provided astronomical data scientifically."
         
+        prompt_tmpl = f"""
+        {FOUNDATION_PROMPT}
+        
+        {instructions}
+
         Input Data (The Cosmic Snapshot):
         {config_data}
-        
-        Markdown Report Hierarchy (Mandatory Phases):
-
-        Phase I: The Universal Clock (General Concepts)
-        - Define "What is a Calendar?". Explain it as an engineering solution to synchronize Day/Month/Year rhythms.
-        - The Solar Engine (Western): Explain how it follows Earth's orbit (seasons).
-        - The Lunar-Solar Fusion (Panchanga): Explain how it synchronizes both Sun and Moon using the background stars (Sidereal).
-        - **The Birthday Drift**: Explain why a "Panchanga Birthday" (based on Tithi/Nakshatra) moves relative to the Western calendar. Mention the ~11 day lunar-solar gap and how **Adhika Masa** (Leap Month) acts as a cosmic synchronization tool.
-        - **The Great Drift**: Explain Axial Precession (Earth's wobble) and why Sidereal signs differ from Tropical ones. Use [[RENDER:ZODIAC_COMPARISON]].
-
-        Phase II: The Library of Atoms (Terminology)
-        Provide detailed physics/geometric deconstructions for:
-        - **Samvatsara**: Explain as the 60-year Jupiter-Saturn resonance/alignment cycle. Use [[RENDER:SAMVATSARA_RESONANCE]].
-        - **Saka Varsha (The Civil Era)**: Explain this as the **Official Indian Civil Calendar** (used by the Government).
-          *   **The Origin**: Started in 78 AD (King Shalivahana).
-          *   **The Difference**: It is a purely **Solar (Agricultural)** count, unlike the **Cosmic (Luni-Solar)** Samvatsara. Use the analogy of "Administrative Time" vs "Nature's Time".
-        - **Masa: The Cosmic Month**: Explain the two ways to measure a month:
-          1. **Saura Mana (The Solar Runner)**: The steady 30-day month defined by the Sun entering a new sign (e.g., Mesha).
-          2. **Chandra Mana (The Lunar Sprinter)**: The fast 29.5-day month defined by the Moon's phases.
-          *   **The Naming Secret**: Explain that Lunar months are named after the star the Moon is near when it is full (e.g., Full Moon near **Chitta/Spica** = **Chaitra**, Full Moon near **Krittika/Pleiades** = **Karthika**).
-          *   **The Drift**: Explain that the Moon is faster than the Sun by ~11 days a year.
-          *   **The Pit Stop (Adhik Masa)**: Explain that every 3 years, the Moon takes a "Pit Stop" (Extra Month) to let the Sun catch up.
-        - **Nakshatra**: 13°20' sectors used as a "Lunar Speedometer" to track the Moon's 27.3-day orbit. Use [[RENDER:CONSTELLATION_MAP]].
-        - **Tithi**: Defined strictly as Every 12° of angular separation between Sun and Moon. Use [[RENDER:MOON_PHASE_3D]].
-        - **Yoga**: Combined longitudinal momentum (Sum of longitudes).
-        - **Rashi**: Define the term Rāśi from a scientific and astronomical perspective (not astrological). Explain its relation to the ecliptic, the Sun, Moon, and planets, and give one simple example. Keep the explanation brief and precise
-        - **Lagna**: Define the term Lagna from a scientific and astronomical perspective (not astrological). Explain its relation to Earth’s rotation, the horizon, the ecliptic, and the observer’s location, and give one simple example. Keep the explanation brief and precise
-        - **Karana**: High-precision Half-Tithi (6° intervals).
-        - **Rahu & Ketu**: Explain as **Lunar Nodes** (intersection points of orbital planes). Use [[RENDER:PRECESSION_WOBBLE]].
-        - **Safe Harbor Terms**: Explain terms like **Graha** (Planetary Bodies), **Muhurtha** (Time units), **Sankranti** (Solar Ingress), **Vakra** (Retrograde Motion), **Asta** (Combustion/Invisibility), and **Ayanamsa** (Precession Index) strictly as mathematical or physical phenomena if they appear in the data. Refuse to discuss their "effects" on human destiny.
-
-        Phase III: Decoding Your Specific Cosmic Alignment
-        - Create a specific section: `## 🧩 Decoding Your Specific Cosmic Alignment`.
-        - Use the specific values from the Input Data (Samvatsara, Masa, etc) to explain THIS specific moment.
-        - Tell the student what they would see if they looked at the sky right now.
-
-        Tone: "Cool Science YouTuber" - high energy, fascinating, and precise.
         """
         
-        # Split system prompt vs user prompt roughly
-        system_instruction = "You are the Astro-Tutor, a science educator. strict_no_astrology: true. format: markdown."
+        system_instruction = "You are the Astro-Tutor. strict_no_astrology: true. format: markdown."
         raw_response = self._call_openrouter(system_instruction, prompt_tmpl)
         return self._clean_response(raw_response)
 
@@ -217,60 +197,22 @@ class GeminiEngine(BaseAIEngine):
                 print(f"Error initializing model {self.model_name}: {e}")
         return self._model
 
-    def generate_insight(self, config_data):
+    def generate_insight(self, config_data, context_instructions=None):
         if not self.model:
             return "AI Engine not configured. Please set GOOGLE_API_KEY environment variable."
             
         if not config_data:
             return "Error: No astronomical configuration data provided to the AI Engine."
 
-        prompt = f"""
-        Role: The "Astro-Tutor" (The Maestro - An enthusiastic, high-energy Science Educator for Grades 6-12).
-        Objective: Generate a comprehensive, 3-Phase "Scientific Masterclass" report in Markdown.
-        Strict Constraint: DO NOT use the term "Vedic". DO NOT mention or associate any concept with Astrology, Horoscopes, Numerology, or Superstition. This is a PURE physical science and archaeoastronomy app.
-        Format: Return ONLY the technical Markdown report. DO NOT Wrap in JSON. DO NOT output a JSON object. Return raw Markdown text.
+        instructions = context_instructions or "Explain the provided astronomical data scientifically."
 
-        Instruction on Visuals: When asked to use a visual loop like [[RENDER:ZODIAC_COMPARISON]], insert that specific tag VERBATIM into the text where it fits. DO NOT generate data or properties for the visual. Just place the tag.
+        prompt = f"""
+        {FOUNDATION_PROMPT}
+        
+        {instructions}
 
         Input Data (The Cosmic Snapshot):
         {config_data}
-        
-        Markdown Report Hierarchy (Mandatory Phases):
-
-        Phase I: The Universal Clock (General Concepts)
-        - Define "What is a Calendar?". Explain it as an engineering solution to synchronize Day/Month/Year rhythms.
-        - The Solar Engine (Western): Explain how it follows Earth's orbit (seasons).
-        - The Lunar-Solar Fusion (Panchanga): Explain how it synchronizes both Sun and Moon using the background stars (Sidereal).
-        - **The Birthday Drift**: Explain why a "Panchanga Birthday" (based on Tithi/Nakshatra) moves relative to the Western calendar. Mention the ~11 day lunar-solar gap and how **Adhika Masa** (Leap Month) acts as a cosmic synchronization tool.
-        - **The Great Drift**: Explain Axial Precession (Earth's wobble) and why Sidereal signs differ from Tropical ones. Use [[RENDER:ZODIAC_COMPARISON]].
-
-        Phase II: The Library of Atoms (Terminology)
-        Provide detailed physics/geometric deconstructions for:
-        - **Samvatsara**: Explain as the 60-year Jupiter-Saturn resonance/alignment cycle. Use [[RENDER:SAMVATSARA_RESONANCE]].
-        - **Saka Varsha (The Civil Era)**: Explain this as the **Official Indian Civil Calendar** (used by the Government).
-          *   **The Origin**: Started in 78 AD (King Shalivahana).
-          *   **The Difference**: It is a purely **Solar (Agricultural)** count, unlike the **Cosmic (Luni-Solar)** Samvatsara. Use the analogy of "Administrative Time" vs "Nature's Time".
-        - **Masa: The Cosmic Month**: Explain the two ways to measure a month:
-          1. **Saura Mana (The Solar Runner)**: The steady 30-day month defined by the Sun entering a new sign (e.g., Mesha).
-          2. **Chandra Mana (The Lunar Sprinter)**: The fast 29.5-day month defined by the Moon's phases.
-          *   **The Naming Secret**: Explain that Lunar months are named after the star the Moon is near when it is full (e.g., Full Moon near **Chitta/Spica** = **Chaitra**, Full Moon near **Krittika/Pleiades** = **Karthika**).
-          *   **The Drift**: Explain that the Moon is faster than the Sun by ~11 days a year.
-          *   **The Pit Stop (Adhik Masa)**: Explain that every 3 years, the Moon takes a "Pit Stop" (Extra Month) to let the Sun catch up.
-        - **Nakshatra**: 13°20' sectors used as a "Lunar Speedometer" to track the Moon's 27.3-day orbit. Use [[RENDER:CONSTELLATION_MAP]].
-        - **Tithi**: Defined strictly as Every 12° of angular separation between Sun and Moon. Use [[RENDER:MOON_PHASE_3D]].
-        - **Yoga**: Combined longitudinal momentum (Sum of longitudes).
-        - **Rashi**: Define the term Rāśi from a scientific and astronomical perspective (not astrological). Explain its relation to the ecliptic, the Sun, Moon, and planets, and give one simple example. Keep the explanation brief and precise
-        - **Lagna**: Define the term Lagna from a scientific and astronomical perspective (not astrological). Explain its relation to Earth’s rotation, the horizon, the ecliptic, and the observer’s location, and give one simple example. Keep the explanation brief and precise
-        - **Karana**: High-precision Half-Tithi (6° intervals).
-        - **Rahu & Ketu**: Explain as **Lunar Nodes** (intersection points of orbital planes). Use [[RENDER:PRECESSION_WOBBLE]].
-        - **Safe Harbor Terms**: Explain terms like **Graha** (Planetary Bodies), **Muhurtha** (Time units), **Sankranti** (Solar Ingress), **Vakra** (Retrograde Motion), **Asta** (Combustion/Invisibility), and **Ayanamsa** (Precession Index) strictly as mathematical or physical phenomena if they appear in the data. Refuse to discuss their "effects" on human destiny.
-
-        Phase III: Decoding Your Specific Cosmic Alignment
-        - Create a specific section: `## 🧩 Decoding Your Specific Cosmic Alignment`.
-        - Use the specific values from the Input Data (Samvatsara: {config_data.get('samvatsara')}, Masa: {config_data.get('masa')}, etc.) to explain THIS specific moment.
-        - Tell the student what they would see if they looked at the sky right now.
-
-        Tone: "Cool Science YouTuber" - high energy, fascinating, and precise.
         """
         try:
             print("DEBUG: Generating content via Gemini...", file=sys.stderr)
@@ -347,25 +289,52 @@ class AIEngineManager:
         # 1. Determine Provider (Explicit vs Auto-Detect)
         explicit_provider = os.environ.get("AI_PROVIDER", "").lower()
         
-        if explicit_provider == "gemini" or (not explicit_provider and not os.environ.get("OPENROUTER_API_KEY")):
+        if explicit_provider == "gemini" or (not explicit_provider and os.environ.get("GOOGLE_API_KEY") and not os.environ.get("OPENROUTER_API_KEY")):
             print("Detected Standard Configuration. Using Gemini Engine.")
             self.engine = GeminiEngine()
             self.provider = "gemini"
-        else:
+        elif explicit_provider == "openrouter" or os.environ.get("OPENROUTER_API_KEY"):
             # Default to OpenRouter if key exists or explicitly requested
             print("🌟 Using OpenRouter Engine (Default Provider).")
             self.engine = OpenRouterEngine()
             self.provider = "openrouter"
+        else:
+            # Fallback to Gemini if nothing else found
+            self.engine = GeminiEngine()
+            self.provider = "gemini"
             
-            # 2. Apply Model Override if requested
-            model_override = os.environ.get("AI_MODEL_OVERRIDE")
-            if model_override:
-                print(f"   ⚠️ AI Model Override Active: {model_override}")
-                # Prepend override to the fallback list
+        # 2. Apply Model Override if requested
+        model_override = os.environ.get("AI_MODEL_OVERRIDE")
+        if model_override:
+            print(f"   ⚠️ AI Model Override Active: {model_override}")
+            if hasattr(self.engine, 'models'):
+                # OpenRouter style
                 self.engine.models.insert(0, model_override)
+            else:
+                # Gemini style
+                self.engine.model_name = model_override
 
-    def get_explanation(self, config_data):
-        return self.engine.generate_insight(config_data)
+    def get_explanation(self, payload):
+        """
+        Double-Spoke Implementation:
+        Fused 'Foundation' (Safety/Guardrails) with civilization-specific 'Context Spoke'.
+        """
+        from engines.factory import EngineFactory
+        
+        # 1. Extract civilization type and raw input
+        metadata = payload.get('metadata', {})
+        civ_type = metadata.get('civilization', 'panchanga')
+        config_data = payload.get('results', payload) # Fallback to full payload if v2 structure missing
+        
+        # 2. Get the Spoke Engine
+        try:
+            spoke_engine = EngineFactory.get_engine(civ_type)
+            context_instructions = spoke_engine.get_ai_instructions()
+        except:
+            # Fallback if engine not found (Phase 3 resilience)
+            context_instructions = "Explain the provided astronomical data scientifically."
+
+        return self.engine.generate_insight(config_data, context_instructions)
 
     def chat_with_tutor(self, message, context_data):
         return self.engine.chat_with_tutor(message, context_data)

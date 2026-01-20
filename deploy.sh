@@ -68,10 +68,19 @@ sudo mkdir -p $DEPLOY_DIR
 # Use rsync for clean copy
 sudo rsync -av --exclude='venv' --exclude='.git' --exclude='__pycache__' "$SOURCE_DIR/" "$DEPLOY_DIR/"
 
-# 3. Handle Google API Key
-if [ -z "$GOOGLE_API_KEY" ]; then
-    echo "⚠️  GOOGLE_API_KEY is not set."
-    read -p "🔑 Please enter your Google Gemini API Key: " GOOGLE_API_KEY
+# 3. Handle AI Configuration
+echo "🤖 Configuring AI Engine..."
+# Support for user's alias
+export GOOGLE_API_KEY="${GOOGLE_API_KEY:-$GOOGLE_GEMINI_API_KEY}"
+
+[ -n "$GOOGLE_API_KEY" ] && echo "   ✅ GOOGLE_API_KEY found." || echo "   ⚪ GOOGLE_API_KEY not set."
+[ -n "$OPENROUTER_API_KEY" ] && echo "   ✅ OPENROUTER_API_KEY found." || echo "   ⚪ OPENROUTER_API_KEY not set."
+[ -n "$AI_PROVIDER" ] && echo "   🎯 AI_PROVIDER set to: $AI_PROVIDER" || echo "   🎯 AI_PROVIDER will be auto-detected."
+
+# Only prompt for Google key if NO other keys exist
+if [ -z "$GOOGLE_API_KEY" ] && [ -z "$OPENROUTER_API_KEY" ]; then
+    echo "⚠️  No AI API keys found."
+    read -p "🔑 Please enter your Google Gemini API Key (or leave blank to configure later): " GOOGLE_API_KEY
 fi
 
 # 4. Setup Virtual Environment (Always Fresh)
@@ -82,12 +91,16 @@ sudo rm -rf venv
 echo "🏗️  Creating fresh virtual environment..."
 sudo /usr/bin/python3 -m venv venv
 
+# 5. FIX PERMISSIONS (Initial Phase - required for pip)
+echo "🔒 Applying Initial Permissions for venv setup..."
+sudo chown -R $CURRENT_USER:$HTTP_GROUP $DEPLOY_DIR
+
 echo "🐍 Installing Python packages..."
 # We use sudo -u $CURRENT_USER to ensure the venv belongs to the real user
 sudo -u $CURRENT_USER ./venv/bin/pip install --upgrade pip
 sudo -u $CURRENT_USER ./venv/bin/pip install -r requirements.txt
 
-# 5. Pre-launch Syntax Check (v5.6.1)
+# 5.1 Pre-launch Syntax Check (v5.6.1)
 echo "🔍 Validating code integrity (v2.0 Architectural Check)..."
 if ! sudo -u $CURRENT_USER ./venv/bin/python3 -m py_compile $DEPLOY_DIR/gateway.py $DEPLOY_DIR/app.py $DEPLOY_DIR/engines/panchanga/engine.py; then
     echo "❌ CRITICAL ERROR: Syntax error detected in v2.0 core files!"
@@ -97,10 +110,8 @@ fi
 echo "🛰️  Pre-downloading astronomical data files..."
 sudo -u $CURRENT_USER ./venv/bin/python3 -c "from skyfield.api import load; load('de421.bsp'); load.timescale()"
 
-# 6. FIX PERMISSIONS (Layered Strategy)
+# 6. FIX PERMISSIONS (Layered Strategy - Final)
 echo "🔒 Applying Layered Permission Strategy..."
-# Phase 1: Reset all to standard readable
-sudo chown -R $CURRENT_USER:$HTTP_GROUP $DEPLOY_DIR
 sudo find $DEPLOY_DIR -type d -exec chmod 755 {} +
 sudo find $DEPLOY_DIR -type f -exec chmod 644 {} +
 
@@ -131,6 +142,9 @@ sed -e "s|{{USER}}|$CURRENT_USER|g" \
     -e "s|{{GROUP}}|$HTTP_GROUP|g" \
     -e "s|{{APP_PATH}}|$DEPLOY_DIR|g" \
     -e "s|{{GOOGLE_API_KEY}}|$GOOGLE_API_KEY|g" \
+    -e "s|{{AI_PROVIDER}}|$AI_PROVIDER|g" \
+    -e "s|{{AI_MODEL_OVERRIDE}}|$AI_MODEL_OVERRIDE|g" \
+    -e "s|{{OPENROUTER_API_KEY}}|$OPENROUTER_API_KEY|g" \
     $DEPLOY_DIR/panchanga_gateway.service.template | sudo tee /etc/systemd/system/$APP_NAME.service > /dev/null
 
 sudo systemctl daemon-reload

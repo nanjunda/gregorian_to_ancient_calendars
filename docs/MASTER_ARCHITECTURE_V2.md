@@ -111,12 +111,71 @@ To support various form factors, the Backend must provide a **Stable Contract**.
 
 ---
 
-## 6. Verification & Stability: The "Zero Mutation" Principle
-Regardless of the architectural shift, the **Panchanga Mathematics must never change.**
+## 7. Operational & Deployment Guide (Oracle Linux 9 / OCI)
 
-1. **Parity Checksums**: Every code move must be verified by `verify_parity.py`.
-2. **Stress Testing**: The `stress_test_parity.py` script ensures that high-latitude, DST, and leap-year cases remain 100% identical to the v1.0 proven code.
+Ancient Calendars v2.0 is designed for high-performance deployment on Oracle Linux 9 using an **Nginx Reverse Proxy + Gunicorn Gateway** stack.
+
+### 7.1 Automated Installation (`setup_fresh.sh`)
+The recommended way to deploy a fresh instance on a generic Linux VM:
+```bash
+# 1. (Optional) Pre-set your keys
+export GOOGLE_API_KEY="your_key"
+export OPENROUTER_API_KEY="your_key"
+export AI_PROVIDER="openrouter" # Selection: gemini | openrouter
+
+# 2. Run the Orchestrator
+curl -L https://raw.githubusercontent.com/nanjunda/gregorian_to_ancient_calendars/main/setup_fresh.sh | bash
+```
+The script automatically handles:
+- **Application Relocation**: Moves the app to `/opt/ancient_calendars` for professional isolation.
+- **SELinux Hardening**: Configures contexts to allow Nginx network relaying and execution.
+- **SSL Generation**: Creates local self-signed certificates for HTTPS on port **58921**.
+- **Systemd Integration**: Configures the `ancient_calendars.service`.
+
+### 7.2 Service Management
+Once installed, use the standard Linux `systemctl` commands:
+- **Restart**: `sudo systemctl restart ancient_calendars`
+- **Status**: `sudo systemctl status ancient_calendars`
+- **Logs**: `sudo journalctl -u ancient_calendars -f`
 
 ---
-**Standardization Date**: January 19, 2026  
-**Status**: 🔵 Design Approved | ⚪ Implementation-Ready
+
+## 8. AI Engine Configuration (The Mastering Layer)
+
+The AI Engine in v2.0 is modular and provider-agnostic. It uses a **"Double-Spoke" Architecture** to maintain scientific integrity.
+
+### 8.1 Double-Spoke Prompt Architecture
+To ensure the AI never drifts into astrology, the instructions are fused at runtime:
+1.  **The Foundation (Must-Not-Change)**: Encapsulated in `utils/ai_engine.py`. Contains the "Astro-Tutor" persona, strict science-only guardrails, and markdown formatting rules.
+2.  **The Context (Panchanga Spoke)**: Encapsulated in `engines/panchanga/engine.py`. Contains the 3-Phase Scientific Masterclass hierarchy and terminology deconstructions (e.g., resonance cycles, geometric tithis).
+
+### 8.2 Provider Selection & Model Overrides
+Configure the engine via these environment variables in your system profile:
+
+| Variable | Description | Options |
+| :--- | :--- | :--- |
+| `AI_PROVIDER` | Explicitly sets the provider. | `gemini` (Standard), `openrouter` (Default) |
+| `AI_MODEL_OVERRIDE` | Forces a specific specific LLM model. | e.g. `google/gemini-2.0-flash-exp:free` |
+| `OPENROUTER_API_KEY` | Required for OpenRouter access. | Your API Key |
+| `GOOGLE_API_KEY` | Required for Gemini access. | Your API Key |
+
+### 8.3 OpenRouter Fallback Strategy
+If OpenRouter is selected, the engine employs an automatic **Cascading Fallback Loop**. If the primary model fails or is busy, it cycles through:
+1. `xiaomi/mimo-v2-flash` (Primary)
+2. `meta-llama/llama-3.3-70b-instruct:free`
+3. `google/gemini-2.0-flash-exp:free`
+4. `meta-llama/llama-3.1-405b-instruct:free`
+5. `deepseek/deepseek-r1:free`
+
+---
+
+## 9. Verification & Stability: The "Zero Mutation" Principle
+Regardless of the architectural shift, the **Panchanga Mathematics and educational prompts must never change.**
+
+1.  **Mathematical Parity**: Every code change is verified by `verify_parity.py` against v1.0 logic.
+2.  **Prompt Parity**: The scientific masterclass hierarchy remains identical in content across Phases 1, 2, and 3.
+3.  **Stress Testing**: The `stress_test_parity.py` script ensures that high-latitude, DST, and leap-year cases remain 100% identical to the v1.0 proven code.
+
+---
+**Last Updated**: January 19, 2026  
+**Status**: 🔵 v2.0 Production-Ready

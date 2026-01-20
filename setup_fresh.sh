@@ -16,6 +16,8 @@ BRANCH=${1:-"main"}
 
 echo "🌌 Starting Fresh Installation of Hindu Panchanga..."
 echo "🌿 Target Branch: $BRANCH"
+# Support for user's alias
+export GOOGLE_API_KEY="${GOOGLE_API_KEY:-$GOOGLE_GEMINI_API_KEY}"
 echo "🔑 Debug: Environment API Key Length: ${#GOOGLE_API_KEY}"
 
 # 1. Clean up old installer traces
@@ -69,7 +71,11 @@ fi
 
 # Pass the key explicitly to the deployment script
 echo "🚢 Handing off to deploy.sh..."
-sudo GOOGLE_API_KEY="$GOOGLE_API_KEY" bash ./deploy.sh
+sudo GOOGLE_API_KEY="$GOOGLE_API_KEY" \
+     AI_PROVIDER="$AI_PROVIDER" \
+     AI_MODEL_OVERRIDE="$AI_MODEL_OVERRIDE" \
+     OPENROUTER_API_KEY="$OPENROUTER_API_KEY" \
+     bash ./deploy.sh
 
 
 echo "================================================================="

@@ -30,6 +30,13 @@ class BaseCalendar(ABC):
         pass
 
     @abstractmethod
+    def get_ai_instructions(self):
+        """
+        Returns the civilization-specific AI prompt/instructions for the context spoke.
+        """
+        pass
+
+    @abstractmethod
     def generate_ical(self, date_str, time_str, location_name, title, lang):
         """
         Generates iCal (.ics) content for the calendar.
