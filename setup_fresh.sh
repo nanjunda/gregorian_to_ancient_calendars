@@ -16,9 +16,18 @@ BRANCH=${1:-"main"}
 
 echo "🌌 Starting Fresh Installation of Hindu Panchanga..."
 echo "🌿 Target Branch: $BRANCH"
-# Support for user's alias
+
+# --- AI Configuration Discovery ---
+# Support for user's alias from .bashrc
 export GOOGLE_API_KEY="${GOOGLE_API_KEY:-$GOOGLE_GEMINI_API_KEY}"
-echo "🔑 Debug: Environment API Key Length: ${#GOOGLE_API_KEY}"
+export AI_PROVIDER="${AI_PROVIDER}"
+export OPENROUTER_API_KEY="${OPENROUTER_API_KEY}"
+export AI_MODEL_OVERRIDE="${AI_MODEL_OVERRIDE}"
+
+echo "🤖 AI Engine Discovery:"
+[ -n "$GOOGLE_API_KEY" ] && echo "   ✅ Google Gemini Key: DETECTED"    || echo "   ⚪ Google Gemini Key: MISSING"
+[ -n "$OPENROUTER_API_KEY" ] && echo "   ✅ OpenRouter Key:    DETECTED" || echo "   ⚪ OpenRouter Key:    MISSING"
+[ -n "$AI_PROVIDER" ] && echo "   🎯 AI Provider:       $AI_PROVIDER" || echo "   🎯 AI Provider:       Auto-Detect"
 
 # 1. Clean up old installer traces
 if [ -d "$INSTALL_DIR" ]; then
@@ -60,13 +69,12 @@ cd "$INSTALL_DIR/$APP_NAME"
 chmod +x deploy.sh
 
 # Pass the current environment's GOOGLE_API_KEY if it exists
-# 6. Handle Google API Key (Pre-flight)
-if [ -z "$GOOGLE_API_KEY" ]; then
-    echo "⚠️  GOOGLE_API_KEY not found in environment."
-    read -p "🔑 Please enter your Google Gemini API Key: " GOOGLE_API_KEY
+# 6. Handle AI Configuration (Pre-flight)
+if [ -z "$GOOGLE_API_KEY" ] && [ -z "$OPENROUTER_API_KEY" ]; then
+    echo "⚠️  No AI API keys found in environment."
+    read -p "🔑 Please enter your Google Gemini API Key (or leave blank to configure later): " GOOGLE_API_KEY
+    export GOOGLE_API_KEY="$GOOGLE_API_KEY"
     echo "✅ Key received."
-else
-    echo "✅ Found GOOGLE_API_KEY in environment."
 fi
 
 # Pass the key explicitly to the deployment script

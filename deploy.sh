@@ -69,18 +69,20 @@ sudo mkdir -p $DEPLOY_DIR
 sudo rsync -av --exclude='venv' --exclude='.git' --exclude='__pycache__' "$SOURCE_DIR/" "$DEPLOY_DIR/"
 
 # 3. Handle AI Configuration
-echo "🤖 Configuring AI Engine..."
-# Support for user's alias
+echo "🤖 AI Engine Configuration (v2.0 Architectural Sync):"
+# Support for user's alias from .bashrc
 export GOOGLE_API_KEY="${GOOGLE_API_KEY:-$GOOGLE_GEMINI_API_KEY}"
 
-[ -n "$GOOGLE_API_KEY" ] && echo "   ✅ GOOGLE_API_KEY found." || echo "   ⚪ GOOGLE_API_KEY not set."
-[ -n "$OPENROUTER_API_KEY" ] && echo "   ✅ OPENROUTER_API_KEY found." || echo "   ⚪ OPENROUTER_API_KEY not set."
-[ -n "$AI_PROVIDER" ] && echo "   🎯 AI_PROVIDER set to: $AI_PROVIDER" || echo "   🎯 AI_PROVIDER will be auto-detected."
+[ -n "$GOOGLE_API_KEY" ] && echo "   ✅ Google Key: DETECTED"    || echo "   ⚪ Google Key: MISSING"
+[ -n "$OPENROUTER_API_KEY" ] && echo "   ✅ OpenRouter Key: DETECTED" || echo "   ⚪ OpenRouter Key: MISSING"
+[ -n "$AI_PROVIDER" ] && echo "   🎯 Provider:   $AI_PROVIDER" || echo "   🎯 Provider:   Auto-Detect"
+[ -n "$AI_MODEL_OVERRIDE" ] && echo "   🚀 Model:      $AI_MODEL_OVERRIDE" || echo "   🚀 Model:      Default"
 
 # Only prompt for Google key if NO other keys exist
 if [ -z "$GOOGLE_API_KEY" ] && [ -z "$OPENROUTER_API_KEY" ]; then
     echo "⚠️  No AI API keys found."
-    read -p "🔑 Please enter your Google Gemini API Key (or leave blank to configure later): " GOOGLE_API_KEY
+    read -p "🔑 Please enter your Google Gemini API Key (or leave blank): " GOOGLE_API_KEY
+    export GOOGLE_API_KEY="$GOOGLE_API_KEY"
 fi
 
 # 4. Setup Virtual Environment (Always Fresh)
