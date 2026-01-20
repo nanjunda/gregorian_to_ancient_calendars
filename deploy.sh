@@ -129,8 +129,8 @@ fi
 echo "⚙️  Configuring systemd service..."
 sed -e "s|{{USER}}|$CURRENT_USER|g" \
     -e "s|{{GROUP}}|$HTTP_GROUP|g" \
-    -s "s|{{APP_PATH}}|$DEPLOY_DIR|g" \
-    -s "s|{{GOOGLE_API_KEY}}|$GOOGLE_API_KEY|g" \
+    -e "s|{{APP_PATH}}|$DEPLOY_DIR|g" \
+    -e "s|{{GOOGLE_API_KEY}}|$GOOGLE_API_KEY|g" \
     $DEPLOY_DIR/panchanga_gateway.service.template | sudo tee /etc/systemd/system/$APP_NAME.service > /dev/null
 
 sudo systemctl daemon-reload
