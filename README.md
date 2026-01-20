@@ -19,11 +19,11 @@ A high-precision tool to convert **any Gregorian event** into its Traditional Pa
    source venv/bin/activate
    pip install -r requirements.txt
    ```
-2. **Run:** `python3 app.py`
+2. **Run:** `python3 gateway.py`
 
 ### Accessing the Application
 Once the script finishes, it will print your public IP. You can access the application at:
-`http://<your-vm-ip>:5080`
+`http://localhost:5080` (or your VM IP)
 
 ### Cloud Deployment (Native Linux VM)
 Simply run the bootstrap script on your VM (Oracle Linux 9 / RHEL recommended):
@@ -33,14 +33,12 @@ cd gregorian_to_ancient_calendars
 sudo bash ./deploy.sh
 ```
 
-### MAINTENANCE: Pulling Updates
-To quickly update your live application to the latest version:
+### MAINTAINING v2.0
+To quickly refresh your live application:
 ```bash
-cd ~/gregorian_to_ancient_calendars
-chmod +x update_app.sh
-./update_app.sh
+sudo bash ./deploy.sh
 ```
-This "Hybrid Sync" workflow uses `rsync` to preserve SELinux labels and optimizes the update process to take less than 10 seconds.
+The `deploy.sh` script is optimized to handle SELinux transitions and fresh environment setups for Oracle Linux 9.
 
 ## Documentation
 Refer to the `docs/` directory for detailed architecture and implementation plans.

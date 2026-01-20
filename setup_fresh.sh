@@ -1,18 +1,18 @@
 #!/bin/bash
 
 # =================================================================
-# Hindu Panchanga V6.0 - Oracle Linux 9 Fresh Install Orchestrator
+# Ancient Calendars v2.0 Headless - Oracle Linux 9 Orchestrator
 # =================================================================
 
 # Exit on any error
 set -e
 
-REPO_URL="https://github.com/nanjunda/gregorian_to_hindu_calendar.git"
+REPO_URL="https://github.com/nanjunda/gregorian_to_ancient_calendars.git"
 INSTALL_BASE="/tmp"
-INSTALL_DIR="$INSTALL_BASE/panchanga_masterclass_v6.0"
-APP_NAME="gregorian_to_hindu_calendar"
-# Allow branch override, default to current feature branch
-BRANCH=${1:-"feature/v6.0.2"}
+INSTALL_DIR="$INSTALL_BASE/ancient_calendars_v2.0"
+APP_NAME="gregorian_to_ancient_calendars"
+# Default to v2.0 main branch
+BRANCH=${1:-"main"}
 
 echo "🌌 Starting Fresh Installation of Hindu Panchanga..."
 echo "🌿 Target Branch: $BRANCH"
@@ -73,7 +73,7 @@ sudo GOOGLE_API_KEY="$GOOGLE_API_KEY" bash ./deploy.sh
 
 
 echo "================================================================="
-echo "✅ SUCCESS! Hindu Panchanga Scientific Masterclass V6.0 is now installed."
+echo "✅ SUCCESS! Ancient Calendars v2.0 (Headless Edition) is now installed."
 echo "🌍 Access at: https://$PUBLIC_IP:58921"
-echo "📘 The Student Guide is linked in the footer."
+echo "📘 The API v2 Contract is documented in the docs/ folder."
 echo "================================================================="

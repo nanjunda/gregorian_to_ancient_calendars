@@ -344,15 +344,25 @@ class GeminiEngine(BaseAIEngine):
 # Factory or Manager to handle future expansion
 class AIEngineManager:
     def __init__(self):
-        # Auto-Detection Logic
-        if os.environ.get("OPENROUTER_API_KEY"):
-            print("🌟 Detected OPENROUTER_API_KEY. Switching to OpenRouter Engine.")
-            self.engine = OpenRouterEngine()
-            self.provider = "openrouter"
-        else:
+        # 1. Determine Provider (Explicit vs Auto-Detect)
+        explicit_provider = os.environ.get("AI_PROVIDER", "").lower()
+        
+        if explicit_provider == "gemini" or (not explicit_provider and not os.environ.get("OPENROUTER_API_KEY")):
             print("Detected Standard Configuration. Using Gemini Engine.")
             self.engine = GeminiEngine()
             self.provider = "gemini"
+        else:
+            # Default to OpenRouter if key exists or explicitly requested
+            print("🌟 Using OpenRouter Engine (Default Provider).")
+            self.engine = OpenRouterEngine()
+            self.provider = "openrouter"
+            
+            # 2. Apply Model Override if requested
+            model_override = os.environ.get("AI_MODEL_OVERRIDE")
+            if model_override:
+                print(f"   ⚠️ AI Model Override Active: {model_override}")
+                # Prepend override to the fallback list
+                self.engine.models.insert(0, model_override)
 
     def get_explanation(self, config_data):
         return self.engine.generate_insight(config_data)

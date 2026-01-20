@@ -3,8 +3,8 @@
 # Exit on any error
 set -e
 
-echo "🚀 Starting Gregorian to Ancient Calendars v1.0 Deployment..."
-echo "ℹ️  Mode: Nginx Reverse Proxy (Port 5080) -> Gunicorn"
+echo "🚀 Starting Gregorian to Ancient Calendars v2.0 (Headless Edition) Deployment..."
+echo "ℹ️  Mode: Nginx Reverse Proxy (Port 58921) -> Gunicorn (Gateway)"
 echo "⚠️  RELOCATING App to /opt/ancient_calendars for SELinux stability"
 
 APP_NAME="ancient_calendars"
@@ -88,9 +88,9 @@ sudo -u $CURRENT_USER ./venv/bin/pip install --upgrade pip
 sudo -u $CURRENT_USER ./venv/bin/pip install -r requirements.txt
 
 # 5. Pre-launch Syntax Check (v5.6.1)
-echo "🔍 Validating code integrity..."
-if ! sudo -u $CURRENT_USER ./venv/bin/python3 -m py_compile $DEPLOY_DIR/app.py $DEPLOY_DIR/utils/ai_engine.py; then
-    echo "❌ CRITICAL ERROR: Syntax error detected in the code!"
+echo "🔍 Validating code integrity (v2.0 Architectural Check)..."
+if ! sudo -u $CURRENT_USER ./venv/bin/python3 -m py_compile $DEPLOY_DIR/gateway.py $DEPLOY_DIR/app.py $DEPLOY_DIR/engines/panchanga/engine.py; then
+    echo "❌ CRITICAL ERROR: Syntax error detected in v2.0 core files!"
     echo "   Check the output above for the specific line number."
     exit 1
 fi
@@ -129,9 +129,9 @@ fi
 echo "⚙️  Configuring systemd service..."
 sed -e "s|{{USER}}|$CURRENT_USER|g" \
     -e "s|{{GROUP}}|$HTTP_GROUP|g" \
-    -e "s|{{APP_PATH}}|$DEPLOY_DIR|g" \
-    -e "s|{{GOOGLE_API_KEY}}|$GOOGLE_API_KEY|g" \
-    $DEPLOY_DIR/ancient_calendars.service.template | sudo tee /etc/systemd/system/$APP_NAME.service > /dev/null
+    -s "s|{{APP_PATH}}|$DEPLOY_DIR|g" \
+    -s "s|{{GOOGLE_API_KEY}}|$GOOGLE_API_KEY|g" \
+    $DEPLOY_DIR/panchanga_gateway.service.template | sudo tee /etc/systemd/system/$APP_NAME.service > /dev/null
 
 sudo systemctl daemon-reload
 sudo systemctl enable $APP_NAME
@@ -154,9 +154,9 @@ echo "================================================================="
 echo "🕵️  Self-Diagnostic: Checking Service Health..."
 sleep 5
 if systemctl is-active --quiet $APP_NAME; then
-    echo "   ✅ Gunicorn Service is RUNNING."
-    if curl -s -I http://127.0.0.1:8000 | grep -q "200 OK\|302 Found\|301 Moved"; then
-        echo "   ✅ Backend is RESPONDING."
+    echo "   ✅ Gunicorn Gateway Service is RUNNING."
+    if curl -s -I http://127.0.0.1:5080 | grep -q "200 OK\|302 Found\|301 Moved"; then
+        echo "   ✅ Backend Gateway is RESPONDING."
     else
         echo "   ⚠️  Backend is NOT responding. Check logs: journalctl -u $APP_NAME"
     fi

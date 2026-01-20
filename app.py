@@ -13,6 +13,7 @@ import os
 import base64
 from utils.ai_engine import ai_engine
 import traceback
+import json
 
 app = Flask(__name__)
 
@@ -227,6 +228,133 @@ def get_panchanga():
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+# ==============================================================================
+# API v2 - HEADLESS UNIFIED ENDPOINTS
+# ==============================================================================
+
+@app.route('/api/v2/calculate', methods=['POST'])
+def api_v2_calculate():
+    """
+    Unified Headless API for Ancient Calendars v2.0.
+    Follows the Contract defined in docs/api_contract_v2.md
+    """
+    input_data = request.json
+    calendar_type = input_data.get('calendar', 'panchanga')
+    date_str = input_data.get('date')
+    time_str = input_data.get('time')
+    location_name = input_data.get('location')
+    lang = input_data.get('lang', 'EN')
+    client_profile = input_data.get('client_profile', {})
+
+    if not all([date_str, time_str, location_name]):
+        return jsonify({"status": "error", "message": "Missing required fields"}), 400
+
+    try:
+        # 1. Get appropriate engine
+        engine = EngineFactory.get_engine(calendar_type)
+        
+        # 2. Perform raw calculation (Proven logic)
+        raw_results = engine.calculate_data(date_str, time_str, location_name, lang=lang)
+        
+        # 3. Get metadata and AI context
+        visual_configs = engine.get_visual_configs(raw_results)
+        ai_context = engine.get_ai_context(raw_results)
+
+        # 4. Construct v2.0 Response (The Contract)
+        response = {
+            "status": "success",
+            "metadata": {
+                "civilization": calendar_type,
+                "engine_version": "2.0",
+                "timestamp_utc": datetime.now(pytz.utc).isoformat(),
+                "render_hints": visual_configs.get("modules", [])
+            },
+            "results": {
+                "civilization_specific": {
+                    "samvatsara": raw_results.get("samvatsara"),
+                    "masa": raw_results.get("masa"),
+                    "paksha": raw_results.get("paksha"),
+                    "tithi": raw_results.get("tithi"),
+                    "vara": raw_results.get("vara"),
+                    "nakshatra": raw_results.get("nakshatra"),
+                    "yoga": raw_results.get("yoga"),
+                    "karana": raw_results.get("karana"),
+                    "saka_year": raw_results.get("saka_year")
+                },
+                "coordinates": {
+                    "rashi": raw_results.get("rashi"),
+                    "lagna": raw_results.get("lagna")
+                },
+                "astronomy": {
+                    "sunrise": raw_results.get("sunrise"),
+                    "sunset": raw_results.get("sunset"),
+                    "angular_data": raw_results.get("angular_data"),
+                    "next_birthday": raw_results.get("next_birthday")
+                }
+            },
+            "education": {
+                "summary": f"Calculated {calendar_type.capitalize()} alignment for {date_str}.",
+                "report_manual": raw_results.get("report")
+            }
+        }
+
+        return jsonify(response)
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/api/v2/ai-explain', methods=['POST'])
+def api_v2_ai_explain():
+    """
+    Headless AI Explanation for v2.0.
+    """
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"status": "error", "message": "No data received."}), 400
+            
+        raw_output = ai_engine.get_explanation(data)
+        
+        # Clean potential JSON wrapping from AI
+        clean_markdown = raw_output.replace('```json', '').replace('```', '').strip()
+        
+        return jsonify({
+            "status": "success",
+            "metadata": { "engine": ai_engine.provider },
+            "education": {
+                "format": "markdown",
+                "content": clean_markdown
+            }
+        })
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/v2/ai-chat', methods=['POST'])
+def api_v2_ai_chat():
+    """
+    Headless AI Chat for v2.0.
+    """
+    try:
+        data = request.get_json()
+        message = data.get('message')
+        context = data.get('context', {})
+
+        if not message:
+            return jsonify({"status": "error", "message": "Missing message"}), 400
+            
+        response = ai_engine.chat_with_tutor(message, context)
+        
+        return jsonify({
+            "status": "success",
+            "response": response
+        })
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/explore')
 def explore():
