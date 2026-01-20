@@ -178,4 +178,5 @@ Regardless of the architectural shift, the **Panchanga Mathematics and education
 
 ---
 **Last Updated**: January 19, 2026  
-**Status**: 🔵 v2.0 Production-Ready
+> [!TIP]
+> **Oracle Linux 9 Deployment Tip**: If environment variables (like `OPENROUTER_API_KEY`) are not being detected by the orchestrator even when using `sudo -E`, it is most reliable to switch to a **Root Shell** first (`sudo -i`), export the variables there, and run the command using **Process Substitution**: `bash <(curl -L [URL])`.
