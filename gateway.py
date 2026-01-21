@@ -2,14 +2,13 @@ from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from app import app as legacy_app
 
 # ==============================================================================
-# The Constellation Hub (Gateway)
+# The Ancient Calendars Gateway (v2.1)
 # ==============================================================================
-# This file acts as the new entry point for the application server.
-# It wraps the existing 'app.py' (Legacy Hindu Panchanga) and serves it at the root '/'.
+# This file acts as the production entry point.
+# It wraps 'app.py' (The Multi-Civilization Hub) and serves it at the root '/'.
 # 
-# This architecture allows us to mount NEW calendars (e.g., Mayan, Chinese) at
-# separate paths (e.g., '/mayan') in the future WITHOUT modifying the existing
-# stable code in 'app.py'.
+# The application logic is modularized into 'engines/', allowing app.py
+# to function as a unified headless hub for all civilizations.
 # ==============================================================================
 
 application = DispatcherMiddleware(legacy_app, {

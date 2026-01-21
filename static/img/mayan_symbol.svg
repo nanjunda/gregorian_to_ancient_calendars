@@ -1,0 +1,73 @@
+<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Mayan Calendar - Pure Mathematical/Astronomical Design -->
+  <defs>
+    <radialGradient id="mayanGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ff9500;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#ff6b00;stop-opacity:0.8" />
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="200" cy="200" r="180" fill="url(#mayanGrad)" opacity="0.2"/>
+  
+  <!-- Outer ring - Haab' (365 days, 18 months) -->
+  <circle cx="200" cy="200" r="170" fill="none" stroke="#ff9500" stroke-width="3" filter="url(#glow)"/>
+  <text x="200" y="50" text-anchor="middle" fill="#ff9500" font-size="14" font-family="monospace">HAAB' (365)</text>
+  
+  <!-- 18 month markers -->
+  <g id="haabMarkers">
+    <line x1="200" y1="35" x2="200" y2="45" stroke="#ff6b00" stroke-width="2"/>
+    <line x1="200" y1="355" x2="200" y2="365" stroke="#ff6b00" stroke-width="2"/>
+    <line x1="35" y1="200" x2="45" y2="200" stroke="#ff6b00" stroke-width="2"/>
+    <line x1="355" y1="200" x2="365" y2="200" stroke="#ff6b00" stroke-width="2"/>
+  </g>
+  
+  <!-- Middle ring - Tzolk'in (260 days) -->
+  <circle cx="200" cy="200" r="130" fill="none" stroke="#ffaa00" stroke-width="3" filter="url(#glow)"/>
+  <text x="200" y="90" text-anchor="middle" fill="#ffaa00" font-size="14" font-family="monospace">TZOLK'IN (260)</text>
+  
+  <!-- 20 day markers -->
+  <g id="tzolkinMarkers">
+    <circle cx="200" cy="70" r="3" fill="#ffaa00"/>
+    <circle cx="200" cy="330" r="3" fill="#ffaa00"/>
+    <circle cx="70" cy="200" r="3" fill="#ffaa00"/>
+    <circle cx="330" cy="200" r="3" fill="#ffaa00"/>
+  </g>
+  
+  <!-- Inner ring - Long Count gears -->
+  <circle cx="200" cy="200" r="90" fill="none" stroke="#cc7700" stroke-width="3" filter="url(#glow)"/>
+  
+  <!-- Vigesimal (Base-20) number system representation -->
+  <g id="vigesimalGears">
+    <!-- Kin (1 day) -->
+    <circle cx="200" cy="200" r="20" fill="none" stroke="#ff6b00" stroke-width="2"/>
+    <text x="200" y="205" text-anchor="middle" fill="#ff9500" font-size="10" font-family="monospace">KIN</text>
+    
+    <!-- Uinal (20 days) -->
+    <circle cx="200" cy="200" r="40" fill="none" stroke="#ff7700" stroke-width="1.5" stroke-dasharray="5,3"/>
+    
+    <!-- Tun (360 days) -->
+    <circle cx="200" cy="200" r="60" fill="none" stroke="#ff8800" stroke-width="1.5" stroke-dasharray="8,4"/>
+  </g>
+  
+  <!-- Mathematical grid overlay -->
+  <line x1="200" y1="20" x2="200" y2="380" stroke="#ff9500" stroke-width="0.5" opacity="0.3"/>
+  <line x1="20" y1="200" x2="380" y2="200" stroke="#ff9500" stroke-width="0.5" opacity="0.3"/>
+  
+  <!-- B'ak'tun cycle markers (4 corners) -->
+  <text x="50" y="50" fill="#ff6b00" font-size="12" font-family="monospace">13</text>
+  <text x="350" y="50" fill="#ff6b00" font-size="12" font-family="monospace">0</text>
+  <text x="50" y="360" fill="#ff6b00" font-size="12" font-family="monospace">0</text>
+  <text x="350" y="360" fill="#ff6b00" font-size="12" font-family="monospace">0</text>
+  
+  <!-- Center label -->
+  <text x="200" y="250" text-anchor="middle" fill="#ff9500" font-size="11" font-family="monospace" font-weight="bold">LONG COUNT</text>
+  <text x="200" y="265" text-anchor="middle" fill="#ffaa00" font-size="9" font-family="monospace">VIGESIMAL SYSTEM</text>
+</svg>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panchanga Insights | Cosmic Configuration</title>
+    <title>{{ 'Mayan Chronology' if active_civ == 'mayan' else 'Panchanga Insights' }} | Cosmic Configuration</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;500;700&display=swap"
@@ -430,7 +430,7 @@
 <body>
     <div class="container">
         <header>
-            <h1>Panchanga Insights</h1>
+            <h1>{{ 'Mayan Calendar Insights' if active_civ == 'mayan' else 'Panchanga Insights' }}</h1>
             <p id="config-title">Astronomical Configuration</p>
         </header>
 
@@ -503,8 +503,10 @@
                 </div>
                 <div id="chat-messages" class="chat-messages">
                     <div class="message bot">
-                        Greetings, cosmic traveler! I am the Maestro. Ask me anything about the stars, the Panchanga, or
-                        how ancient civilizations read the sky.
+                        {{ "Greetings, student of the Yucatan! I am the Maestro. Ask me anything about the Long Count,
+                        the B'ak'tun cycles, or how the Maya tracked the celestial heartbeat." if active_civ == 'mayan'
+                        else "Greetings, cosmic traveler! I am the Maestro. Ask me anything about the stars, the
+                        Panchanga, or how ancient civilizations read the sky." }}
                     </div>
                 </div>
                 <div class="chat-input-area">
@@ -518,7 +520,8 @@
         </div>
 
         <footer>
-            <p>&copy; 2026 Hindu Panchanga Engine | AI Powered Insights</p>
+            <p>&copy; 2026 {{ 'Mayan Calendar Engine' if active_civ == 'mayan' else 'Hindu Panchanga Engine' }} | AI
+                Powered Insights</p>
         </footer>
     </div>
 
@@ -527,12 +530,14 @@
             console.log("Insights page initialized.");
 
             // Priority 1: Data passed directly from server (v5.0 robust delivery)
+            const activeCiv = "{{ active_civ }}";
             let insightData = {% if initial_data %}{{ initial_data | tojson | safe }}{% else %}null{% endif %};
 
         // Priority 2: Fallback to storage if page was refreshed or direct access
         if (!insightData) {
             console.log("No server-side data found, checking local storage...");
-            const rawData = localStorage.getItem('lastPanchangaResult') || sessionStorage.getItem('lastPanchangaResult');
+            const storageKey = activeCiv === 'panchanga' ? 'lastPanchangaResult' : `last${activeCiv.charAt(0).toUpperCase() + activeCiv.slice(1)}Result`;
+            const rawData = localStorage.getItem(storageKey) || localStorage.getItem('lastHubResult');
             if (rawData) {
                 try { insightData = JSON.parse(rawData); } catch (e) { }
             }
@@ -555,7 +560,11 @@
             return;
         }
 
-        configTitle.textContent = `${insightData.masa} ${insightData.samvatsara} | ${insightData.tithi}`;
+        if (activeCiv === 'mayan') {
+            configTitle.textContent = `${insightData.long_count.formatted} | ${insightData.tzolkin.formatted}`;
+        } else {
+            configTitle.textContent = `${insightData.masa} ${insightData.samvatsara} | ${insightData.tithi}`;
+        }
 
         try {
             const response = await fetch('/api/ai-explain', {
@@ -593,7 +602,7 @@
                     console.error("Markdown parse failed:", pe);
                     htmlContent = rawInsight.replace(/\n/g, '<br>');
                 }
-                const glossary = {
+                const panchangaGlossary = {
                     'epoch': { def: 'A fixed point in time used as a reference point.', target: null },
                     'jovian': { def: 'Relating to Jupiter. The 60-year Samvatsara cycle follows Jupiter\'s path.', target: 'SAMVATSARA_RESONANCE' },
                     'precession': { def: 'The slow conical wobble of Earth\'s axis (25,800 year cycle).', target: 'PRECESSION_WOBBLE' },
@@ -606,6 +615,20 @@
                     'chandra mana': { def: 'Luni-Solar Month system. Defined by the Moon\'s phase cycle.', target: 'MOON_PHASE_3D' },
                     'adhik masa': { def: 'The \'Extra Month\' (Pit Stop) added every ~3 years to let the Sun catch up.', target: 'CALENDAR_DRIFT' }
                 };
+
+                const mayanGlossary = {
+                    'b\'ak\'tun': { def: 'A cycle of 144,000 days (~394 years) in the Long Count.', target: null },
+                    'tzolk\'in': { def: 'The 260-day sacred calendar, interlocked with the solar year.', target: null },
+                    'haab\'': { def: 'The 365-day solar calendar, composed of 18 months of 20 days.', target: null },
+                    'calendar round': { def: 'A 52-year cycle where a specific Tzolk\'in and Haab\' date repeats.', target: 'CALENDAR_DRIFT' },
+                    'vigesimal': { def: 'Base-20 math system used by the Maya (insted of decimal Base-10).', target: null },
+                    'wayeb\'': { def: 'The 19th month of the Haab\', consisting of 5 "nameless" days.', target: null },
+                    'kin': { def: 'A single day in the Long Count system.', target: null },
+                    'uinal': { def: 'A period of 20 days (Mayan month).', target: null },
+                    'tun': { def: 'A period of 360 days (approximate solar year).', target: null }
+                };
+
+                const glossary = activeCiv === 'mayan' ? mayanGlossary : panchangaGlossary;
 
                 for (const [term, data] of Object.entries(glossary)) {
                     const regex = new RegExp(`\\b${term}\\b`, 'gi');

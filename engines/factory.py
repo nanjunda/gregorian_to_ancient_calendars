@@ -1,4 +1,5 @@
 from engines.panchanga.engine import PanchangaEngine
+from engines.mayan.engine import MayanEngine
 
 class EngineFactory:
     """
@@ -6,8 +7,8 @@ class EngineFactory:
     """
     _engines = {
         "panchanga": PanchangaEngine(),
+        "mayan": MayanEngine(),
         # Future slots:
-        # "mayan": MayanEngine(),
         # "chinese": ChineseEngine()
     }
 

@@ -1,0 +1,76 @@
+<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Chinese Calendar - Pure Astronomical/Mathematical Design -->
+  <defs>
+    <radialGradient id="chineseGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#00ff88;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#00cc66;stop-opacity:0.8" />
+    </radialGradient>
+    <filter id="glowGreen">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="200" cy="200" r="180" fill="url(#chineseGrad)" opacity="0.2"/>
+  
+  <!-- Outer ring - 60-year Sexagenary Cycle -->
+  <circle cx="200" cy="200" r="170" fill="none" stroke="#00ff88" stroke-width="3" filter="url(#glowGreen)"/>
+  <text x="200" y="50" text-anchor="middle" fill="#00ff88" font-size="14" font-family="monospace">SEXAGENARY (60)</text>
+  
+  <!-- 12 Earthly Branches (zodiac positions) -->
+  <circle cx="200" cy="200" r="140" fill="none" stroke="#00dd77" stroke-width="2" stroke-dasharray="10,5" filter="url(#glowGreen)"/>
+  <text x="200" y="80" text-anchor="middle" fill="#00dd77" font-size="12" font-family="monospace">12 BRANCHES</text>
+  
+  <!-- 12 markers for zodiac positions -->
+  <g id="zodiacMarkers">
+    <circle cx="200" cy="60" r="4" fill="#00ff88"/>
+    <circle cx="260" cy="80" r="4" fill="#00ff88"/>
+    <circle cx="300" cy="120" r="4" fill="#00ff88"/>
+    <circle cx="320" cy="170" r="4" fill="#00ff88"/>
+    <circle cx="320" cy="230" r="4" fill="#00ff88"/>
+    <circle cx="300" cy="280" r="4" fill="#00ff88"/>
+    <circle cx="260" cy="320" r="4" fill="#00ff88"/>
+    <circle cx="200" cy="340" r="4" fill="#00ff88"/>
+    <circle cx="140" cy="320" r="4" fill="#00ff88"/>
+    <circle cx="100" cy="280" r="4" fill="#00ff88"/>
+    <circle cx="80" cy="230" r="4" fill="#00ff88"/>
+    <circle cx="80" cy="170" r="4" fill="#00ff88"/>
+  </g>
+  
+  <!-- Middle ring - 10 Celestial Stems -->
+  <circle cx="200" cy="200" r="110" fill="none" stroke="#00cc66" stroke-width="2" filter="url(#glowGreen)"/>
+  <text x="200" y="110" text-anchor="middle" fill="#00cc66" font-size="12" font-family="monospace">10 STEMS</text>
+  
+  <!-- Inner ring - Lunar-Solar sync -->
+  <circle cx="200" cy="200" r="80" fill="none" stroke="#00aa55" stroke-width="2" stroke-dasharray="5,3"/>
+  
+  <!-- Sun-Moon orbital representation -->
+  <g id="orbitalMechanics">
+    <!-- Sun (center) -->
+    <circle cx="200" cy="200" r="15" fill="#ffdd00" opacity="0.6"/>
+    <text x="200" y="205" text-anchor="middle" fill="#000" font-size="10" font-family="monospace">☉</text>
+    
+    <!-- Moon orbit -->
+    <circle cx="200" cy="200" r="50" fill="none" stroke="#00ff88" stroke-width="1" stroke-dasharray="3,2"/>
+    <circle cx="250" cy="200" r="8" fill="#cccccc" opacity="0.8"/>
+    <text x="250" y="204" text-anchor="middle" fill="#000" font-size="8">☽</text>
+  </g>
+  
+  <!-- Mathematical grid -->
+  <line x1="200" y1="30" x2="200" y2="370" stroke="#00ff88" stroke-width="0.5" opacity="0.3"/>
+  <line x1="30" y1="200" x2="370" y2="200" stroke="#00ff88" stroke-width="0.5" opacity="0.3"/>
+  
+  <!-- Cycle numbers -->
+  <text x="60" y="60" fill="#00cc66" font-size="11" font-family="monospace">60</text>
+  <text x="340" y="60" fill="#00cc66" font-size="11" font-family="monospace">12</text>
+  <text x="60" y="350" fill="#00cc66" font-size="11" font-family="monospace">10</text>
+  <text x="340" y="350" fill="#00cc66" font-size="11" font-family="monospace">yr</text>
+  
+  <!-- Center label -->
+  <text x="200" y="260" text-anchor="middle" fill="#00ff88" font-size="11" font-family="monospace" font-weight="bold">SEXAGENARY</text>
+  <text x="200" y="275" text-anchor="middle" fill="#00dd77" font-size="9" font-family="monospace">LUNAR-SOLAR SYNC</text>
+</svg>

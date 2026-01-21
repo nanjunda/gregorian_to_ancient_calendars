@@ -8,9 +8,9 @@ class BaseCalendar(ABC):
     """
 
     @abstractmethod
-    def calculate_data(self, date_obj, location_data):
+    def calculate_data(self, date_str, time_str, location_name, lang='EN'):
         """
-        Performs the core astronomical/calendar calculations.
+        Performs the core astronomical/calendar calculations based on input strings.
         Returns a dictionary containing the primary results.
         """
         pass

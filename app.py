@@ -16,7 +16,14 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    """Entry Portal: Choose Your Epoch"""
+    return render_template('portal.html')
+
+@app.route('/hub/<civilization>')
+def hub_dashboard(civilization):
+    """The Unified Dashboard (Headless)"""
+    # Simply render the same dashboard, the JS will handle the rest
+    return render_template('index.html', active_civ=civilization)
 
 @app.route('/api/generate-ical', methods=['POST'])
 def generate_ical():
@@ -24,7 +31,8 @@ def generate_ical():
     date_str = data.get('date')
     time_str = data.get('time')
     location_name = data.get('location')
-    title = data.get('title', 'Hindu Panchanga Event')
+    calendar_type = data.get('calendar', 'panchanga')
+    title = data.get('title', f'{calendar_type.capitalize()} Event')
     lang = data.get('lang', 'EN')
 
     if not all([date_str, time_str, location_name]):
@@ -32,7 +40,7 @@ def generate_ical():
 
     try:
         # Resolve engine
-        engine = EngineFactory.get_engine("panchanga")
+        engine = EngineFactory.get_engine(calendar_type)
         
         # Generate iCal using the engine (Logic moved to spoke)
         ical_data = engine.generate_ical(date_str, time_str, location_name, title, lang)
@@ -49,12 +57,13 @@ def generate_ical():
 @app.route('/api/skyshot', methods=['POST'])
 def get_skyshot():
     """
-    Generate or retrieve a cached sky map image showing Moon position.
+    Generate or retrieve a cached sky map image.
     """
     data = request.json
     date_str = data.get('date')
     time_str = data.get('time')
     location_name = data.get('location')
+    calendar_type = data.get('calendar', 'panchanga')
     title = data.get('title', '')
     
     if not all([date_str, time_str, location_name]):
@@ -62,7 +71,7 @@ def get_skyshot():
     
     try:
         # Resolve engine
-        engine = EngineFactory.get_engine("panchanga")
+        engine = EngineFactory.get_engine(calendar_type)
         
         # Get rich visuals from engine
         visuals = engine.get_rich_visuals(date_str, time_str, location_name, title)
@@ -70,7 +79,7 @@ def get_skyshot():
         return jsonify({
             "success": True,
             "image_data": visuals.get("skyshot"),
-            "cached": "N/A" # Cache management is now internal to Engine
+            "cached": "N/A"
         })
         
     except Exception as e:
@@ -85,6 +94,7 @@ def get_solar_system():
     date_str = data.get('date')
     time_str = data.get('time')
     location_name = data.get('location')
+    calendar_type = data.get('calendar', 'panchanga')
     title = data.get('title', '')
     
     if not all([date_str, time_str, location_name]):
@@ -92,7 +102,7 @@ def get_solar_system():
     
     try:
         # Resolve engine
-        engine = EngineFactory.get_engine("panchanga")
+        engine = EngineFactory.get_engine(calendar_type)
         
         # Get rich visuals from engine
         visuals = engine.get_rich_visuals(date_str, time_str, location_name, title)
@@ -102,7 +112,7 @@ def get_solar_system():
             "image_data": visuals.get("solar_system"),
             "cached": "N/A"
         })
-        
+    
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
@@ -174,6 +184,22 @@ def api_v2_calculate():
         rich_visuals = engine.get_rich_visuals(date_str, time_str, location_name, title)
 
         # 5. Construct v2.0 Response (The Contract)
+        # ZERO MUTATION: Ensure Panchanga specific block stays identical to v2.0
+        if calendar_type == 'panchanga':
+            civ_specific = {
+                "samvatsara": raw_results.get("samvatsara"),
+                "masa": raw_results.get("masa"),
+                "paksha": raw_results.get("paksha"),
+                "tithi": raw_results.get("tithi"),
+                "vara": raw_results.get("vara"),
+                "nakshatra": raw_results.get("nakshatra"),
+                "yoga": raw_results.get("yoga"),
+                "karana": raw_results.get("karana"),
+                "saka_year": raw_results.get("saka_year")
+            }
+        else:
+            civ_specific = raw_results
+
         response = {
             "status": "success",
             "metadata": {
@@ -183,17 +209,7 @@ def api_v2_calculate():
                 "render_hints": visual_configs.get("modules", [])
             },
             "results": {
-                "civilization_specific": {
-                    "samvatsara": raw_results.get("samvatsara"),
-                    "masa": raw_results.get("masa"),
-                    "paksha": raw_results.get("paksha"),
-                    "tithi": raw_results.get("tithi"),
-                    "vara": raw_results.get("vara"),
-                    "nakshatra": raw_results.get("nakshatra"),
-                    "yoga": raw_results.get("yoga"),
-                    "karana": raw_results.get("karana"),
-                    "saka_year": raw_results.get("saka_year")
-                },
+                "civilization_specific": civ_specific,
                 "coordinates": {
                     "rashi": raw_results.get("rashi"),
                     "lagna": raw_results.get("lagna")
@@ -280,11 +296,12 @@ def explore():
     return render_template('flyer.html')
 
 @app.route('/guide')
-def guide():
+@app.route('/guide/<civ>')
+def guide(civ='panchanga'):
     """
     Serve the interactive HTML Student Guide.
     """
-    return render_template('guide.html')
+    return render_template('guide.html', active_civ=civ)
 
 @app.route('/visuals/lunar-nodes')
 def lunar_nodes_visual():
@@ -299,6 +316,16 @@ def zodiac_visual():
     Serve the 3D Zodiac Stadium visualization.
     """
     return render_template('zodiac_visual.html')
+
+@app.route('/visuals/mayan-gears')
+def visual_mayan_gears():
+    """Serve the 3D Mayan Odometer (Base-20) interactive module."""
+    return render_template('visuals/mayan_gears.html')
+
+@app.route('/visuals/venus-cycle')
+def visual_venus_cycle():
+    """Serve the 3D Venus Synodic Cycle (Path of Kukulkan) interactive module."""
+    return render_template('visuals/venus_cycle.html')
 
 @app.route('/visuals/zodiac-comparison')
 def zodiac_comparison():
@@ -408,7 +435,8 @@ def ai_chat():
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/insights', methods=['GET', 'POST'], strict_slashes=False)
-def insights_page():
+@app.route('/insights/<civ>', methods=['GET', 'POST'], strict_slashes=False)
+def insights_page(civ=None):
     """
     Serve the deep insights page. Can receive configuration via POST for reliability.
     """
@@ -420,13 +448,17 @@ def insights_page():
                 data = request.json
             else:
                 import json
-                data_str = request.form.get('panchanga_data')
+                # Handle both legacy key and new hub key for Zero Mutation
+                data_str = request.form.get('panchanga_data') or request.form.get('hub_data')
                 if data_str:
                     data = json.loads(data_str)
         except Exception as e:
             print(f"Error parsing insights POST data: {e}")
     
-    return render_template('insights.html', initial_data=data)
+    # Resolve active civ
+    active_civ = civ or (data.get('metadata', {}).get('civilization') if data else 'panchanga')
+    
+    return render_template('insights.html', initial_data=data, active_civ=active_civ)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5080, debug=True)

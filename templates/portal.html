@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Hub - Choose Your Epoch</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Cosmic Background */
+        .cosmic-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('{{ url_for('static', filename='img/cosmic_background.png') }}');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            animation: slowZoom 60s ease-in-out infinite alternate;
+        }
+
+        @keyframes slowZoom {
+            0% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(1.1);
+            }
+        }
+
+        /* Overlay for depth */
+        .cosmic-background::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.4) 100%);
+        }
+
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .portal-header {
+            text-align: center;
+            margin-bottom: 4rem;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .portal-header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 4rem;
+            font-weight: 900;
+            letter-spacing: 0.3rem;
+            background: linear-gradient(135deg, #00d4ff 0%, #7b2ff7 50%, #f107a3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(0, 212, 255, 0.5);
+            margin-bottom: 1rem;
+        }
+
+        .portal-header .subtitle {
+            font-size: 1.2rem;
+            color: #a0a0a0;
+            letter-spacing: 0.2rem;
+            text-transform: uppercase;
+        }
+
+        /* Epoch Grid */
+        .epoch-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 3rem;
+            max-width: 1400px;
+            width: 100%;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        /* Epoch Card */
+        .epoch-card {
+            position: relative;
+            background: rgba(15, 15, 35, 0.6);
+            border-radius: 24px;
+            padding: 2.5rem;
+            text-decoration: none;
+            color: #fff;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid transparent;
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .epoch-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, var(--glow-color-1), var(--glow-color-2));
+            border-radius: 24px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .epoch-card:hover::before {
+            opacity: 1;
+        }
+
+        .epoch-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Card Variants */
+        .card-panchanga {
+            --glow-color-1: #00d4ff;
+            --glow-color-2: #0066ff;
+        }
+
+        .card-mayan {
+            --glow-color-1: #ff6b00;
+            --glow-color-2: #ff9500;
+        }
+
+        .card-chinese {
+            --glow-color-1: #00ff88;
+            --glow-color-2: #00cc66;
+        }
+
+        /* Symbol Container */
+        .symbol-container {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 2rem;
+            position: relative;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .symbol-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 20px var(--glow-color-1));
+            transition: filter 0.4s ease;
+        }
+
+        .epoch-card:hover .symbol-container img {
+            filter: drop-shadow(0 0 40px var(--glow-color-1)) drop-shadow(0 0 60px var(--glow-color-2));
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(5deg);
+            }
+        }
+
+        /* Card Content */
+        .card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--glow-color-1);
+            text-shadow: 0 0 20px var(--glow-color-1);
+        }
+
+        .card-desc {
+            text-align: center;
+            line-height: 1.6;
+            color: #c0c0c0;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .btn-enter {
+            display: block;
+            text-align: center;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--glow-color-1), var(--glow-color-2));
+            border-radius: 50px;
+            font-weight: 600;
+            letter-spacing: 0.1rem;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .epoch-card:hover .btn-enter {
+            box-shadow: 0 10px 40px var(--glow-color-1);
+            transform: scale(1.05);
+        }
+
+        /* Coming Soon Badge */
+        .coming-soon {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.1rem;
+            text-transform: uppercase;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .portal-header h1 {
+                font-size: 2.5rem;
+                letter-spacing: 0.2rem;
+            }
+
+            .portal-header .subtitle {
+                font-size: 0.9rem;
+            }
+
+            .epoch-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .symbol-container {
+                width: 150px;
+                height: 150px;
+            }
+
+            .card-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="cosmic-background"></div>
+
+    <div class="container">
+        <header class="portal-header">
+            <h1>CHOOSE YOUR EPOCH</h1>
+            <p class="subtitle">Navigate the Cosmic Timelines</p>
+        </header>
+
+        <div class="epoch-grid">
+            <!-- Hindu Panchanga Card -->
+            <a href="/hub/panchanga" class="epoch-card card-panchanga">
+                <div class="symbol-container">
+                    <img src="{{ url_for('static', filename='img/hindu_symbol.png') }}" alt="Hindu Panchanga">
+                </div>
+                <div class="card-title">HINDU PANCHANGA</div>
+                <p class="card-desc">Navigate the lunar-solar sync with 5,000 years of precision. Track Samvatsara,
+                    Tithi, and Nakshatra through the celestial wheel.</p>
+                <div class="btn-enter">Enter Hub</div>
+            </a>
+
+            <!-- Mayan Long Count Card -->
+            <a href="/hub/mayan" class="epoch-card card-mayan">
+                <div class="symbol-container">
+                    <img src="{{ url_for('static', filename='img/mayan_symbol.svg') }}" alt="Mayan Long Count">
+                </div>
+                <div class="card-title">MAYAN LONG COUNT</div>
+                <p class="card-desc">Master the interlocked gears of the Tzolk'in and Haab'. Decipher the vigesimal
+                    odometer of the B'ak'tun cycles.</p>
+                <div class="btn-enter">Enter Hub</div>
+            </a>
+
+            <!-- Ancient Chinese Card (Coming Soon) -->
+            <div class="epoch-card card-chinese" style="pointer-events: none; opacity: 0.7;">
+                <span class="coming-soon">Coming Soon</span>
+                <div class="symbol-container">
+                    <img src="{{ url_for('static', filename='img/chinese_symbol.svg') }}" alt="Ancient Chinese">
+                </div>
+                <div class="card-title">ANCIENT CHINESE</div>
+                <p class="card-desc">Explore the 60-year Sexagenary cycle, celestial stems, and earthly branches. Decode
+                    the harmony of Yin and Yang.</p>
+                <div class="btn-enter" style="opacity: 0.5;">Coming Soon</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Parallax effect on mouse move
+        document.addEventListener('mousemove', (e) => {
+            const cards = document.querySelectorAll('.epoch-card');
+            const mouseX = e.clientX / window.innerWidth - 0.5;
+            const mouseY = e.clientY / window.innerHeight - 0.5;
+
+            cards.forEach((card, index) => {
+                const depth = (index + 1) * 10;
+                const moveX = mouseX * depth;
+                const moveY = mouseY * depth;
+                card.style.transform = `translate(${moveX}px, ${moveY}px)`;
+            });
+        });
+
+        // Reset on mouse leave
+        document.addEventListener('mouseleave', () => {
+            const cards = document.querySelectorAll('.epoch-card');
+            cards.forEach(card => {
+                card.style.transform = 'translate(0, 0)';
+            });
+        });
+    </script>
+</body>
+
+</html>

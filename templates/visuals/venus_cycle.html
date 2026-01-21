@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Path of Kukulkan: Venus Synodic Cycle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+            font-family: sans-serif;
+        }
+
+        #ui {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 20px;
+            border: 1px solid #00d2ff;
+            text-align: center;
+            width: 300px;
+        }
+
+        input[type=range] {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .label {
+            color: #aaa;
+            font-size: 0.8rem;
+        }
+
+        #days-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ffaa00;
+        }
+    </style>
+    <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+    <script type="importmap">
+        { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+    </script>
+</head>
+
+<body>
+    <div id="ui">
+        <div>Day: <span id="days-display">0</span> / 2920 (8 Years)</div>
+        <input type="range" id="time-slider" min="0" max="2920" value="0" step="1">
+        <div class="label">Drag to reveal the Pentagram of Venus</div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
+        // Scene
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 300, 0); // Top-down view
+        camera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        // --- Celestial Objects ---
+
+        // Sun
+        const sun = new THREE.Mesh(new THREE.SphereGeometry(10, 32, 32), new THREE.MeshBasicMaterial({ color: 0xffdd00 }));
+        scene.add(sun);
+        scene.add(new THREE.PointLight(0xffffff, 2, 500));
+
+        // Earth Setup (Radius ~100)
+        const earthOrbit = new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints(new THREE.Path().absarc(0, 0, 100, 0, Math.PI * 2).getPoints(64)),
+            new THREE.LineBasicMaterial({ color: 0x00Aaff, transparent: true, opacity: 0.3 })
+        );
+        earthOrbit.rotation.x = Math.PI / 2;
+        scene.add(earthOrbit);
+
+        const earth = new THREE.Mesh(new THREE.SphereGeometry(4, 16, 16), new THREE.MeshStandardMaterial({ color: 0x2233ff }));
+        scene.add(earth);
+
+        // Venus Setup (Radius ~72)
+        const venusOrbit = new THREE.Line(
+            new THREE.BufferGeometry().setFromPoints(new THREE.Path().absarc(0, 0, 72.3, 0, Math.PI * 2).getPoints(64)),
+            new THREE.LineBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.3 })
+        );
+        venusOrbit.rotation.x = Math.PI / 2;
+        scene.add(venusOrbit);
+
+        const venus = new THREE.Mesh(new THREE.SphereGeometry(3.5, 16, 16), new THREE.MeshStandardMaterial({ color: 0xff8800 }));
+        scene.add(venus);
+
+        // --- The Synodic Pattern (Pentagram) ---
+        // We will draw lines between Earth and Venus at regular intervals
+        const traceGroup = new THREE.Group();
+        scene.add(traceGroup);
+
+        const patternMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.15 });
+
+        function updatePlanets(day) {
+            // Earth: 365.25 days per orbit
+            const earthAngle = (day / 365.25) * Math.PI * 2;
+            earth.position.set(Math.cos(earthAngle) * 100, 0, Math.sin(earthAngle) * 100);
+
+            // Venus: 224.7 days per orbit
+            const venusAngle = (day / 224.7) * Math.PI * 2;
+            venus.position.set(Math.cos(venusAngle) * 72.3, 0, Math.sin(venusAngle) * 72.3);
+        }
+
+        // Pre-calculate full pattern? Or draw dynamically?
+        // Let's draw dynamically based on slider
+        const slider = document.getElementById('time-slider');
+        const display = document.getElementById('days-display');
+
+        function redrawPattern(upToDay) {
+            // Clear old lines
+            while (traceGroup.children.length > 0) {
+                traceGroup.remove(traceGroup.children[0]);
+            }
+
+            display.innerText = upToDay;
+            updatePlanets(upToDay);
+
+            // Draw trace lines every 10 days
+            const geometry = new THREE.BufferGeometry();
+            const points = [];
+
+            for (let d = 0; d <= upToDay; d += 8) { // Step 8 days for performance/clarity
+                const eA = (d / 365.25) * Math.PI * 2;
+                const vA = (d / 224.7) * Math.PI * 2;
+
+                const ePos = new THREE.Vector3(Math.cos(eA) * 100, 0, Math.sin(eA) * 100);
+                const vPos = new THREE.Vector3(Math.cos(vA) * 72.3, 0, Math.sin(vA) * 72.3);
+
+                points.push(ePos.x, ePos.y, ePos.z);
+                points.push(vPos.x, vPos.y, vPos.z);
+            }
+
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(points, 3));
+            const lines = new THREE.LineSegments(geometry, patternMaterial);
+            traceGroup.add(lines);
+        }
+
+        slider.oninput = (e) => {
+            redrawPattern(parseInt(e.target.value));
+        };
+
+        // Initial Draw
+        redrawPattern(0);
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>

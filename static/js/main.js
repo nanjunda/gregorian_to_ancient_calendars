@@ -49,15 +49,20 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     });
 
+    // Get active civilization from URL path if possible
+    const pathParts = window.location.pathname.split('/');
+    const activeCiv = pathParts[pathParts.length - 1] || 'panchanga';
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const data = {
-            title: document.getElementById('title').value,
+            calendar: activeCiv,
             date: document.getElementById('date').value,
             time: document.getElementById('time').value,
             location: locationInput.value,
-            lang: selectedLang
+            lang: selectedLang,
+            title: document.getElementById('title').value
         };
 
         // Show loader, hide results
@@ -65,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         resultContainer.classList.add('hidden');
 
         try {
-            const response = await fetch('/api/panchanga', {
+            const response = await fetch('/api/v2/calculate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -75,14 +80,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await response.json();
 
-            if (result.success) {
-                renderResult(result.data);
+            if (result.status === "success") {
+                renderResult(result);
             } else {
-                alert('Error: ' + result.error);
+                alert('Error: ' + (result.message || result.error));
             }
         } catch (error) {
             console.error('Fetch error:', error);
-            alert('An error occurred while fetching Panchanga data.');
+            alert('An error occurred while fetching data.');
         } finally {
             loader.classList.add('hidden');
         }
@@ -91,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadBtn = document.getElementById('download-ical-btn');
     downloadBtn.addEventListener('click', async () => {
         const data = {
+            calendar: activeCiv,
             title: document.getElementById('title').value,
             date: document.getElementById('date').value,
             time: document.getElementById('time').value,
@@ -133,117 +139,122 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function renderResult(data) {
+    function renderResult(fullResponse) {
+        const data = fullResponse.results;
+        const metadata = fullResponse.metadata;
+        const civSpecific = data.civilization_specific;
+
         // Use user-provided title for the header
-        document.getElementById('res-title').textContent = document.getElementById('title').value || 'Panchanga Result';
-        document.getElementById('res-location').textContent = `${data.address} (${data.timezone})`;
+        document.getElementById('res-title').textContent = document.getElementById('title').value || `${activeCiv.toUpperCase()} Result`;
+        document.getElementById('res-location').textContent = `${locationInput.value}`;
 
-        document.getElementById('res-samvatsara').textContent = data.samvatsara;
-        document.getElementById('res-saka-year').textContent = data.saka_year;
-        document.getElementById('res-masa').textContent = data.masa;
-        document.getElementById('res-paksha').textContent = data.paksha;
-        document.getElementById('res-tithi').textContent = data.tithi;
-        document.getElementById('res-vara').textContent = data.vara;
-        document.getElementById('res-nakshatra').textContent = data.nakshatra;
-        document.getElementById('res-yoga').textContent = data.yoga;
-        document.getElementById('res-rashi').textContent = data.rashi.name;
-        document.getElementById('res-lagna').textContent = data.lagna.name;
+        // Clear and rebuild the grid dynamically
+        const grid = document.querySelector('.grid');
+        grid.innerHTML = '';
 
-        // Persist data for AI insights page (v5.0)
+        // Function to build a grid item
+        const addGridItem = (label, value) => {
+            const item = document.createElement('div');
+            item.className = 'grid-item';
+            item.innerHTML = `
+                <span class="label">${label}</span>
+                <span class="value">${value}</span>
+            `;
+            grid.appendChild(item);
+        };
+
+        // Logic for different civilizations
+        if (activeCiv === 'panchanga') {
+            addGridItem('Samvatsara', civSpecific.samvatsara);
+            addGridItem('Saka Varsha', civSpecific.saka_year);
+            addGridItem('Masa', civSpecific.masa);
+            addGridItem('Paksha', civSpecific.paksha);
+            addGridItem('Tithi', civSpecific.tithi);
+            addGridItem('Vara', civSpecific.vara);
+            addGridItem('Nakshatra', civSpecific.nakshatra);
+            addGridItem('Yoga', civSpecific.yoga);
+            addGridItem('Rashi', data.coordinates.rashi.name);
+            addGridItem('Lagna', data.coordinates.lagna.name);
+        } else if (activeCiv === 'mayan') {
+            addGridItem('Long Count', civSpecific.long_count.formatted);
+            addGridItem('Tzolk\'in', civSpecific.tzolkin.formatted);
+            addGridItem('Haab\'', civSpecific.haab.formatted);
+            addGridItem('Baktun', civSpecific.long_count.baktun);
+            addGridItem('Katun', civSpecific.long_count.katun);
+            addGridItem('Tun', civSpecific.long_count.tun);
+            addGridItem('Uinal', civSpecific.long_count.uinal);
+            addGridItem('Kin', civSpecific.long_count.kin);
+        }
+
+        // Persist data for AI insights page (Zero Mutation for Panchanga)
         try {
             const insightData = {
-                ...data,
+                ...civSpecific,
+                ...data.coordinates,
+                ...data.astronomy,
+                metadata: metadata,
                 input_datetime: `${document.getElementById('date').value} ${document.getElementById('time').value}`
             };
             const dataStr = JSON.stringify(insightData);
-            localStorage.setItem('lastPanchangaResult', dataStr);
-            sessionStorage.setItem('lastPanchangaResult', dataStr); // Dual storage for robustness
-            console.log("Panchanga results persisted for AI insights.");
+
+            // 1. Separate Storage for zero mutation
+            if (activeCiv === 'panchanga') {
+                localStorage.setItem('lastPanchangaResult', dataStr);
+                sessionStorage.setItem('lastPanchangaResult', dataStr);
+            } else {
+                localStorage.setItem(`last${activeCiv.charAt(0).toUpperCase() + activeCiv.slice(1)}Result`, dataStr);
+            }
+
+            // 2. Unified hub storage for the new /insights page
+            localStorage.setItem('lastHubResult', dataStr);
+            console.log(`${activeCiv.toUpperCase()} results persisted.`);
         } catch (e) {
-            console.warn("Storage warning (v5.0): Could not persist data for AI insights.", e);
+            console.warn("Storage warning: Could not persist data for AI insights.", e);
         }
 
-        // Handle AI Insight Link (v5.0 robust delivery via Hidden Form)
+        // Handle AI Insight Link (Dynamic Routing)
         const aiLink = document.getElementById('ai-insight-link');
         if (aiLink) {
             aiLink.onclick = (e) => {
                 e.preventDefault();
-
-                // Create a hidden form to POST the data
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = '/insights';
-
+                form.action = `/insights/${activeCiv}`;
                 const hiddenInput = document.createElement('input');
                 hiddenInput.type = 'hidden';
-                hiddenInput.name = 'panchanga_data';
-                hiddenInput.value = localStorage.getItem('lastPanchangaResult');
-
+                hiddenInput.name = 'hub_data'; // Renamed for hub generality
+                hiddenInput.value = localStorage.getItem('lastHubResult');
                 form.appendChild(hiddenInput);
                 document.body.appendChild(form);
                 form.submit();
             };
         }
 
-        // Next Occurrence (v4.1)
+        // Next Occurrence
         const eventTitle = document.getElementById('title').value || 'Event';
-        document.getElementById('res-next-occurrence-label').textContent = `✨ Next occurrence as per Hindu Panchanga: ${eventTitle}`;
-        document.getElementById('res-next-birthday').textContent = data.next_birthday;
+        const nextLabel = activeCiv === 'panchanga' ? 'Hindu Panchanga' : 'Mayan Calendar Round';
+        document.getElementById('res-next-occurrence-label').textContent = `✨ Next occurrence as per ${nextLabel}: ${eventTitle}`;
+        document.getElementById('res-next-birthday').textContent = data.astronomy.next_birthday || 'See iCal for details';
 
-        // Simplified educational fact cards
-        const factContainer = document.getElementById('fact-cards-container');
-        factContainer.innerHTML = '';
-        const angular = data.angular_data;
-        const westernZodiacs = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
-        const sunIdx = Math.floor(angular.sun_sidereal / 30) % 12;
-        const moonIdx = Math.floor(angular.moon_sidereal / 30) % 12;
-        const facts = [];
-        facts.push({ title: 'Sun', text: `${westernZodiacs[sunIdx]} (sidereal)` });
-        facts.push({ title: 'Moon', text: `${westernZodiacs[moonIdx]} (sidereal)` });
-        // Moon phase description
-        let phaseDesc = '';
-        if (angular.phase_angle === 0) phaseDesc = 'New Moon';
-        else if (angular.phase_angle === 180) phaseDesc = 'Full Moon';
-        else phaseDesc = `${angular.phase_angle.toFixed(1)}° separation`;
-        facts.push({ title: 'Moon Phase', text: phaseDesc });
-        // Precision correction (Ayanamsha)
-        facts.push({ title: 'Precision correction (Ayanamsha)', text: `${angular.ayanamsha.toFixed(2)}°` });
-        // Render cards
-        facts.forEach(f => {
-            const card = document.createElement('div');
-            card.className = 'grid-item';
-            const label = document.createElement('span');
-            label.className = 'label';
-            label.textContent = f.title;
-            const value = document.createElement('span');
-            value.className = 'value';
-            value.textContent = f.text;
-            card.appendChild(label);
-            card.appendChild(value);
-            factContainer.appendChild(card);
-        });
-
-        // Populate sunrise and sunset times
-        document.getElementById('res-sunrise').textContent = data.sunrise || '-';
-        document.getElementById('res-sunset').textContent = data.sunset || '-';
-
-        // Show the fact cards section
-        document.getElementById('fact-cards').classList.remove('hidden');
+        // Sunrise/Sunset
+        document.getElementById('res-sunrise').textContent = data.astronomy.sunrise || '-';
+        document.getElementById('res-sunset').textContent = data.astronomy.sunset || '-';
 
         // Show result grid again
         resultContainer.classList.remove('hidden');
         resultContainer.scrollIntoView({ behavior: 'smooth' });
 
-        // Load the Sky-Shot visualization (Phase 2)
+        // Load visual snippets
         loadSkyshot({
+            calendar: activeCiv,
             date: document.getElementById('date').value,
             time: document.getElementById('time').value,
             location: locationInput.value,
             title: document.getElementById('title').value
         });
 
-        // Load the Solar System visualization (Phase 3)
         loadSolarSystem({
+            calendar: activeCiv,
             date: document.getElementById('date').value,
             time: document.getElementById('time').value,
             location: locationInput.value,
@@ -276,7 +287,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (result.success) {
                 // Update HTML Title Area (v4.1 fix for truncation)
-                skyshotMainTitle.textContent = result.nakshatra || 'Unknown Nakshatra';
+                // Zero Mutation: Keep 'Nakshatra' for Panchanga, use 'Long Count' for Mayan
+                const displayTitle = (activeCiv === 'panchanga') ? (result.nakshatra || 'Unknown Nakshatra') : (civSpecific.long_count ? `Long Count: ${civSpecific.long_count.formatted}` : 'Celestial Alignment');
+                skyshotMainTitle.textContent = displayTitle;
                 skyshotTitleArea.style.opacity = '1';
 
                 // Use Base64 data directly

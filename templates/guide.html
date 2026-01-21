@@ -364,19 +364,234 @@
 <body>
     <div class="container" style="max-width: 900px;">
         <header>
-            <h1>Cosmic Masterclass</h1>
-            <p>The Advanced Student's Guide to Time & Space</p>
+            <h1>{{ 'Mayan Chronology' if active_civ == 'mayan' else 'Cosmic Masterclass' }}</h1>
+            <p>{{ 'Mastering the 2,000-year Vigesimal Odometer' if active_civ == 'mayan' else "The Advanced Student's
+                Guide to Time & Space" }}</p>
         </header>
 
         <main>
             <div class="back-nav">
-                <a href="/" class="insight-link" style="background: rgba(255,255,255,0.05);">← Return to Converter</a>
+                <a href="/hub/{{ active_civ }}" class="insight-link" style="background: rgba(255,255,255,0.05);">←
+                    Return to Hub</a>
                 <button id="audio-tutor-btn" class="btn glass"
                     style="background: rgba(0, 210, 255, 0.1); border: 1px solid var(--secondary); color: var(--secondary); padding: 0.6rem 1.2rem; border-radius: 50px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.9rem;">
                     <span id="audio-icon">🎙️</span> <span id="audio-text">Listen to Maestro</span>
                 </button>
             </div>
 
+            {% if active_civ == 'mayan' %}
+            <section class="card glass guide-content">
+                <h2>1. The Mayan Odometer (Base-20)</h2>
+                <p>
+                    Unlike the decimal (Base-10) system we use today, the Mayans used a **Vigesimal (Base-20)** system.
+                    Why 20? Because we have 10 fingers and 10 toes! This made their math incredibly powerful for
+                    counting large cycles of time.
+                </p>
+                <div class="visual-block-wrapper" id="MAYAN_GEARS">
+                    <div class="visual-block">
+                        <iframe class="visual-iframe" src="/visuals/mayan-gears"></iframe>
+                        <div class="visual-caption">🖥️ 3D Interactive: The Vigesimal Odometer (Click 'Start Time Flow')
+                        </div>
+                    </div>
+                    <div class="visual-significance">
+                        <strong>Significance:</strong> Watch how the **Kin** (Day) ring drives the others. The Mayans
+                        arranged numbers in columns. The "Cryptex" above visualizes how a date like
+                        <code>13.0.0.0.0</code> is just a giant counter ticking forward one day at a time.
+                    </div>
+                </div>
+
+                <div class="anga-card">
+                    <div class="anga-icon">🐚</div>
+                    <div class="anga-info">
+                        <h4>Zero (Shell)</h4>
+                        <p>The Mayans understood the concept of "Zero" centuries before Europe. They wrote it as a
+                            shell, representing completion.</p>
+                    </div>
+                </div>
+
+                <h3>The Long Count Units</h3>
+                <p>Think of a vertical "abacus" of days. Each level is multiplied by 20 (roughly):</p>
+                <ul>
+                    <li><strong>B'ak'tun</strong> (Level 5): 144,000 days (~394 years). The "Era" cycle.</li>
+                    <li><strong>K'atun</strong> (Level 4): 7,200 days (~20 years). The rhythm of generations.</li>
+                    <li><strong>Tun</strong> (Level 3): 360 days. The "approximate year" (18 Uinals).</li>
+                    <li><strong>Uinal</strong> (Level 2): 20 days (One human digit).</li>
+                    <li><strong>Kin</strong> (Level 1): 1 day.</li>
+                </ul>
+
+                <h3>Deep Time: The Cosmic Scale</h3>
+                <p>
+                    The Mayans tracked time on scales that dwarf modern history. While a B'ak'tun (394 years) is huge,
+                    it is just the beginning. They had specific names for numbers that count millions of years into the
+                    past and future.
+                </p>
+
+                <div
+                    style="overflow-x: auto; margin: 1.5rem 0; border: 1px solid var(--glass-border); border-radius: 12px; padding: 1rem; background: rgba(0,0,0,0.2);">
+                    <table
+                        style="width: 100%; text-align: left; border-collapse: collapse; color: var(--text-muted); font-size: 0.9rem;">
+                        <tr
+                            style="border-bottom: 1px solid var(--glass-border); color: var(--secondary); font-family: 'Outfit', sans-serif;">
+                            <th style="padding: 0.5rem;">Unit</th>
+                            <th style="padding: 0.5rem;">Math</th>
+                            <th style="padding: 0.5rem;">Time Scale</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem; color: #fff; font-weight: bold;">Piktun</td>
+                            <td style="padding: 0.5rem;">20 B'ak'tuns</td>
+                            <td style="padding: 0.5rem;">~7,885 Years</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem; color: #fff; font-weight: bold;">Kalabtun</td>
+                            <td style="padding: 0.5rem;">20 Piktuns</td>
+                            <td style="padding: 0.5rem;">~157,000 Years</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem; color: #fff; font-weight: bold;">Kinchiltun</td>
+                            <td style="padding: 0.5rem;">20 Kalabtuns</td>
+                            <td style="padding: 0.5rem;">~3 Million Years</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem; color: #fff; font-weight: bold;">Alautun</td>
+                            <td style="padding: 0.5rem;">20 Kinchiltuns</td>
+                            <td style="padding: 0.5rem;">~63 Million Years</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="anga-card"
+                    style="border-left: 4px solid var(--secondary); background: rgba(255, 145, 0, 0.05);">
+                    <div class="anga-icon">🗿</div>
+                    <div class="anga-info">
+                        <h4>Archaeological Evidence: Coba Stela 1</h4>
+                        <p>
+                            A real monument from the 9th Century CE records a date in the deep mythological past using
+                            **13 place values**: <br>
+                            <code>13.13.13.13.13.13.13.13.13.13.13.13.13</code>
+                        </p>
+                    </div>
+                </div>
+
+                <h3>Why Such Big Numbers?</h3>
+                <p>
+                    Unlike the Greeks who debated precision, or the Romans who struggled with M (1000), the Mayans
+                    freely calculated **LCMs (Least Common Multiples)** of planetary cycles.
+                </p>
+                <ul>
+                    <li><strong>Cyclical + Linear</strong>: They believed time repeats in cycles nested within larger
+                        cycles forever. There is no "Maximum Date."</li>
+                    <li><strong>Comparisons</strong>: While Romans stopped at 100,000, Mayans and Ancient Indians
+                        (Yugas) were the only civilizations comfortable with numbers reaching 10<sup>9</sup> and beyond.
+                    </li>
+                </ul>
+
+
+                <h2>2. The Sacred Calendar Round</h2>
+                <p>
+                    While the Long Count tracks history, daily life followed two interlocked cycles:
+                </p>
+                <blockquote>
+                    "The Calendar Round is like two gears of different sizes—260 teeth and 365 teeth. A specific date
+                    only repeats once every 18,980 days (52 years)."
+                </blockquote>
+
+                <h2>3. Astronomy: The Path of Kukulkan (Venus)</h2>
+                <p>
+                    The Mayans were obsessed with **Venus** (the deity *Kukulkan*). They knew its **Synodic Period**—the
+                    time it takes to return to the same position relative to the Sun—is exactly **584 days**.
+                </p>
+                <p>
+                    They discovered a cosmic secret: <br>
+                    <code>5 Venus Cycles (2,920 days) ≈ 8 solar years.</code>
+                </p>
+
+                <div class="visual-block-wrapper" id="VENUS_TRACKER">
+                    <div class="visual-block">
+                        <iframe class="visual-iframe" src="/visuals/venus-cycle"></iframe>
+                        <div class="visual-caption">🖥️ 3D Sky Simulator: The Pentagram of Venus</div>
+                    </div>
+                    <div class="visual-significance">
+                        <strong>Significance:</strong> Drag the slider to trace the path! Over 8 years, the conjunctions
+                        of Venus and Earth draw a perfect **5-pointed star (Pentagram)** in space. The Mayans timed
+                        their wars and coronations to these specific points, especially the "Heliacal Rise" (Morning
+                        Star).
+                    </div>
+                </div>
+
+                <h2>🎓 The Time-Keeper's Challenge</h2>
+                <p>
+                    Prove your skills as a Day-Keeper (Ah Kin). Decode the date or calculate a cosmic alignment!
+                </p>
+
+                <div class="quiz-container" id="mayan-quiz-widget">
+                    <h3>🔮 Mayan Date Decoder</h3>
+                    <div id="quiz-ui" style="text-align: center;">
+                        <p style="margin-bottom: 1rem;">Enter your Gregorian birthdate to find your Long Count:</p>
+                        <input type="date" id="quiz-date-input"
+                            style="padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--secondary); color: white; border-radius: 8px;">
+                        <button onclick="calculateMayanSignature()"
+                            style="padding: 10px 20px; background: var(--secondary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-left: 10px;">Decode</button>
+
+                        <div id="quiz-result"
+                            style="margin-top: 2rem; display: none; background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--glass-border);">
+                            <div style="font-size: 2rem; color: var(--secondary); font-family: monospace; font-weight: bold;"
+                                id="res-long-count"></div>
+                            <div style="color: #00d2ff; font-size: 1.1rem; margin-top: 0.5rem;" id="res-tzolkin"></div>
+                            <p id="res-math"
+                                style="font-size: 0.9rem; color: #aaa; margin-top: 1rem; font-style: italic;"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    style="text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--glass-border);">
+                    <p style="font-size: 1.3rem; margin-bottom: 2.5rem;">Ready to track the stars yourself?</p>
+                    <a href="/" class="btn"
+                        style="padding: 1.2rem 3rem; border-radius: 50px; background: var(--secondary); color: #000; font-weight: 700; text-decoration: none; font-size: 1.1rem; box-shadow: 0 10px 20px rgba(255, 145, 0, 0.2);">Run
+                        New Conversion</a>
+                </div>
+
+                <script>
+                    // Mini-Calculator for the Quiz Widget
+                    function calculateMayanSignature() {
+                        const dateStr = document.getElementById('quiz-date-input').value;
+                        if (!dateStr) return;
+
+                        const date = new Date(dateStr);
+                        // Julian Day Calculation
+                        const a = Math.floor((14 - (date.getMonth() + 1)) / 12);
+                        const y = date.getFullYear() + 4800 - a;
+                        const m = (date.getMonth() + 1) + 12 * a - 3;
+                        const JDN = date.getDate() + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+
+                        // Mayan Correlation (GMT 584283)
+                        const mayanDay = JDN - 584283;
+
+                        // Long Count
+                        const baktun = Math.floor(mayanDay / 144000);
+                        const r1 = mayanDay % 144000;
+                        const katun = Math.floor(r1 / 7200);
+                        const r2 = r1 % 7200;
+                        const tun = Math.floor(r2 / 360);
+                        const r3 = r2 % 360;
+                        const uinal = Math.floor(r3 / 20);
+                        const kin = r3 % 20;
+
+                        // Tzolk'in
+                        // Reference: 4 Ahau (Day 0) -> Number=(0+4)%13=4 (index 3), Name=(0+19)%20=19 (Ahau)
+                        // Formula: Number = (mayanDay + 3) % 13 + 1
+                        const tzolkinNum = (mayanDay + 3) % 13 + 1; // Correct offset relative to 4 Ahau
+                        const dayNames = ['Imix', 'Ik', 'Akbal', 'Kan', 'Chicchan', 'Cimi', 'Manik', 'Lamat', 'Muluc', 'Oc', 'Chuen', 'Eb', 'Ben', 'Ix', 'Men', 'Cib', 'Caban', 'Etznab', 'Cauac', 'Ahau'];
+                        const tzolkinName = dayNames[(mayanDay + 19) % 20];
+
+                        // UpdateUI
+                        document.getElementById('res-long-count').textContent = `${baktun}.${katun}.${tun}.${uinal}.${kin}`;
+                        document.getElementById('res-tzolkin').textContent = `Tzolk'in: ${tzolkinNum} ${tzolkinName}`;
+                        document.getElementById('res-math').textContent = `Total Days (Kin) since Creation: ${mayanDay.toLocaleString()}`;
+                        document.getElementById('quiz-result').style.display = 'block';
+                    }
+                </script>
+            </section> {% else %}
             <section class="card glass guide-content">
                 <h2>1. The Two Clocks of Earth</h2>
                 <p>
@@ -690,10 +905,12 @@
                         New Conversion</a>
                 </div>
             </section>
+            {% endif %}
         </main>
 
         <footer style="padding: 4rem 0;">
-            <p>&copy; 2026 Hindu Panchanga Engine | Student Masterclass Initiative</p>
+            <p>&copy; 2026 {{ 'Mayan Calendar Engine' if active_civ == 'mayan' else 'Hindu Panchanga Engine' }} |
+                Student Masterclass Initiative</p>
             <p style="margin-top: 1rem; opacity: 0.5;">Scientific calculations powered by NASA JPL Ephemerides.</p>
         </footer>
     </div>
@@ -708,8 +925,10 @@
             </div>
             <div id="chat-messages" class="chat-messages">
                 <div class="message bot">
-                    Greetings, cosmic traveler! I am the Maestro. Ask me anything about the stars, the Panchanga,
-                    or how ancient civilizations read the sky.
+                    {{ "Greetings, student of the Yucatan! I am the Maestro. Ask me anything about the Long Count, the
+                    B'ak'tun cycles, or how the Maya tracked the celestial heartbeat." if active_civ == 'mayan' else
+                    "Greetings, cosmic traveler! I am the Maestro. Ask me anything about the stars, the Panchanga, or
+                    how ancient civilizations read the sky." }}
                 </div>
             </div>
             <div class="chat-input-area">

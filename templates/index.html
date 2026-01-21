@@ -16,8 +16,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>Hindu Panchanga</h1>
-            <p>Precise Panchanga Insights</p>
+            <h1 id="hub-title">{{ 'Hindu Panchanga' if active_civ == 'panchanga' else 'Mayan Long Count' }}</h1>
+            <p id="hub-subtitle">Cosmic Intelligence Dashboard</p>
         </header>
 
         <main>
@@ -50,7 +50,8 @@
                         <button type="button" id="geo-btn" title="Use current location">📍</button>
                         <small class="input-hint">Village, Town, City, or Landmark</small>
                     </div>
-                    <button type="submit" id="submit-btn">Convert to Panchanga</button>
+                    <button type="submit" id="submit-btn">Convert to {{ 'Panchanga' if active_civ == 'panchanga' else
+                        'Ancient Calendar' }}</button>
                 </form>
             </section>
 
@@ -109,7 +110,8 @@
                 </div>
 
                 <div id="next-birthday-section" class="special-card">
-                    <span class="label" id="res-next-occurrence-label">✨ Next occurrence as per Hindu Panchanga</span>
+                    <span class="label" id="res-next-occurrence-label">✨ Next occurrence as per {{ 'Hindu Panchanga' if
+                        active_civ == 'panchanga' else 'Mayan Calendar' }}</span>
                     <span class="value" id="res-next-birthday">-</span>
                 </div>
 
@@ -142,9 +144,13 @@
                 </div>
                 <div id="skyshot-caption-area" class="caption-area">
                     <p id="skyshot-caption" class="caption">
-                        This ecliptic wheel shows precisely where the Moon was positioned across the 27 Nakshatras.
+                        {{ 'This ecliptic wheel shows precisely where the Moon was positioned across the 27 Nakshatras.'
+                        if active_civ == 'panchanga' else 'This celestial wheel shows the astronomical position of the
+                        Moon relative to the background stars.' }}
                     </p>
-                    <p class="educational-note">Ecliptic wheel showing the Moon's sidereal position among the Nakshatras
+                    <p class="educational-note">{{ "Ecliptic wheel showing the Moon's sidereal position among the
+                        Nakshatras" if active_civ == 'panchanga' else "Celestial wheel showing the Moon's astronomical
+                        position" }}
                     </p>
                 </div>
             </section>
@@ -176,11 +182,11 @@
 
         <footer>
             <div class="footer-links" style="margin-bottom: 1rem;">
-                <a href="/guide"
+                <a href="/guide/{{ active_civ }}"
                     style="color: var(--secondary); text-decoration: none; font-weight: 600; font-size: 0.9rem;">📘
                     Explore Interactive Student Guide</a>
             </div>
-            <p>&copy; 2026 Hindu Panchanga Engine</p>
+            <p>&copy; 2026 {{ 'Hindu Panchanga Engine' if active_civ == 'panchanga' else 'Mayan Calendar Engine' }}</p>
             <p class="privacy-note">Privacy Note: All calculations happen in real-time. No location or personal data is
                 stored on our servers.</p>
         </footer>

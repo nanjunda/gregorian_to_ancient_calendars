@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Mayan Odometer: The Long Count</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #05070c;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(13, 17, 23, 0.9);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 145, 0, 0.3);
+            backdrop-filter: blur(10px);
+            max-width: 300px;
+        }
+
+        h3 {
+            margin: 0 0 10px 0;
+            color: #ffaa00;
+            font-size: 1.1rem;
+        }
+
+        p {
+            font-size: 0.85rem;
+            color: #ccc;
+            line-height: 1.4;
+            margin-bottom: 15px;
+        }
+
+        .control-group {
+            border-top: 1px solid #444;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        button {
+            background: rgba(255, 145, 0, 0.2);
+            border: 1px solid #ffaa00;
+            color: #ffaa00;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #ffaa00;
+            color: #000;
+        }
+
+        #readout {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            text-align: center;
+            margin-top: 10px;
+            color: #00d2ff;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+    </style>
+    <!-- Import Map for Three.js -->
+    <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+    <script type="importmap">
+        { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+    </script>
+</head>
+
+<body>
+    <div id="ui">
+        <h3>The Mayan Long Count</h3>
+        <p>A "Vigesimal Odometer" tracking days since creation (13.0.0.0.0). Observe how the <strong>Kin</strong> (Day)
+            ring drives the <strong>Uinal</strong> (Month) ring.</p>
+        <div id="readout">13.0.0.0.0</div>
+        <div class="control-group">
+            <button id="toggle-anim">▶ Start Time Flow</button>
+        </div>
+        <p style="font-size: 0.7rem; color: #888; margin-top: 10px; text-align: center;">Click & Drag to Rotate View</p>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
+        // Scene Setup
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x05070c, 0.002);
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 30, 80);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        const pointLight = new THREE.PointLight(0xffaa00, 2, 100);
+        pointLight.position.set(20, 20, 20);
+        scene.add(pointLight);
+        const spotLight = new THREE.SpotLight(0x00d2ff, 1);
+        spotLight.position.set(-20, 50, -20);
+        scene.add(spotLight);
+
+        // --- Mayan Ring Generator ---
+        function createRingLabelTexture(count, label) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+
+            // Background
+            ctx.fillStyle = '#221100';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Grid lines
+            ctx.fillStyle = '#ffaa00';
+            ctx.font = 'bold 40px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const step = canvas.width / count;
+            for (let i = 0; i < count; i++) {
+                // Separator
+                ctx.strokeStyle = '#442200';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(i * step, 0); ctx.lineTo(i * step, 128);
+                ctx.stroke();
+
+                // Number (Mayan Dot-Bar approximation using text for MVP)
+                ctx.fillStyle = '#ffcc00';
+                ctx.fillText(i.toString(), i * step + step / 2, 64);
+            }
+
+            // Bottom label
+            ctx.fillStyle = '#00d2ff';
+            ctx.font = '20px Arial';
+            ctx.fillText(label.toUpperCase(), 512, 110);
+
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.wrapS = THREE.RepeatWrapping;
+            tex.repeat.set(1, 1);
+            return tex;
+        }
+
+        const rings = [];
+        const ringData = [
+            { name: 'BAKTUN', max: 20, radius: 22, width: 6, speed: 0.0001 }, // Outer
+            { name: 'KATUN', max: 20, radius: 18, width: 6, speed: 0.002 },
+            { name: 'TUN', max: 20, radius: 14, width: 6, speed: 0.04 },
+            { name: 'UINAL', max: 18, radius: 10, width: 6, speed: 0.8 },
+            { name: 'KIN', max: 20, radius: 6, width: 6, speed: 10 }          // Inner
+        ];
+
+        // Create Rings (Concentric Cylinders) for "Cryptex" look
+        // Actually, let's stack them horizontally like a real odometer?
+        // No, concentric is cooler for "Sacred Rounds". Let's do horizontal stack (linear odometer) 
+        // as per "Odometer" metaphor in guide.
+
+        const group = new THREE.Group();
+        scene.add(group);
+
+        ringData.forEach((d, i) => {
+            const geometry = new THREE.CylinderGeometry(10, 10, 8, 32, 1, true); // Same radius, spread out x
+            const material = new THREE.MeshStandardMaterial({
+                map: createRingLabelTexture(d.max, d.name),
+                side: THREE.DoubleSide,
+                roughness: 0.6,
+                metalness: 0.4
+            });
+
+            const ring = new THREE.Mesh(geometry, material);
+            // Arrange horizontally: Baktun (Left) -> Kin (Right)
+            ring.position.x = (i - 2) * 12;
+            ring.rotation.z = Math.PI / 2; // Lie flat like wheels
+            ring.rotation.y = Math.PI / 2; // Face forward
+
+            // Add "Housing" borders
+            const borderGeo = new THREE.TorusGeometry(10.2, 0.5, 8, 32);
+            const borderMat = new THREE.MeshStandardMaterial({ color: 0xcd7f32 });
+            const borderL = new THREE.Mesh(borderGeo, borderMat);
+            const borderR = new THREE.Mesh(borderGeo, borderMat);
+            borderL.position.x = -4; borderL.rotation.y = Math.PI / 2;
+            borderR.position.x = 4; borderR.rotation.y = Math.PI / 2;
+            ring.add(borderL); ring.add(borderR);
+
+            ring.userData = {
+                max: d.max,
+                value: 0,
+                targetRot: 0
+            };
+
+            group.add(ring);
+            rings.push(ring);
+        });
+
+        // Current Date State (13.0.0.0.0 defaults)
+        let state = [13, 0, 0, 0, 0];
+
+        // Indicator Line
+        const lineGeo = new THREE.BoxGeometry(60, 0.5, 0.5);
+        const lineMat = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.8 });
+        const line = new THREE.Mesh(lineGeo, lineMat);
+        line.position.z = 10.5;
+        scene.add(line);
+
+        // Animation Logic
+        let isRunning = false;
+        let timeAccumulator = 0;
+
+        document.getElementById('toggle-anim').onclick = function () {
+            isRunning = !isRunning;
+            this.textContent = isRunning ? "⏸ Pause Flow" : "▶ Start Time Flow";
+        };
+
+        function updateReadout() {
+            document.getElementById('readout').textContent =
+                rings.map(r => Math.round(r.userData.value)).join('.');
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (isRunning) {
+                // Rotate the KIN ring (last one)
+                const kinRing = rings[4];
+                kinRing.rotation.x -= 0.05; // Spin visual
+
+                // Track value
+                // Map rotation angle 0..2PI to 0..20
+                // Simple visual simulation:
+                // Actually, let's just spin them and update readout for effect
+                // A real simulation requires linking the gears accurately.
+
+                // Let's perform a math-based rotation
+                timeAccumulator += 1;
+
+                // Base-20 math logic
+                const totalKin = timeAccumulator;
+                const kin = totalKin % 20;
+                const uinal = Math.floor(totalKin / 20) % 18;
+                const tun = Math.floor(totalKin / 360) % 20;
+                const katun = Math.floor(totalKin / 7200) % 20;
+                const baktun = (13 + Math.floor(totalKin / 144000));
+
+                // Update rotations
+                rings[4].rotation.x = - (kin / 20) * Math.PI * 2;
+                rings[3].rotation.x = - (uinal / 18) * Math.PI * 2;
+                rings[2].rotation.x = - (tun / 20) * Math.PI * 2;
+                rings[1].rotation.x = - (katun / 20) * Math.PI * 2;
+                rings[0].rotation.x = - (baktun / 20) * Math.PI * 2;
+
+                // Update text values
+                rings[4].userData.value = kin;
+                rings[3].userData.value = uinal;
+                rings[2].userData.value = tun;
+                rings[1].userData.value = katun;
+                rings[0].userData.value = baktun;
+
+                updateReadout();
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Handle Window Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>
