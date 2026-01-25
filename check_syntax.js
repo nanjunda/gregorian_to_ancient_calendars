@@ -1,142 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ 'Mayan Chronology' if active_civ == 'mayan' else 'Panchanga Insights' }} | Cosmic Configuration</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Outfit:wght@300;500;700&display=swap"
-        rel="stylesheet">
-    <!-- Marked for markdown parsing -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <style>
-        .insight-content {
-            line-height: 1.7;
-            font-size: 1.15rem;
-            color: var(--text-white);
-            font-family: 'Inter', sans-serif;
-            white-space: normal;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            word-break: break-word;
-            max-width: 100%;
-            overflow-x: hidden;
-        }
-
-        .insight-content h1 {
-            font-size: 1.8rem;
-            line-height: 1.2;
-        }
-
-        .insight-content h2,
-        .insight-content h3 {
-            color: var(--secondary);
-            margin-top: 2.5rem;
-            font-family: 'Outfit', sans-serif;
-            border-bottom: 1px solid rgba(255, 145, 0, 0.2);
-            padding-bottom: 0.5rem;
-        }
-
-        .insight-content li {
-            margin-bottom: 1rem;
-            position: relative;
-            padding-left: 5px;
-            color: #e0e0e0;
-        }
-
-        .insight-content strong {
-            color: var(--secondary);
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-top: 2rem;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.3s;
-        }
-
-        .back-link:hover {
-            color: var(--secondary);
-        }
-
-        .loading-state {
-            text-align: center;
-            padding: 4rem;
-        }
-
-        /* Updated Visual Styles (Ported from guide.html) */
-        .visual-block {
-            margin: 2rem 0;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            overflow: hidden;
-            position: relative;
-            min-height: 600px;
-            /* Increased height */
-        }
-
-        .visual-iframe {
-            width: 100%;
-            height: 600px;
-            /* Match container */
-            border: none;
-            display: block;
-        }
-
-        .visual-significance {
-            padding: 1rem 1.5rem;
-            background: rgba(0, 210, 255, 0.05);
-            border-left: 3px solid var(--secondary);
-            font-size: 0.95rem;
-            line-height: 1.6;
-            color: var(--text-white);
-            position: relative;
-            max-width: 90%;
-            /* Prevent overlap overlap */
-            margin: 0 auto;
-            /* Center it */
-            border-radius: 0 0 16px 16px;
-            transition: all 0.3s ease;
-        }
-
-        .visual-significance.minimized {
-            height: 40px;
-            overflow: hidden;
-            padding: 0.5rem 1rem;
-            opacity: 0.7;
-        }
-
-        .minimize-btn {
-            position: absolute;
-            top: 5px;
-            right: 10px;
-            background: transparent;
-            border: none;
-            color: var(--secondary);
-            cursor: pointer;
-            font-size: 1.2rem;
-            z-index: 10;
-        }
-
-        .visual-caption {
-            padding: 1rem;
-            background: rgba(13, 17, 23, 0.8);
-            font-size: 0.85rem;
-            color: var(--secondary);
-            text-align: center;
-            border-top: 1px solid var(--border-color);
-        }
-    </style>
-</head>
-
-<body>
-    <!-- (Body content skipped for brevity) -->
-    <script>
         // Global toggle function
         function toggleSignificance(btn) {
             const container = btn.parentElement;
@@ -232,19 +93,9 @@
                     'adhik masa': { def: 'The \'Extra Month\' (Pit Stop) added every ~3 years to let the Sun catch up.', target: 'CALENDAR_DRIFT' }
                 };
 
-                const mayanGlossary = {
-                    'b\'ak\'tun': { def: 'A cycle of 144,000 days (~394 years) in the Long Count.', target: null },
-                    'tzolk\'in': { def: 'The 260-day sacred calendar, interlocked with the solar year.', target: null },
-                    'haab\'': { def: 'The 365-day solar calendar, composed of 18 months of 20 days.', target: null },
-                    'calendar round': { def: 'A 52-year cycle where a specific Tzolk\'in and Haab\' date repeats.', target: 'CALENDAR_DRIFT' },
-                    'vigesimal': { def: 'Base-20 math system used by the Maya (instead of decimal Base-10).', target: null },
-                    'wayeb\'': { def: 'The 19th month of the Haab\', consisting of 5 "nameless" days.', target: null },
-                    'kin': { def: 'A single day in the Long Count system.', target: null },
-                    'uinal': { def: 'A period of 20 days (Mayan month).', target: null },
-                    'tun': { def: 'A period of 360 days (approximate solar year).', target: null }
-                };
 
-                const glossary = activeCiv === 'mayan' ? mayanGlossary : panchangaGlossary;
+
+                const glossary = panchangaGlossary;
 
                 for (const [term, data] of Object.entries(glossary)) {
                     const regex = new RegExp(`\\b${term}\\b`, 'gi');
@@ -290,27 +141,6 @@
                         caption: 'Jovian-Saturn Samvatsara Resonance',
                         significance: 'This visual shows why the Samvatsara cycle is 60 years. It tracks the resonance between Jupiter (~11.86y) and Saturn (~29.46y). Broadly, every 5 Jupiter orbits align with 2 Saturn orbits, creating a rhythmic "Great Conjunction" that resets the traditional calendar cycle.'
                     },
-                    'VIGESEL_ODOOMETER': {
-                        id: 'visual-mayan-gears',
-                        url: '/visuals/mayan-gears?mode=odometer',
-                        preferredHeight: '600px',
-                        caption: 'The Vigesimal Odometer',
-                        significance: 'Watch how the Kin (Day) ring drives the others. The "Cryptex" visualizes how a date like 13.0.0.0.0 is just a giant counter ticking forward one day at a time.'
-                    },
-                    'GEAR_INTERLOCK_52YR': {
-                        id: 'visual-calendar-round',
-                        url: '/visuals/mayan-gears?mode=interlock',
-                        preferredHeight: '600px',
-                        caption: 'The Calendar Round',
-                        significance: 'The interaction of the 260-day Tzolk\'in and 365-day Haab\' creates a 52-year cycle. This visual demonstrates the mechanical nature of these interlocking time cycles.'
-                    },
-                    'VENUS_MARS_ALIGNMENT': {
-                        id: 'visual-venus-cycle',
-                        url: '/visuals/venus-cycle',
-                        preferredHeight: '600px',
-                        caption: 'Venus-Mars Planetary Alignment',
-                        significance: 'The Maya tracked the synodic periods of Venus and Mars with extreme precision.'
-                    }
                 };
 
                 function parseVisualTags(content) {
@@ -561,7 +391,3 @@
                 initBirthdayTimeMachine();
             }, 2000);
         });
-    </script>
-</body>
-
-</html>

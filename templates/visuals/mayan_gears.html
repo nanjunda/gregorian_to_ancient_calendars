@@ -15,7 +15,7 @@
 
         #ui {
             position: absolute;
-            top: 20px;
+            bottom: 20px;
             left: 20px;
             color: white;
             background: rgba(13, 17, 23, 0.9);
@@ -24,6 +24,45 @@
             border: 1px solid rgba(255, 145, 0, 0.3);
             backdrop-filter: blur(10px);
             max-width: 300px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+        }
+
+        #ui.minimized {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 145, 0, 0.15);
+            border: 1px solid rgba(255, 145, 0, 0.4);
+        }
+
+        #ui.minimized .content-box {
+            display: none;
+        }
+
+        .toggle-btn {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            cursor: pointer;
+            color: #ffaa00;
+            font-size: 1.1rem;
+            font-weight: bold;
+            user-select: none;
+            z-index: 1001;
+        }
+
+        #ui.minimized .toggle-btn {
+            position: static;
+            font-size: 1.3rem;
+            color: #ffaa00;
+            top: auto;
+            right: auto;
         }
 
         h3 {
@@ -81,14 +120,19 @@
 
 <body>
     <div id="ui">
-        <h3>The Mayan Long Count</h3>
-        <p>A "Vigesimal Odometer" tracking days since creation (13.0.0.0.0). Observe how the <strong>Kin</strong> (Day)
-            ring drives the <strong>Uinal</strong> (Month) ring.</p>
-        <div id="readout">13.0.0.0.0</div>
-        <div class="control-group">
-            <button id="toggle-anim">▶ Start Time Flow</button>
+        <div class="toggle-btn" onclick="toggleUI()">−</div>
+        <div class="content-box">
+            <h3>The Mayan Long Count</h3>
+            <p>A "Vigesimal Odometer" tracking days since creation (13.0.0.0.0). Observe how the <strong>Kin</strong>
+                (Day)
+                ring drives the <strong>Uinal</strong> (Month) ring.</p>
+            <div id="readout">13.0.0.0.0</div>
+            <div class="control-group">
+                <button id="toggle-anim">▶ Start Time Flow</button>
+            </div>
+            <p style="font-size: 0.7rem; color: #888; margin-top: 10px; text-align: center;">Click & Drag to Rotate View
+            </p>
         </div>
-        <p style="font-size: 0.7rem; color: #888; margin-top: 10px; text-align: center;">Click & Drag to Rotate View</p>
     </div>
 
     <script type="module">
@@ -118,8 +162,36 @@
         spotLight.position.set(-20, 50, -20);
         scene.add(spotLight);
 
+        // Read URL Config
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode') || 'odometer'; // 'odometer' or 'interlock'
+
+        // Update UI Text
+        if (mode === 'interlock') {
+            document.querySelector('#ui h3').textContent = "The Calendar Round";
+            document.querySelector('#ui p').innerHTML = "The <strong>260-day Tzolk'in</strong> gear interlocks with the <strong>365-day Haab'</strong> gear. They only return to the same position every 52 years.";
+            document.getElementById('readout').style.display = 'none'; // No long count readout here
+        }
+
+        // Internal UI Toggle
+        window.toggleUI = function () {
+            const ui = document.getElementById('ui');
+            const toggleBtn = ui.querySelector('.toggle-btn');
+            if (ui.classList.contains('minimized')) {
+                ui.classList.remove('minimized');
+                toggleBtn.textContent = '−';
+            } else {
+                ui.classList.add('minimized');
+                toggleBtn.textContent = '+';
+            }
+        }
+
+        const rings = [];
+        const group = new THREE.Group();
+        scene.add(group);
+
         // --- Mayan Ring Generator ---
-        function createRingLabelTexture(count, label) {
+        function createRingLabelTexture(count, label, colorOverride) {
             const canvas = document.createElement('canvas');
             canvas.width = 1024; canvas.height = 128;
             const ctx = canvas.getContext('2d');
@@ -129,7 +201,7 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             // Grid lines
-            ctx.fillStyle = '#ffaa00';
+            ctx.fillStyle = colorOverride || '#ffaa00';
             ctx.font = 'bold 40px monospace';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -144,8 +216,8 @@
                 ctx.stroke();
 
                 // Number (Mayan Dot-Bar approximation using text for MVP)
-                ctx.fillStyle = '#ffcc00';
-                ctx.fillText(i.toString(), i * step + step / 2, 64);
+                ctx.fillStyle = colorOverride || '#ffcc00';
+                ctx.fillText((i % 20).toString(), i * step + step / 2, 64);
             }
 
             // Bottom label
@@ -159,66 +231,89 @@
             return tex;
         }
 
-        const rings = [];
-        const ringData = [
-            { name: 'BAKTUN', max: 20, radius: 22, width: 6, speed: 0.0001 }, // Outer
-            { name: 'KATUN', max: 20, radius: 18, width: 6, speed: 0.002 },
-            { name: 'TUN', max: 20, radius: 14, width: 6, speed: 0.04 },
-            { name: 'UINAL', max: 18, radius: 10, width: 6, speed: 0.8 },
-            { name: 'KIN', max: 20, radius: 6, width: 6, speed: 10 }          // Inner
-        ];
+        if (mode === 'odometer') {
+            // --- MODE: ODOMETER (Classic 5 Rings) ---
+            const ringData = [
+                { name: 'BAKTUN', max: 20, radius: 22, width: 6 },
+                { name: 'KATUN', max: 20, radius: 18, width: 6 },
+                { name: 'TUN', max: 20, radius: 14, width: 6 },
+                { name: 'UINAL', max: 18, radius: 10, width: 6 },
+                { name: 'KIN', max: 20, radius: 6, width: 6 }
+            ];
 
-        // Create Rings (Concentric Cylinders) for "Cryptex" look
-        // Actually, let's stack them horizontally like a real odometer?
-        // No, concentric is cooler for "Sacred Rounds". Let's do horizontal stack (linear odometer) 
-        // as per "Odometer" metaphor in guide.
+            ringData.forEach((d, i) => {
+                const geometry = new THREE.CylinderGeometry(10, 10, 8, 32, 1, true);
+                const material = new THREE.MeshStandardMaterial({
+                    map: createRingLabelTexture(d.max, d.name),
+                    side: THREE.DoubleSide,
+                    roughness: 0.6,
+                    metalness: 0.4
+                });
 
-        const group = new THREE.Group();
-        scene.add(group);
+                const ring = new THREE.Mesh(geometry, material);
+                ring.position.x = (i - 2) * 12;
+                ring.rotation.z = Math.PI / 2;
+                ring.rotation.y = Math.PI / 2;
 
-        ringData.forEach((d, i) => {
-            const geometry = new THREE.CylinderGeometry(10, 10, 8, 32, 1, true); // Same radius, spread out x
-            const material = new THREE.MeshStandardMaterial({
-                map: createRingLabelTexture(d.max, d.name),
-                side: THREE.DoubleSide,
-                roughness: 0.6,
-                metalness: 0.4
+                // Add "Housing" borders
+                const borderGeo = new THREE.TorusGeometry(10.2, 0.5, 8, 32);
+                const borderMat = new THREE.MeshStandardMaterial({ color: 0xcd7f32 });
+                const borderL = new THREE.Mesh(borderGeo, borderMat);
+                const borderR = new THREE.Mesh(borderGeo, borderMat);
+                borderL.position.x = -4; borderL.rotation.y = Math.PI / 2;
+                borderR.position.x = 4; borderR.rotation.y = Math.PI / 2;
+                ring.add(borderL); ring.add(borderR);
+
+                ring.userData = { max: d.max, value: 0 };
+                group.add(ring);
+                rings.push(ring);
             });
 
-            const ring = new THREE.Mesh(geometry, material);
-            // Arrange horizontally: Baktun (Left) -> Kin (Right)
-            ring.position.x = (i - 2) * 12;
-            ring.rotation.z = Math.PI / 2; // Lie flat like wheels
-            ring.rotation.y = Math.PI / 2; // Face forward
+            // Indicator Line
+            const lineGeo = new THREE.BoxGeometry(60, 0.5, 0.5);
+            const lineMat = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.8 });
+            const line = new THREE.Mesh(lineGeo, lineMat);
+            line.position.z = 10.5;
+            scene.add(line);
 
-            // Add "Housing" borders
-            const borderGeo = new THREE.TorusGeometry(10.2, 0.5, 8, 32);
-            const borderMat = new THREE.MeshStandardMaterial({ color: 0xcd7f32 });
-            const borderL = new THREE.Mesh(borderGeo, borderMat);
-            const borderR = new THREE.Mesh(borderGeo, borderMat);
-            borderL.position.x = -4; borderL.rotation.y = Math.PI / 2;
-            borderR.position.x = 4; borderR.rotation.y = Math.PI / 2;
-            ring.add(borderL); ring.add(borderR);
+        } else if (mode === 'interlock') {
+            // --- MODE: INTERLOCKING GEARS (Calendar Round) ---
+            camera.position.set(0, 40, 40); // Higher angle
 
-            ring.userData = {
-                max: d.max,
-                value: 0,
-                targetRot: 0
-            };
+            // 1. Tzolk'in Gear (Small, Inner) - 13 Numbers x 20 Names = 260
+            // Represented as a 20-toothed gear
+            const geo1 = new THREE.CylinderGeometry(12, 12, 4, 20, 1);
+            const mat1 = new THREE.MeshStandardMaterial({
+                color: 0xcc2200,
+                map: createRingLabelTexture(20, "TZOLKIN (260)", "#ffaa00"),
+                roughness: 0.5
+            });
+            const tzolkinGear = new THREE.Mesh(geo1, mat1);
+            tzolkinGear.position.set(-14, 0, 0);
+            group.add(tzolkinGear);
+            rings.push(tzolkinGear); // Index 0
 
-            group.add(ring);
-            rings.push(ring);
-        });
+            // 2. Haab' Gear (Large, Outer) - 365 Days
+            // Represented as a larger gear
+            const geo2 = new THREE.CylinderGeometry(18, 18, 4, 30, 1);
+            const mat2 = new THREE.MeshStandardMaterial({
+                color: 0x004488,
+                map: createRingLabelTexture(20, "HAAB (365)", "#00d2ff"),
+                roughness: 0.5
+            });
+            const haabGear = new THREE.Mesh(geo2, mat2);
+            haabGear.position.set(18, 0, 0);
+            group.add(haabGear);
+            rings.push(haabGear); // Index 1
 
-        // Current Date State (13.0.0.0.0 defaults)
-        let state = [13, 0, 0, 0, 0];
-
-        // Indicator Line
-        const lineGeo = new THREE.BoxGeometry(60, 0.5, 0.5);
-        const lineMat = new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.8 });
-        const line = new THREE.Mesh(lineGeo, lineMat);
-        line.position.z = 10.5;
-        scene.add(line);
+            // Interaction Point Marker
+            const markerGeo = new THREE.ConeGeometry(2, 6, 32);
+            const markerMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x555555 });
+            const marker = new THREE.Mesh(markerGeo, markerMat);
+            marker.rotation.x = Math.PI;
+            marker.position.set(2, 5, 0); // Roughly between them
+            scene.add(marker);
+        }
 
         // Animation Logic
         let isRunning = false;
@@ -230,48 +325,46 @@
         };
 
         function updateReadout() {
-            document.getElementById('readout').textContent =
-                rings.map(r => Math.round(r.userData.value)).join('.');
+            if (mode === 'odometer') {
+                document.getElementById('readout').textContent =
+                    rings.map(r => Math.round(r.userData.value)).join('.');
+            }
         }
 
         function animate() {
             requestAnimationFrame(animate);
 
             if (isRunning) {
-                // Rotate the KIN ring (last one)
-                const kinRing = rings[4];
-                kinRing.rotation.x -= 0.05; // Spin visual
+                if (mode === 'odometer') {
+                    // Odometer Logic
+                    timeAccumulator += 1;
+                    const totalKin = timeAccumulator;
 
-                // Track value
-                // Map rotation angle 0..2PI to 0..20
-                // Simple visual simulation:
-                // Actually, let's just spin them and update readout for effect
-                // A real simulation requires linking the gears accurately.
+                    const kin = totalKin % 20;
+                    const uinal = Math.floor(totalKin / 20) % 18;
+                    const tun = Math.floor(totalKin / 360) % 20;
+                    const katun = Math.floor(totalKin / 7200) % 20;
+                    const baktun = (13 + Math.floor(totalKin / 144000));
 
-                // Let's perform a math-based rotation
-                timeAccumulator += 1;
+                    rings[4].rotation.x = - (kin / 20) * Math.PI * 2;
+                    rings[3].rotation.x = - (uinal / 18) * Math.PI * 2;
+                    rings[2].rotation.x = - (tun / 20) * Math.PI * 2;
+                    rings[1].rotation.x = - (katun / 20) * Math.PI * 2;
+                    rings[0].rotation.x = - (baktun / 20) * Math.PI * 2;
 
-                // Base-20 math logic
-                const totalKin = timeAccumulator;
-                const kin = totalKin % 20;
-                const uinal = Math.floor(totalKin / 20) % 18;
-                const tun = Math.floor(totalKin / 360) % 20;
-                const katun = Math.floor(totalKin / 7200) % 20;
-                const baktun = (13 + Math.floor(totalKin / 144000));
+                    rings[4].userData.value = kin;
+                    rings[3].userData.value = uinal;
+                    rings[2].userData.value = tun;
+                    rings[1].userData.value = katun;
+                    rings[0].userData.value = baktun;
 
-                // Update rotations
-                rings[4].rotation.x = - (kin / 20) * Math.PI * 2;
-                rings[3].rotation.x = - (uinal / 18) * Math.PI * 2;
-                rings[2].rotation.x = - (tun / 20) * Math.PI * 2;
-                rings[1].rotation.x = - (katun / 20) * Math.PI * 2;
-                rings[0].rotation.x = - (baktun / 20) * Math.PI * 2;
-
-                // Update text values
-                rings[4].userData.value = kin;
-                rings[3].userData.value = uinal;
-                rings[2].userData.value = tun;
-                rings[1].userData.value = katun;
-                rings[0].userData.value = baktun;
+                } else if (mode === 'interlock') {
+                    // Interlock Logic: Simply spin them in opposite directions
+                    // Tzolk'in spins faster (smaller cycle representation)
+                    rings[0].rotation.y -= 0.02;
+                    // Haab spins slower
+                    rings[1].rotation.y += 0.015;
+                }
 
                 updateReadout();
             }

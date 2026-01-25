@@ -64,13 +64,15 @@
             border-radius: 20px;
             overflow: hidden;
             position: relative;
-            min-height: 500px;
+            min-height: 600px;
+            /* Increased by 20% */
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
         .visual-iframe {
             width: 100%;
-            height: 500px;
+            height: 600px;
+            /* Matches visual-block */
             border: none;
             display: block;
         }
@@ -86,16 +88,42 @@
         }
 
         .visual-significance {
-            padding: 1.5rem;
+            padding: 1rem 1.5rem;
+            /* Reduced padding slightly */
             background: rgba(0, 210, 255, 0.05);
             border-left: 4px solid var(--secondary);
             font-size: 0.95rem;
             line-height: 1.7;
             color: var(--text-white);
-            margin-top: -1px;
+            margin-top: 0;
             border-radius: 0 0 20px 20px;
             border: 1px solid var(--glass-border);
             border-top: none;
+            position: relative;
+            max-width: 90%;
+            /* Reduced width by ~10% effectively */
+            margin-left: auto;
+            margin-right: auto;
+            transition: all 0.3s ease;
+        }
+
+        .visual-significance.minimized {
+            height: 40px;
+            overflow: hidden;
+            padding: 0.5rem 1rem;
+            opacity: 0.7;
+        }
+
+        .minimize-btn {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: transparent;
+            border: none;
+            color: var(--secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            z-index: 10;
         }
 
         /* Reactive Glossary Styles */
@@ -381,12 +409,40 @@
 
             {% if active_civ == 'mayan' %}
             <section class="card glass guide-content">
-                <h2>1. The Mayan Odometer (Base-20)</h2>
-                <p>
-                    Unlike the decimal (Base-10) system we use today, the Mayans used a **Vigesimal (Base-20)** system.
-                    Why 20? Because we have 10 fingers and 10 toes! This made their math incredibly powerful for
-                    counting large cycles of time.
-                </p>
+
+                Of course. As an astronomer with a deep interest in the comparative history of science, I find the Mayan
+                civilization to be one of the most fascinating. Their achievements in astronomy, mathematics, and
+                calendrics are a testament to human ingenuity, standing in parallel yet distinct from the other great
+                ancient civilizations.
+
+                Let's break this down as you requested.
+
+                <h2>1. The Mayan Calendaring System, Astronomy, and Mathematics</h2>
+
+                <p>The Maya of the Classic Period (c. 250–900 CE) developed one of the most sophisticated and accurate
+                    calendrical systems in the ancient world. It was not a single calendar but a complex, interlocking
+                    series of cycles that served both ritual and practical purposes.</p>
+
+                <h3>The Calendar Round: Tzolk'in and Haab'</h3>
+                <p>The foundation was a 52-year cycle formed by the interlocking of two smaller calendars:</p>
+
+                <ul>
+                    <li><strong>The Tzolk'in (260-day sacred calendar):</strong> This was the ritual calendar, used for
+                        divination, scheduling religious ceremonies, and naming individuals. It consisted of 20 day
+                        names combined with 13 numbers, creating 260 unique days (20 x 13 = 260). The origin of the
+                        260-day count is debated but may be linked to the human gestation period or the cycles of Venus.
+                    </li>
+                    <li><strong>The Haab' (365-day solar calendar):</strong> This was the civil calendar used for
+                        agriculture and tracking the seasons. It had 18 months of 20 days each, plus a special 5-day
+                        period called the <strong>Wayeb'</strong> (considered a dangerous, unlucky time). The Haab' year
+                        was 365 days, lacking leap years, so it drifted by about one day every four years relative to
+                        the true solar year.</li>
+                </ul>
+
+                <p><strong>Example:</strong> A date written as "4 Ahau 8 Kumk'u" would be a specific day in the Calendar
+                    Round. This combination of the Tzolk'in and Haab' would only repeat every 52 Haab' years (18,980
+                    days), a period known as the Calendar Round.</p>
+
                 <div class="visual-block-wrapper" id="MAYAN_GEARS">
                     <div class="visual-block">
                         <iframe class="visual-iframe" src="/visuals/mayan-gears"></iframe>
@@ -394,116 +450,56 @@
                         </div>
                     </div>
                     <div class="visual-significance">
-                        <strong>Significance:</strong> Watch how the **Kin** (Day) ring drives the others. The Mayans
-                        arranged numbers in columns. The "Cryptex" above visualizes how a date like
-                        <code>13.0.0.0.0</code> is just a giant counter ticking forward one day at a time.
+                        <button class="minimize-btn" onclick="toggleSignificance(this)">−</button>
+                        <strong>Significance:</strong> Trace the flow of time through the B'ak'tun, K'atun, and Tun
+                        cycles. This Vigesimal Odometer visualizes the linear accumulation of days in the Long Count.
                     </div>
                 </div>
 
-                <div class="anga-card">
-                    <div class="anga-icon">🐚</div>
-                    <div class="anga-info">
-                        <h4>Zero (Shell)</h4>
-                        <p>The Mayans understood the concept of "Zero" centuries before Europe. They wrote it as a
-                            shell, representing completion.</p>
-                    </div>
-                </div>
+                <h3>The Long Count: Linear Time and the Mastery of Zero</h3>
+                <p>To record history over vast periods and to pinpoint dates in the distant past or future, the Maya
+                    used the <strong>Long Count</strong>. This was a linear, non-repeating count of days from a mythical
+                    starting point (August 11, 3114 BCE in the Gregorian calendar, according to the most common
+                    correlation).</p>
 
-                <h3>The Long Count Units</h3>
-                <p>Think of a vertical "abacus" of days. Each level is multiplied by 20 (roughly):</p>
                 <ul>
-                    <li><strong>B'ak'tun</strong> (Level 5): 144,000 days (~394 years). The "Era" cycle.</li>
-                    <li><strong>K'atun</strong> (Level 4): 7,200 days (~20 years). The rhythm of generations.</li>
-                    <li><strong>Tun</strong> (Level 3): 360 days. The "approximate year" (18 Uinals).</li>
-                    <li><strong>Uinal</strong> (Level 2): 20 days (One human digit).</li>
-                    <li><strong>Kin</strong> (Level 1): 1 day.</li>
-                </ul>
-
-                <h3>Deep Time: The Cosmic Scale</h3>
-                <p>
-                    The Mayans tracked time on scales that dwarf modern history. While a B'ak'tun (394 years) is huge,
-                    it is just the beginning. They had specific names for numbers that count millions of years into the
-                    past and future.
-                </p>
-
-                <div
-                    style="overflow-x: auto; margin: 1.5rem 0; border: 1px solid var(--glass-border); border-radius: 12px; padding: 1rem; background: rgba(0,0,0,0.2);">
-                    <table
-                        style="width: 100%; text-align: left; border-collapse: collapse; color: var(--text-muted); font-size: 0.9rem;">
-                        <tr
-                            style="border-bottom: 1px solid var(--glass-border); color: var(--secondary); font-family: 'Outfit', sans-serif;">
-                            <th style="padding: 0.5rem;">Unit</th>
-                            <th style="padding: 0.5rem;">Math</th>
-                            <th style="padding: 0.5rem;">Time Scale</th>
-                        </tr>
-                        <tr>
-                            <td style="padding: 0.5rem; color: #fff; font-weight: bold;">Piktun</td>
-                            <td style="padding: 0.5rem;">20 B'ak'tuns</td>
-                            <td style="padding: 0.5rem;">~7,885 Years</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 0.5rem; color: #fff; font-weight: bold;">Kalabtun</td>
-                            <td style="padding: 0.5rem;">20 Piktuns</td>
-                            <td style="padding: 0.5rem;">~157,000 Years</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 0.5rem; color: #fff; font-weight: bold;">Kinchiltun</td>
-                            <td style="padding: 0.5rem;">20 Kalabtuns</td>
-                            <td style="padding: 0.5rem;">~3 Million Years</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 0.5rem; color: #fff; font-weight: bold;">Alautun</td>
-                            <td style="padding: 0.5rem;">20 Kinchiltuns</td>
-                            <td style="padding: 0.5rem;">~63 Million Years</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div class="anga-card"
-                    style="border-left: 4px solid var(--secondary); background: rgba(255, 145, 0, 0.05);">
-                    <div class="anga-icon">🗿</div>
-                    <div class="anga-info">
-                        <h4>Archaeological Evidence: Coba Stela 1</h4>
-                        <p>
-                            A real monument from the 9th Century CE records a date in the deep mythological past using
-                            **13 place values**: <br>
-                            <code>13.13.13.13.13.13.13.13.13.13.13.13.13</code>
-                        </p>
-                    </div>
-                </div>
-
-                <h3>Why Such Big Numbers?</h3>
-                <p>
-                    Unlike the Greeks who debated precision, or the Romans who struggled with M (1000), the Mayans
-                    freely calculated **LCMs (Least Common Multiples)** of planetary cycles.
-                </p>
-                <ul>
-                    <li><strong>Cyclical + Linear</strong>: They believed time repeats in cycles nested within larger
-                        cycles forever. There is no "Maximum Date."</li>
-                    <li><strong>Comparisons</strong>: While Romans stopped at 100,000, Mayans and Ancient Indians
-                        (Yugas) were the only civilizations comfortable with numbers reaching 10<sup>9</sup> and beyond.
+                    <li><strong>Mathematical Brilliance: The Vigesimal (Base-20) System:</strong> The Maya used a
+                        base-20 (vigesimal) number system, likely based on counting fingers and toes. It was a
+                        place-value system, similar to our modern base-10 system.</li>
+                    <li><strong>The Concept of Zero:</strong> This is one of their greatest mathematical achievements.
+                        The Maya independently invented a placeholder symbol for zero (often represented as a shell
+                        glyph) by at least 36 BCE. This allowed for complex calculations and the precise notation of the
+                        Long Count.
+                        <ul>
+                            <li><strong>Example:</strong> The Long Count date for the famous "Dresden Codex Eclipse
+                                Table" is 9.16.4.10.8 (9 cycles of 144,000 days, 16 cycles of 7,200 days, 4 cycles of
+                                360 days, 10 cycles of 20 days, and 8 days). Without zero, such a notation would be
+                                impossible.</li>
+                        </ul>
                     </li>
                 </ul>
 
+                <h3>Astronomical Prowess</h3>
+                <p>The Maya were meticulous observers of the heavens. Their astronomical knowledge was deeply integrated
+                    with their religion and calendar.</p>
 
-                <h2>2. The Sacred Calendar Round</h2>
-                <p>
-                    While the Long Count tracks history, daily life followed two interlocked cycles:
-                </p>
-                <blockquote>
-                    "The Calendar Round is like two gears of different sizes—260 teeth and 365 teeth. A specific date
-                    only repeats once every 18,980 days (52 years)."
-                </blockquote>
-
-                <h2>3. Astronomy: The Path of Kukulkan (Venus)</h2>
-                <p>
-                    The Mayans were obsessed with **Venus** (the deity *Kukulkan*). They knew its **Synodic Period**—the
-                    time it takes to return to the same position relative to the Sun—is exactly **584 days**.
-                </p>
-                <p>
-                    They discovered a cosmic secret: <br>
-                    <code>5 Venus Cycles (2,920 days) ≈ 8 solar years.</code>
-                </p>
+                <ul>
+                    <li><strong>The Lunar Cycle:</strong> They calculated the length of the synodic month (new moon to
+                        new moon) with remarkable accuracy. The <strong>Dresden Codex</strong> contains a lunar series
+                        that corrects for the moon's irregularities, allowing them to predict lunar eclipses.</li>
+                    <li><strong>The Solar Year:</strong> While the Haab' was 365 days, Maya astronomers knew the true
+                        solar year was slightly shorter. The Long Count, when correlated with solar events, shows they
+                        had a more precise figure (around 365.242 days) than many other ancient cultures.</li>
+                    <li><strong>Venus Cycle:</strong> The Maya were obsessed with the planet Venus. They tracked its
+                        appearances as the Morning and Evening Star with incredible precision. The Dresden Codex
+                        contains a Venus table that calculates the 584-day synodic period of Venus (the time it takes to
+                        reappear in the same position relative to the Sun) with an error of only a few hours over 500
+                        years. This was crucial for warfare, as Venus was associated with war gods.</li>
+                    <li><strong>Eclipse Prediction:</strong> Using their knowledge of the Sun and Moon cycles, they
+                        could predict solar and lunar eclipses. They understood the <strong>Saros cycle</strong> (a
+                        period of approximately 18 years between similar eclipses), though their calculations were based
+                        on their own observations and mathematical models.</li>
+                </ul>
 
                 <div class="visual-block-wrapper" id="VENUS_TRACKER">
                     <div class="visual-block">
@@ -511,6 +507,7 @@
                         <div class="visual-caption">🖥️ 3D Sky Simulator: The Pentagram of Venus</div>
                     </div>
                     <div class="visual-significance">
+                        <button class="minimize-btn" onclick="toggleSignificance(this)">−</button>
                         <strong>Significance:</strong> Drag the slider to trace the path! Over 8 years, the conjunctions
                         of Venus and Earth draw a perfect **5-pointed star (Pentagram)** in space. The Mayans timed
                         their wars and coronations to these specific points, especially the "Heliacal Rise" (Morning
@@ -518,77 +515,173 @@
                     </div>
                 </div>
 
-                <h2>🎓 The Time-Keeper's Challenge</h2>
-                <p>
-                    Prove your skills as a Day-Keeper (Ah Kin). Decode the date or calculate a cosmic alignment!
-                </p>
+                <hr style="margin: 3rem 0; border: 0; border-top: 1px solid var(--glass-border);">
 
-                <div class="quiz-container" id="mayan-quiz-widget">
-                    <h3>🔮 Mayan Date Decoder</h3>
-                    <div id="quiz-ui" style="text-align: center;">
-                        <p style="margin-bottom: 1rem;">Enter your Gregorian birthdate to find your Long Count:</p>
-                        <input type="date" id="quiz-date-input"
-                            style="padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--secondary); color: white; border-radius: 8px;">
-                        <button onclick="calculateMayanSignature()"
-                            style="padding: 10px 20px; background: var(--secondary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-left: 10px;">Decode</button>
+                <h2>2. Comparison with Other Ancient Civilizations</h2>
 
-                        <div id="quiz-result"
-                            style="margin-top: 2rem; display: none; background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--glass-border);">
-                            <div style="font-size: 2rem; color: var(--secondary); font-family: monospace; font-weight: bold;"
-                                id="res-long-count"></div>
-                            <div style="color: #00d2ff; font-size: 1.1rem; margin-top: 0.5rem;" id="res-tzolkin"></div>
-                            <p id="res-math"
-                                style="font-size: 0.9rem; color: #aaa; margin-top: 1rem; font-style: italic;"></p>
-                        </div>
-                    </div>
-                </div>
+                <p>While all ancient civilizations developed astronomy for timekeeping and religion, their approaches,
+                    mathematical tools, and philosophical frameworks differed significantly.</p>
 
                 <div
-                    style="text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--glass-border);">
-                    <p style="font-size: 1.3rem; margin-bottom: 2.5rem;">Ready to track the stars yourself?</p>
-                    <a href="/" class="btn"
-                        style="padding: 1.2rem 3rem; border-radius: 50px; background: var(--secondary); color: #000; font-weight: 700; text-decoration: none; font-size: 1.1rem; box-shadow: 0 10px 20px rgba(255, 145, 0, 0.2);">Run
-                        New Conversion</a>
+                    style="overflow-x: auto; margin: 1.5rem 0; border: 1px solid var(--glass-border); border-radius: 12px; padding: 1rem; background: rgba(0,0,0,0.2);">
+                    <table
+                        style="width: 100%; text-align: left; border-collapse: collapse; color: var(--text-muted); font-size: 0.9rem;">
+                        <thead>
+                            <tr
+                                style="border-bottom: 1px solid var(--glass-border); color: var(--secondary); font-family: 'Outfit', sans-serif;">
+                                <th style="padding: 0.5rem; border-right: 1px solid rgba(255,255,255,0.1);">Feature</th>
+                                <th style="padding: 0.5rem; border-right: 1px solid rgba(255,255,255,0.1);">Maya</th>
+                                <th style="padding: 0.5rem; border-right: 1px solid rgba(255,255,255,0.1);">Ancient
+                                    India</th>
+                                <th style="padding: 0.5rem; border-right: 1px solid rgba(255,255,255,0.1);">Ancient
+                                    China</th>
+                                <th style="padding: 0.5rem;">Ancient Greece</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td
+                                    style="padding: 0.5rem; font-weight: bold; border-right: 1px solid rgba(255,255,255,0.1);">
+                                    Mathematical System</td>
+                                <td style="padding: 0.5rem; border-right: 1px solid rgba(255,255,255,0.1);">Vigesimal
+                                    (Base-20), Place-value, <strong>Zero</strong> as a placeholder.</td>
+                                <td style="padding: 0.5rem; border-right: 1px solid rgba(255,255,255,0.1);">Decimal
+                                    (Base-10), Place-value, <strong>Zero</strong> as both placeholder and philosophical
+                                    concept.</td>
+                                <td style="padding: 0.5rem; border-right: 1px solid rgba(255,255,255,0.1);">Decimal
+                                    (Base-10), Rod numerals (place-value), but no conceptual zero.</td>
+                                <td style="padding: 0.5rem;">Alphabetic (e.g., Attic, Ionic), no place-value, cumbersome
+                                    for complex math.</td>
+                            </tr>
+                            <tr style="background: rgba(255,255,255,0.02);">
+                                <td
+                                    style="padding: 0.5rem; font-weight: bold; border-right: 1px solid rgba(255,255,255,0.1);">
+                                    Primary Calendrical Goal</td>
+                                <td style="padding: 0.5rem; border-right: 1px solid rgba(255,255,255,0.1);">Interlocking
+                                    cycles for ritual, historical recording (Long Count), and astronomical prediction.
+                                </td>
+                                <td style="padding: 0.5rem; border-right: 1px solid rgba(255,255,255,0.1);"><strong>Yuga
+                                        Cycles:</strong> Vast cyclical time scales (432,000 years) for cosmological and
+                                    astrological purposes.</td>
+                                <td style="padding: 0.5rem; border-right: 1px solid rgba(255,255,255,0.1);">
+                                    <strong>State-Centric:</strong> Accurate solar calendar for agriculture, tax
+                                    collection, and imperial administration.
+                                </td>
+                                <td style="padding: 0.5rem;"><strong>Philosophical & Mathematical:</strong> Seeking
+                                    ideal mathematical forms (e.g., Meton's 19-year cycle).</td>
+                            </tr>
+                            <tr>
+                                <td
+                                    style="padding: 0.5rem; font-weight: bold; border-right: 1px solid rgba(255,255,255,0.1);">
+                                    Astronomical Focus</td>
+                                <td style="padding: 0.5rem; border-right: 1px solid rgba(255,255,255,0.1);">
+                                    <strong>Planetary Cycles:</strong> Venus, Eclipse Prediction, precise Long Count.
+                                </td>
+                                <td style="padding: 0.5rem; border-right: 1px solid rgba(255,255,255,0.1);">
+                                    <strong>Sidereal vs. Tropical:</strong> Developed complex models to track the
+                                    precession of equinoxes (Yogajataka).
+                                </td>
+                                <td style="padding: 0.5rem; border-right: 1px solid rgba(255,255,255,0.1);">
+                                    <strong>Mandate of Heaven:</strong> Celestial omens (comets, sunspots, supernovae)
+                                    recorded for the Emperor.
+                                </td>
+                                <td style="padding: 0.5rem;"><strong>Geometric Models:</strong> Earth-centered spheres,
+                                    planetary deferents/epicycles (Ptolemy).</td>
+                            </tr>
+                            <tr style="background: rgba(255,255,255,0.02);">
+                                <td
+                                    style="padding: 0.5rem; font-weight: bold; border-right: 1px solid rgba(255,255,255,0.1);">
+                                    Key Achievement</td>
+                                <td style="padding: 0.5rem; border-right: 1px solid rgba(255,255,255,0.1);"><strong>Long
+                                        Count</strong> for linear history, <strong>Venus Table</strong>, independent
+                                    invention of <strong>zero</strong>.</td>
+                                <td style="padding: 0.5rem; border-right: 1px solid rgba(255,255,255,0.1);">
+                                    <strong>Concept of Deep Time</strong>, precise calculation of π, trigonometry (sine
+                                    function), heliocentric hints (Aryabhata).
+                                </td>
+                                <td style="padding: 0.5rem; border-right: 1px solid rgba(255,255,255,0.1);">
+                                    <strong>Continuous Astronomical Records</strong> (e.g., 2000+ years of sunspot
+                                    observations), star catalogs.
+                                </td>
+                                <td style="padding: 0.5rem;"><strong>Theoretical Geometry:</strong> Formally modeling
+                                    the cosmos (Aristotle, Ptolemy), laying groundwork for modern science.</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
+                <h3>Detailed Comparisons & Examples:</h3>
+
+                <ul>
+                    <li><strong>Vs. Ancient India:</strong>
+                        <ul>
+                            <li><strong>Similarities:</strong> Both independently invented a place-value number system
+                                with zero. Both had sophisticated astronomical models (India's <em>Siddhantas</em> vs.
+                                Maya's codices).</li>
+                            <li><strong>Differences:</strong> Indian astronomy was deeply intertwined with Hindu
+                                cosmology and astrology (<em>Jyotisha</em>), focusing on vast, repeating Yuga cycles.
+                                The Maya, while also religious, were more pragmatic, using their Long Count for
+                                historical and prophetic purposes. For example, the Indian <strong>Surya
+                                    Siddhanta</strong> (c. 400-500 CE) describes a geocentric model with epicycles,
+                                while the Maya used numerical cycles and tables without a stated geometric model.</li>
+                        </ul>
+                    </li>
+
+                    <li><strong>Vs. Ancient China:</strong>
+                        <ul>
+                            <li><strong>Similarities:</strong> Both were highly practical, state-sponsored sciences.
+                                Chinese astronomers, like the Maya, were masters of observation and record-keeping,
+                                crucial for agriculture and imperial legitimacy.</li>
+                            <li><strong>Differences:</strong> Chinese mathematics did not develop a concept of zero as a
+                                number, limiting certain algebraic developments. Their astronomy was more focused on
+                                "guest stars" (novas/supernovae), comets, and sunspots as omens. The Maya were more
+                                focused on <em>predicting</em> cycles (eclipse, Venus) for ritual purposes. A prime
+                                example is the Chinese <strong>Shi Shen Astronomical Manual</strong> (c. 4th century
+                                BCE), one of the world's oldest star catalogs, which was primarily observational, unlike
+                                the predictive Venus tables of the Maya.</li>
+                        </ul>
+                    </li>
+
+                    <li><strong>Vs. Ancient Greece:</strong>
+                        <ul>
+                            <li><strong>Similarities:</strong> Both sought to understand the cosmos through mathematics
+                                and geometry.</li>
+                            <li><strong>Differences:</strong> This is the starkest contrast. The Greeks, particularly
+                                from the 5th century BCE onward, moved towards abstract, geometric models of the
+                                universe (e.g., Aristotle's crystalline spheres, Ptolemy's <em>Almagest</em> with its
+                                complex deferents and epicycles). The Maya, despite their computational prowess, did not
+                                develop a physical model of the cosmos. Theirs was a "cosmic calculator" based on
+                                numerical cycles.
+                                <ul>
+                                    <li><strong>Example:</strong> The Greek <strong>Metonic Cycle</strong> (19 solar
+                                        years ≈ 235 lunar months) is a beautiful mathematical solution to reconcile
+                                        solar and lunar calendars, similar in spirit to the Maya's Calendar Round.
+                                        However, the Greeks expressed it as a geometric proportion, while the Maya
+                                        expressed it as an interlocking of two cycles (Tzolk'in and Haab').</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>Conclusion</h3>
+
+                <p>The Maya stood out for their <strong>mathematical innovation (vigesimal system, zero) and their
+                        unique focus on linear historical time (Long Count) combined with incredibly precise tracking of
+                        planetary cycles (Venus, eclipses)</strong>. While the Indians delved into vast cosmological
+                    time and advanced trigonometry, the Chinese maintained the world's longest continuous astronomical
+                    record for state purposes, and the Greeks pioneered the geometric modeling of the heavens.</p>
+
+                <p>Each civilization built a monumental intellectual edifice to understand their place in the cosmos.
+                    The Maya's legacy is a powerful reminder that advanced science and mathematics can flourish in
+                    entirely different cultural and philosophical frameworks, reaching pinnacles of achievement that
+                    were, in many ways, unique to their own worldview.</p>
+
                 <script>
-                    // Mini-Calculator for the Quiz Widget
-                    function calculateMayanSignature() {
-                        const dateStr = document.getElementById('quiz-date-input').value;
-                        if (!dateStr) return;
-
-                        const date = new Date(dateStr);
-                        // Julian Day Calculation
-                        const a = Math.floor((14 - (date.getMonth() + 1)) / 12);
-                        const y = date.getFullYear() + 4800 - a;
-                        const m = (date.getMonth() + 1) + 12 * a - 3;
-                        const JDN = date.getDate() + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
-
-                        // Mayan Correlation (GMT 584283)
-                        const mayanDay = JDN - 584283;
-
-                        // Long Count
-                        const baktun = Math.floor(mayanDay / 144000);
-                        const r1 = mayanDay % 144000;
-                        const katun = Math.floor(r1 / 7200);
-                        const r2 = r1 % 7200;
-                        const tun = Math.floor(r2 / 360);
-                        const r3 = r2 % 360;
-                        const uinal = Math.floor(r3 / 20);
-                        const kin = r3 % 20;
-
-                        // Tzolk'in
-                        // Reference: 4 Ahau (Day 0) -> Number=(0+4)%13=4 (index 3), Name=(0+19)%20=19 (Ahau)
-                        // Formula: Number = (mayanDay + 3) % 13 + 1
-                        const tzolkinNum = (mayanDay + 3) % 13 + 1; // Correct offset relative to 4 Ahau
-                        const dayNames = ['Imix', 'Ik', 'Akbal', 'Kan', 'Chicchan', 'Cimi', 'Manik', 'Lamat', 'Muluc', 'Oc', 'Chuen', 'Eb', 'Ben', 'Ix', 'Men', 'Cib', 'Caban', 'Etznab', 'Cauac', 'Ahau'];
-                        const tzolkinName = dayNames[(mayanDay + 19) % 20];
-
-                        // UpdateUI
-                        document.getElementById('res-long-count').textContent = `${baktun}.${katun}.${tun}.${uinal}.${kin}`;
-                        document.getElementById('res-tzolkin').textContent = `Tzolk'in: ${tzolkinNum} ${tzolkinName}`;
-                        document.getElementById('res-math').textContent = `Total Days (Kin) since Creation: ${mayanDay.toLocaleString()}`;
-                        document.getElementById('quiz-result').style.display = 'block';
+                    function toggleSignificance(btn) {
+                        const container = btn.parentElement;
+                        container.classList.toggle('minimized');
+                        btn.textContent = container.classList.contains('minimized') ? '+' : '−';
                     }
                 </script>
             </section> {% else %}

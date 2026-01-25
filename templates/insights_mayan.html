@@ -135,8 +135,90 @@
 </head>
 
 <body>
-    <!-- (Body content skipped for brevity) -->
+    <div class="container" style="max-width: 900px; margin: 0 auto; padding: 20px;">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <a href="/" class="back-link">← Return to Base</a>
+            <h1 id="config-title"
+                style="font-family: 'Outfit', sans-serif; color: var(--secondary); font-size: 1.5rem;">
+                Insights
+            </h1>
+        </header>
+
+        <!-- Loading State -->
+        <div id="loading-insights" class="loading-state">
+            <div class="orbit-spinner"></div>
+            <p style="margin-top: 1rem; color: var(--text-muted);">Calibrating Wisdom Engine...</p>
+        </div>
+
+        <!-- Content Display -->
+        <div id="insight-display" class="insight-content hidden">
+            <!-- Dynamic Content Injected Here -->
+        </div>
+
+        <!-- Chat Interface -->
+        <div id="chat-window">
+            <div id="chat-header" onclick="toggleChat()">
+                <span>Ask the Sages (AI)</span>
+                <span>▼</span>
+            </div>
+            <div id="chat-messages"></div>
+            <div style="display: flex; gap: 10px; padding: 10px;">
+                <input type="text" id="chat-input" placeholder="Ask about this alignment..."
+                    onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()"
+                    style="background: var(--secondary); border: none; padding: 5px 15px; cursor: pointer; border-radius: 4px;">Send</button>
+            </div>
+        </div>
+
+        <!-- Engagement Sections (v6.0) -->
+        <div id="quiz-section" class="hidden"
+            style="margin-top: 3rem; border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px; background: rgba(0,0,0,0.3);">
+            <h3 style="color: var(--secondary); margin-bottom: 1rem;">🧠 Maestro's Challenge</h3>
+            <p id="quiz-question" style="font-size: 1.1rem; margin-bottom: 1rem;"></p>
+            <div id="quiz-options" style="display: flex; flex-direction: column; gap: 10px;"></div>
+            <div id="quiz-feedback" style="margin-top: 1rem; font-weight: bold;"></div>
+        </div>
+
+        <div id="time-machine-section" class="hidden"
+            style="margin-top: 3rem; border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px; background: rgba(0,0,0,0.3);">
+            <h3 style="color: var(--secondary); margin-bottom: 1rem;">⏳ Birthday Time Machine</h3>
+            <p id="drift-explanation" style="margin-bottom: 1rem;"></p>
+            <div style="position: relative; margin: 2rem 0;">
+                <div id="sync-pointer"
+                    style="position: absolute; top: -10px; left: 50%; width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid var(--secondary); transform: translateX(-50%); transition: left 0.3s;">
+                </div>
+                <div
+                    style="height: 10px; background: linear-gradient(90deg, red, yellow, #00ff7f, yellow, red); border-radius: 5px;">
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <span>2025</span>
+                <input type="range" id="timeline-scrubber" min="2025" max="2075" value="2025" style="flex-grow: 1;">
+                <span>2075</span>
+            </div>
+            <div id="year-display-huge"
+                style="text-align: center; font-size: 3rem; font-weight: bold; color: rgba(255,255,255,0.1); margin-top: -1rem;">
+                2025</div>
+        </div>
+
+    </div>
     <script>
+        // Global Error Handler for Hanging Issues
+        window.onerror = function (msg, url, line, col, error) {
+            const display = document.getElementById('insight-display');
+            const loader = document.getElementById('loading-insights');
+            if (loader && !loader.classList.contains('hidden')) {
+                loader.classList.add('hidden');
+                display.innerHTML = `<div style="padding: 2rem; color: #ff6b6b; text-align: center;">
+                    <h3>⚠️ Calibration Error</h3>
+                    <p>${msg}</p>
+                    <p style="font-size: 0.8em; opacity: 0.7;">${url}:${line}</p>
+                </div>`;
+                display.classList.remove('hidden');
+            }
+            return false;
+        };
+
         // Global toggle function
         function toggleSignificance(btn) {
             const container = btn.parentElement;
@@ -185,12 +267,17 @@
             configTitle.textContent = `${insightData.masa} ${insightData.samvatsara} | ${insightData.tithi}`;
         }
 
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s timeout
+
         try {
             const response = await fetch('/api/ai-explain', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(insightData)
+                body: JSON.stringify(insightData),
+                signal: controller.signal
             });
+            clearTimeout(timeoutId);
 
             const result = await response.json();
 
@@ -218,19 +305,7 @@
                     htmlContent = rawInsight.replace(/\n/g, '<br>');
                 }
 
-                const panchangaGlossary = {
-                    'epoch': { def: 'A fixed point in time used as a reference point.', target: null },
-                    'jovian': { def: 'Relating to Jupiter. The 60-year Samvatsara cycle follows Jupiter\'s path.', target: 'SAMVATSARA_RESONANCE' },
-                    'precession': { def: 'The slow conical wobble of Earth\'s axis (25,800 year cycle).', target: 'PRECESSION_WOBBLE' },
-                    'sidereal': { def: 'Measured relative to fixed stars (Hindu system).', target: 'ZODIAC_COMPARISON' },
-                    'ayanamsha': { def: 'The angular drift (24°) between seasons and stars.', target: 'ZODIAC_COMPARISON' },
-                    'tithi': { def: 'A lunar day, defined by every 12° of Sun-Moon separation.', target: 'MOON_PHASE_3D' },
-                    'nakshatra': { def: 'Star clusters the moon visits daily.', target: 'CONSTELLATION_MAP' },
-                    'masa': { def: 'A month in the Hindu calendar. It can be Solar (Saura) or Lunar (Chandra).', target: null },
-                    'saura mana': { def: 'Solar Month system. Defined by the Sun\'s entry into a new Zodiac sign.', target: 'ZODIAC_COMPARISON' },
-                    'chandra mana': { def: 'Luni-Solar Month system. Defined by the Moon\'s phase cycle.', target: 'MOON_PHASE_3D' },
-                    'adhik masa': { def: 'The \'Extra Month\' (Pit Stop) added every ~3 years to let the Sun catch up.', target: 'CALENDAR_DRIFT' }
-                };
+
 
                 const mayanGlossary = {
                     'b\'ak\'tun': { def: 'A cycle of 144,000 days (~394 years) in the Long Count.', target: null },
@@ -244,7 +319,7 @@
                     'tun': { def: 'A period of 360 days (approximate solar year).', target: null }
                 };
 
-                const glossary = activeCiv === 'mayan' ? mayanGlossary : panchangaGlossary;
+                const glossary = mayanGlossary;
 
                 for (const [term, data] of Object.entries(glossary)) {
                     const regex = new RegExp(`\\b${term}\\b`, 'gi');
@@ -255,41 +330,6 @@
 
                 // Dynamic 3D Tag Injection (v5.0 Penthouse Edition)
                 const renderTags = {
-                    'ZODIAC_COMPARISON': {
-                        id: 'visual-zodiac',
-                        url: '/visuals/zodiac-comparison',
-                        preferredHeight: '800px',
-                        caption: 'Interactive Zodiac Aligner',
-                        significance: 'This simulation shows the "Great Drift" between Modern and Hindu astronomy.'
-                    },
-                    'MOON_PHASE_3D': {
-                        id: 'visual-moon',
-                        url: '/visuals/moon-phase',
-                        preferredHeight: '520px',
-                        caption: 'Tithi Phase Protractor',
-                        significance: 'A Tithi (Lunar Day) is not a 24-hour clock. It is a geometric measurement of the angle between the Sun and Moon. Every 12° of separation creates one Tithi. This protractor shows how the phases we see from Earth are actually results of this specific celestial angle.'
-                    },
-                    'PRECESSION_WOBBLE': {
-                        id: 'visual-precession',
-                        url: '/visuals/precession',
-                        preferredHeight: '520px',
-                        caption: 'The Earth\'s Great Wobble',
-                        significance: 'Imagine Earth as a spinning top that is starting to tilt. This "Precession" takes 25,800 years for one full circle. This wobble is the reason the Zodiac Aligner (above) needs a shift—the "beginning" of the stars has moved relative to our seasons!'
-                    },
-                    'CONSTELLATION_MAP': {
-                        id: 'visual-constellations',
-                        url: '/visuals/constellation',
-                        preferredHeight: '520px',
-                        caption: 'Sky Focus: Lunar Tracking',
-                        significance: 'Interactive 3D Zodiac belt with symbols and names. Moon is shown in the foreground with slow orbital motion and simulated phases. Use mouse to rotate and zoom the view.'
-                    },
-                    'SAMVATSARA_RESONANCE': {
-                        id: 'visual-samvatsara',
-                        url: '/visuals/samvatsara',
-                        preferredHeight: '520px',
-                        caption: 'Jovian-Saturn Samvatsara Resonance',
-                        significance: 'This visual shows why the Samvatsara cycle is 60 years. It tracks the resonance between Jupiter (~11.86y) and Saturn (~29.46y). Broadly, every 5 Jupiter orbits align with 2 Saturn orbits, creating a rhythmic "Great Conjunction" that resets the traditional calendar cycle.'
-                    },
                     'VIGESEL_ODOOMETER': {
                         id: 'visual-mayan-gears',
                         url: '/visuals/mayan-gears?mode=odometer',
@@ -322,7 +362,7 @@
                                         <div class="visual-block card glass" style="margin-bottom: 0;">
                                             <div class="visual-loading">Launching 3D Module...</div>
                                             <div class="visual-wrapper" style="height: ${tag.preferredHeight};">
-                                                <iframe class="visual-iframe" style="height: 100%;" src="${tag.url}?samvatsara=${encodeURIComponent(insightData.samvatsara || '')}&tithi=${encodeURIComponent(insightData.tithi || '')}&rashi=${encodeURIComponent(insightData.rashi?.name || 'Leo')}" onload="this.parentElement.previousElementSibling.style.display='none'"></iframe>
+                                                <iframe class="visual-iframe" style="height: 100%;" src="${tag.url}${tag.url.includes('?') ? '&' : '?'}samvatsara=${encodeURIComponent(insightData.samvatsara || '')}&tithi=${encodeURIComponent(insightData.tithi || '')}&rashi=${encodeURIComponent(insightData.rashi?.name || 'Leo')}" onload="this.parentElement.previousElementSibling.style.display='none'"></iframe>
                                             </div>
                                             <div class="visual-caption">🖥️ ${tag.caption}</div>
                                         </div>
@@ -348,9 +388,14 @@
                 display.classList.remove('hidden');
                 loader.classList.add('hidden');
             }
+            loader.classList.add('hidden');
         } catch (error) {
-            console.error("Fetch Error:", error);
-            display.innerHTML = "<p>Failed to connect to the Wisdom Engine. Please try again later.</p>";
+            if (error.name === 'AbortError') {
+                display.innerHTML = "<p>The Wisdom Engine is taking too long to respond. Please try again.</p>";
+            } else {
+                console.error("Fetch Error:", error);
+                display.innerHTML = "<p>Failed to connect to the Wisdom Engine. Please try again later.</p>";
+            }
             display.classList.remove('hidden');
             loader.classList.add('hidden');
         }
@@ -457,26 +502,26 @@
 
             const questions = [
                 {
-                    q: "Why does the 'Panchanga Birthday' drift away from the Gregorian date?",
+                    q: "Why does the Haab' calendar drift from the seasons?",
                     options: [
-                        "Earth's rotation slowing down",
-                        "The ~11 day gap between Lunar and Solar years",
-                        "Magnetic pole reversal",
-                        "Standard human error"
+                        "The Maya didn't know the year length",
+                        "The Haab' has no leap years (365 days exactly)",
+                        "Earth's orbit is expanding",
+                        "It doesn't drift"
                     ],
                     correct: 1,
-                    explanation: "Correct! A lunar year is roughly 354 days, while a solar year is 365. This 11-day gap causes the drift."
+                    explanation: "Correct! The Haab' is exactly 365 days. The true solar year is ~365.2422 days, so the Haab' drifts by about 1 day every 4 years."
                 },
                 {
-                    q: "What is the 60-year Jupiter-Saturn cycle called?",
+                    q: "What is the 'Calendar Round'?",
                     options: [
-                        "Masa",
-                        "Tithi",
-                        "Samvatsara",
-                        "Yoga"
+                        "A Maya ball game",
+                        "The 20-day month",
+                        "The 52-year cycle where Tzolk'in and Haab' align",
+                        "The end of the world"
                     ],
                     correct: 2,
-                    explanation: "Exactly! Samvatsara cycles align with the major resonances of our solar system's giants."
+                    explanation: "Exactly! It takes 52 Haab' years (18,980 days) for the 260-day and 365-day cycles to return to the same starting combination."
                 }
             ];
 
@@ -518,34 +563,30 @@
             function updateTimeMachine(year) {
                 yearDisplay.textContent = year;
 
-                // Deterministic Drift Physics (v6.0.1)
-                // Base: Lunar year is 11 days shorter than Solar.
-                // Reset: Every 3 years (approx) an Adhika Masa (30 days) pulls it back.
+                // Deterministic Haab' Drift Physics
+                // Base: Haab' is 365 days. Solar Year is ~365.2422 days.
+                // Drift: The Haab' falls BEHIND the seasons by ~0.2422 days per year.
+                // Meaning: Your Haab' birthday comes EARLIER in the Gregorian year over time.
                 const anchorYear = 2025;
                 const yearsPassed = year - anchorYear;
 
-                // Cumulative raw drift in days
-                let rawDrift = yearsPassed * 11;
+                // Cumulative drift in days (approx 1 day every 4 years)
+                const drift = yearsPassed * 0.2422;
 
-                // Number of Adhika Masas added (approx 1 every 2.7 years)
-                const leapMonths = Math.floor((yearsPassed + 1.2) / 2.7);
-                const effectiveDrift = (rawDrift - (leapMonths * 30)) % 30;
-
-                // Map effectiveDrift (-15 to +15 ideally) to the Sync Meter (10% to 90%)
-                const percentage = 50 + (effectiveDrift * 2.5);
+                // Map drift (0 to 13 days over 52 years) to the meter
+                // 52 years * 0.25 = 13 days max shift before Calendar Round context matters more
+                const percentage = 50 + (drift * 3); // Scale factor
                 pointer.style.left = `${Math.max(5, Math.min(95, percentage))}%`;
 
-                const driftAbs = Math.abs(Math.round(effectiveDrift));
-                const direction = effectiveDrift > 0 ? "later" : "earlier";
+                const driftDays = drift.toFixed(1);
+                const driftHours = Math.round(drift * 24);
 
                 let physicsNote = "";
-                if (driftAbs < 3) {
-                    physicsNote = " ✨ <strong>COSMIC SYNC!</strong> In this year, the solar and lunar cycles align perfectly.";
-                } else if (leapMonths !== Math.floor((year - 1 - anchorYear + 1.2) / 2.7)) {
-                    physicsNote = " 🚀 <strong>ADHIKA MASA RESET!</strong> A leap month was added recently to stop your birthday from drifting out of its season.";
+                if (Math.abs(yearsPassed) % 52 === 0 && yearsPassed !== 0) {
+                    physicsNote = " 🔄 <strong>CALENDAR ROUND RESET!</strong> The cycles have realigned (52 years).";
                 }
 
-                expl.innerHTML = `<strong>Year ${year}:</strong> Your Panchanga birthday falls approximately <strong>${driftAbs} days ${direction}</strong> than your Gregorian birthday. Since the Moon travels faster than our seasonal calendar, it creates this rhythmic drift.${physicsNote}`;
+                expl.innerHTML = `<strong>Year ${year}:</strong> Your Haab' birthday arrives approx <strong>${driftHours} hours earlier</strong> relative to the tropical year than it did in 2025. Without leap years, the Mayan calendar slowly rotates through the seasons.${physicsNote}`;
             }
 
             scrubber.oninput = (e) => updateTimeMachine(parseInt(e.target.value));

@@ -162,6 +162,8 @@
         // Get Params
         const params = new URLSearchParams(window.location.search);
         const targetRashi = (params.get('rashi') || 'Simha').split(' (')[0].trim();
+        const targetNakshatra = (params.get('nakshatra') || '').split(' (')[0].trim();
+        const initialView = params.get('view') || 'rashi';
 
         // 12 Rashis
         const rashis = [
@@ -243,9 +245,9 @@
             rashiGroup.add(sprite);
         });
 
-        // 2. Nakshatra Group (Hidden by default)
+        // 2. Nakshatra Group
         const nakshatraGroup = new THREE.Group();
-        nakshatraGroup.visible = false;
+        nakshatraGroup.visible = (initialView === 'nakshatra');
         mainGroup.add(nakshatraGroup);
 
         const nakBandMat = new THREE.MeshStandardMaterial({ color: 0x00d2ff, emissive: 0x001122, transparent: true, opacity: 0.2 });
@@ -277,8 +279,23 @@
             nakshatraGroup.add(tMesh);
         });
 
-        // Focus Camera on Target Rashi
-        mainGroup.rotation.y = - (targetIdx / 12) * Math.PI * 2 + Math.PI / 2;
+        // Focus Camera
+        if (initialView === 'nakshatra' && targetNakshatra) {
+            let nIndex = 0;
+            nakshatras.forEach((n, i) => { if (n.toLowerCase() === targetNakshatra.toLowerCase()) nIndex = i; });
+            mainGroup.rotation.y = - (nIndex / 27) * Math.PI * 2 + Math.PI / 2;
+
+            // Update UI Text
+            document.getElementById('view-toggle').classList.add('active');
+            document.getElementById('view-toggle').innerText = "Switch to 12 Rashis";
+        } else {
+            mainGroup.rotation.y = - (targetIdx / 12) * Math.PI * 2 + Math.PI / 2;
+            // Ensure Rashi visible if default
+            if (initialView !== 'nakshatra') rashiGroup.visible = true;
+        }
+
+        // Ensure mutual exclusivity based on initial state
+        rashiGroup.visible = !nakshatraGroup.visible;
 
         // UI Logic
         window.toggleUI = function () {

@@ -140,7 +140,7 @@ class PanchangaEngine(BaseCalendar):
           *   **The Naming Secret**: Explain that Lunar months are named after the star the Moon is near when it is full (e.g., Full Moon near **Chitta/Spica** = **Chaitra**, Full Moon near **Krittika/Pleiades** = **Karthika**).
           *   **The Drift**: Explain that the Moon is faster than the Sun by ~11 days a year.
           *   **The Pit Stop (Adhik Masa)**: Explain that every 3 years, the Moon takes a "Pit Stop" (Extra Month) to let the Sun catch up.
-        - **Nakshatra**: 13°20' sectors used as a "Lunar Speedometer" to track the Moon's 27.3-day orbit. Use [[RENDER:CONSTELLATION_MAP]].
+        - **Nakshatra**: 13°20' sectors used as a "Lunar Speedometer" to track the Moon's 27.3-day orbit. **MANDATORY**: You MUST display the star map using [[RENDER:CONSTELLATION_MAP]].
         - **Tithi**: Defined strictly as Every 12° of angular separation between Sun and Moon. Use [[RENDER:MOON_PHASE_3D]].
         - **Yoga**: Combined longitudinal momentum (Sum of longitudes).
         - **Rashi**: Define the term Rāśi from a scientific and astronomical perspective (not astrological). Explain its relation to the ecliptic, the Sun, Moon, and planets, and give one simple example. Keep the explanation brief and precise
@@ -185,12 +185,14 @@ class PanchangaEngine(BaseCalendar):
         sky_cache = get_sky_cache(date_str, time_str, loc["latitude"], loc["longitude"])
         sky_img_path = get_sky_cached(sky_cache)
         
+        # Always calculate metadata (cheap) for UI titles
+        moon_lon = get_sidereal_longitude(utc_dt, moon)
+        ang = get_angular_data(local_dt, loc["latitude"], loc["longitude"], loc["timezone"])
+        nak, pada = calculate_nakshatra(moon_lon, lang='EN')
+
         if not sky_img_path:
             from utils.skyshot import CACHE_DIR
             sky_img_path = str(CACHE_DIR / f"{sky_cache}.png")
-            moon_lon = get_sidereal_longitude(utc_dt, moon)
-            ang = get_angular_data(local_dt, loc["latitude"], loc["longitude"], loc["timezone"])
-            nak, pada = calculate_nakshatra(moon_lon, lang='EN')
             generate_skymap(moon_lon, nak, pada, ang["phase_angle"], sky_img_path, 
                            event_title=title, rahu_longitude=ang["rahu_sidereal"], ketu_longitude=ang["ketu_sidereal"])
 
@@ -204,7 +206,11 @@ class PanchangaEngine(BaseCalendar):
             generate_solar_system(utc_dt, sol_img_path, event_title=title)
 
         # Convert to Base64
-        results = {}
+        results = {
+            "nakshatra": nak,
+            "moon_longitude": f"{moon_lon:.2f}",
+            "phase_angle": f"{ang['phase_angle']:.2f}"
+        }
         for key, path in [("skyshot", sky_img_path), ("solar_system", sol_img_path)]:
             with open(path, "rb") as f:
                 encoded = base64.b64encode(f.read()).decode('utf-8')

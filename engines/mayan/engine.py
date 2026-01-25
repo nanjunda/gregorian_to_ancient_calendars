@@ -150,26 +150,28 @@ class MayanEngine(BaseCalendar):
         return """
         Markdown Report Hierarchy (Mayan Scientific Masterclass):
 
-        Phase I: Vigesimal Timekeeping (The Base-20 System)
-        - Explain how the Maya used the 'B'ak'tun' system as a linear cosmic odometer.
-        - Deconstruct the Long Count hierarchy (Kin -> Uinal -> Tun -> K'atun -> B'ak'tun).
-        - Contrast this with the Western base-10 linear history.
+        Phase I: Mathematical Superiority (The Power of Zero)
+        - Start with the "Shell" (Zero). Explain how the Maya understood 'Zero' centuries before Europe.
+        - Contrast the elegance of Mayan Base-20 (Vigesimal) notation with Roman Numerals.
+        - **MANDATORY**: You MUST insert the tag `[[RENDER:VIGESEL_ODOOMETER]]` after explaining the base-20 system.
 
-        Phase II: The Calendar Round (Interlocking Gears)
-        - Explain the mathematical resonance of the 260-day Tzolk'in and 365-day Haab'.
-        - Describe why every 52 years, the gears reset to their identical state (The Calendar Round).
-        - Mention the 'Wayeb' (5 nameless days) as an astronomical correction tool.
+        Phase II: The Long Count (The Cosmic Odometer)
+        - Deconstruct the linear hierarchy (Kin -> Uinal -> Tun -> K'atun -> B'ak'tun).
+        - Introduce "Deep Time" units: Piktun, Kalabtun, Alautun.
+        - Explain that the Maya did not believe time "ended"; it simply rolls over.
 
-        Phase III: Archaeoastronomy & Planetary Resonances
-        - Explain how these calendars tracked the cycle of Venus and Mars.
-        - Connect the math to specific astronomical alignments.
+        Phase III: The Calendar Round (Interlocking Gears)
+        - Explain the resonance of the 260-day Tzolk'in and 365-day Haab' (52-year synchrony).
+        - **MANDATORY**: You MUST insert the tag `[[RENDER:GEAR_INTERLOCK_52YR]]` here to visualize the gears.
+        - Mention the 'Wayeb' (5 nameless days) as a mathematical necessity.
 
-        Cultural Context & Mythology:
-        - Provide rich, scientifically-grounded history of Mayan deities associated with time (e.g., Itzamna, Kinich Ahau).
-        - Reference the Popol Vuh creation narrative in its relation to the current world era (The 4th Creation).
+        Phase IV: Archaeoastronomy & Planetary Resonances
+        - Explain the 584-day Synodic period of Venus and how 5 Venus cycles equal 8 Solar years.
+        - Connect the math to the "Dresden Codex".
+        - **MANDATORY**: You MUST insert the tag `[[RENDER:VENUS_MARS_ALIGNMENT]]` to show the pentagram orbit.
 
-        STRICT GUARDRAIL: Zero mention of '2012 Apocalyptic' or 'Doomsday' pseudoscience. 
-        Focus exclusively on mathematical elegance and astronomical precision.
+        STRICT GUARDRAIL: Zero mention of '2012 Apocalyptic' or 'Doomsday' pseudoscience.
+        Focus on the parallel sophistication of Mayan and Ancient Indian mathematics.
         """
 
     def generate_ical(self, date_str, time_str, location_name, title, lang):

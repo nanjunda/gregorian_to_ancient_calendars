@@ -79,6 +79,9 @@ def get_skyshot():
         return jsonify({
             "success": True,
             "image_data": visuals.get("skyshot"),
+            "nakshatra": visuals.get("nakshatra"),
+            "moon_longitude": visuals.get("moon_longitude"),
+            "phase_angle": visuals.get("phase_angle"),
             "cached": "N/A"
         })
         
@@ -458,7 +461,15 @@ def insights_page(civ=None):
     # Resolve active civ
     active_civ = civ or (data.get('metadata', {}).get('civilization') if data else 'panchanga')
     
-    return render_template('insights.html', initial_data=data, active_civ=active_civ)
+    # 2026-01-22: Split Architecture for Zero Mutation
+    # Serve distinct templates for each civilization to prevent regression.
+    if active_civ == 'mayan':
+        return render_template('insights_mayan.html', initial_data=data, active_civ=active_civ)
+    elif active_civ == 'panchanga':
+        return render_template('insights_panchanga.html', initial_data=data, active_civ=active_civ)
+    else:
+        # Fallback for future calendars or generic use
+        return render_template('insights.html', initial_data=data, active_civ=active_civ)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5080, debug=True)
