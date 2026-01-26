@@ -206,6 +206,7 @@ class PanchangaEngine(BaseCalendar):
             generate_solar_system(utc_dt, sol_img_path, event_title=title)
 
         # Convert to Base64
+        # v2.1 FIX: Ensure nakshatra is passed to UI to prevent "Unknown" error
         results = {
             "nakshatra": nak,
             "moon_longitude": f"{moon_lon:.2f}",
